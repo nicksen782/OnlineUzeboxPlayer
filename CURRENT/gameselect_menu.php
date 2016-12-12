@@ -22,7 +22,7 @@
 
 <?php
 	if( $_SERVER['HTTP_HOST'] == "dev-nicksen782.c9.io" || $_SERVER['SERVER_NAME'] == "dev-nicksen782.c9.io" ){ $devenvironment=true;}else{$devenvironment=false;}
-	if($developmentenvironment){ echo '<a href="APP_gamemanager/gamemanager.php" target="_blank"> test</a>'; }
+	if($devenvironment){ echo '<a href="APP_gamemanager/gamemanager.php" target="_blank"> test</a>'; }
 ?>
 <h3>Currently only Player 1's SNES controller is added, as follows:</h3>
 <ul>

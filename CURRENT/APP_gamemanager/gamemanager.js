@@ -7,8 +7,10 @@
 	function gamedirList_nonSD(){
 		var callback = function(resp){
 			// console.log("initial resp:", resp);
-			var games=JSON.parse(resp).listofroms;
-			console.log("gamedirList_nonSD:",games, Object.keys(games).length );
+			var games    = JSON.parse(resp).listofroms;
+			var newgames = JSON.parse(resp).new;
+			var dupes    = JSON.parse(resp).dupes;
+			console.log("gamedirList_nonSD:",games, Object.keys(newgames).length, Object.keys(dupes).length, Object.keys(games).length );
 			// document.getElementById('viewGameDB_results').innerHTML = "<pre>"+JSON.stringify(JSON.parse(resp), null, 1)+"</pre>";
 
 			var cont;
@@ -23,6 +25,25 @@
 			}
 
 			var table = document.getElementById("gameslist2");
+
+			for(var i in games){
+				var row = table.insertRow();
+				var key               = row.insertCell(0);
+				var title             = row.insertCell(1);
+				var filename          = row.insertCell(2);
+				var authors           = row.insertCell(3);
+				var header            = row.insertCell(4);
+				var description       = row.insertCell(5);
+				var hashmatchwith     = row.insertCell(6);
+
+				key.innerHTML         = i;
+				title.innerHTML       = games[i].title;
+				filename.innerHTML    = games[i].filename;
+				authors.innerHTML     = games[i].authors;
+				header.innerHTML      = games[i].validheader;
+				description.innerHTML = games[i].description;
+				hashmatchwith.innerHTML = games[i].hashmatchwith;
+			}
 
 			for(var i in games){
 				var row = table.insertRow(1);

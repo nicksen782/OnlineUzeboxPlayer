@@ -5,7 +5,7 @@ if( $_SERVER['HTTP_HOST'] == "dev-nicksen782.c9.io" || $_SERVER['SERVER_NAME'] =
 
 // Get file listing minus the '.' and '..'.
 $directory = ".";
-$scanned_directory = array_values(array_diff(scandir($directory), array('..', '.')));
+$scanned_directory = array_values(array_diff(scandir($directory), array('..', '.', '.git')));
 // $scanned_directory = array_values(array_diff(scandir($directory), array()));
 
 // Gather only the directory names.
@@ -17,11 +17,15 @@ for($i=0; $i<sizeof($scanned_directory); $i++){
 	}
 }
 
-header("Refresh:10; url='".$dirlist[0]."'");
+// Now, figure out which one is the 'CURRENT' folder.
+$dirlist = array_diff($dirlist, ["CURRENT"]);
+
+header("Refresh:15; url='CURRENT'");
 
 for($i=0; $i<sizeof($dirlist); $i++){
 	array_push($links, "<a href='".$dirlist[$i]."'>".$dirlist[$i]."</a>");
 }
+
 ?>
 
 
@@ -29,21 +33,21 @@ for($i=0; $i<sizeof($dirlist); $i++){
 <h2>Version Links:</h2>
 
 <?php
-	$output = shell_exec("find v4.1 -type f -printf '%TY-%Tm-%Td %.8TT--%p \n' | sort -r | head -1");
+	$output = shell_exec("find CURRENT -type f -printf '%TY-%Tm-%Td %.8TT--%p \n' | sort -r | head -1");
 	$output2 = explode('--', $output);
-	// echo date("D M j G:i:s T Y", strtotime($output2[0])) . " -- " . $output2[1];
+	// echo "<a href='CURRENT/'>CURRENT</a> -- ".date("D M j G:i:s T Y", strtotime($output2[0])) . " -- " . $output2[1] . "<br>";
 
 	if($devenvironment==true){
-		echo $links[0] . " -- LAST UPDATE: TIME/FILE: -- " . date("D M j G:i:s T Y", strtotime($output2[0])) . " -- " . $output2[1] . "<br>";
-		for($i=1;$i<sizeof($links);$i++){ echo $links[$i] . "<br>";; }
+		echo "<a href='CURRENT/'>CURRENT</a> -- ".date("D M j, Y, g:i:s A (T)", strtotime($output2[0])) . " -- " . $output2[1] . "<br>";
+		for($i=1;$i<sizeof($links);$i++){ echo $links[$i] . "<br>"; }
 	}
 	else{
-		echo $links[0] . " -- LAST UPDATE: -- " . date("D M j G:i:s T Y", strtotime($output2[0])) . "<br>";
+		echo "<a href='CURRENT/'>CURRENT</a> -- ".date("D M j, Y, g:i:s A (T)", strtotime($output2[0])) . "<br>";
 	}
 ?>
 
-<h3>Page will automatically redirect to == <?php echo $dirlist[0] ;?> == in 10 seconds.</h3>
-<h4>... or you could just click <a href='<?php echo $dirlist[0] ;?>/'>HERE (<?php echo $dirlist[0] ;?>)</a> to see the latest version</h4>
+<h3>Page will automatically redirect to == <?php echo 'CURRENT' ;?> == in 15 seconds.</h3>
+<h4>... or you could just click <a href='<?php echo 'CURRENT' ;?>/'>HERE (<?php echo 'CURRENT' ;?>)</a> to see the latest version</h4>
 <?php
 clearstatcache();
 

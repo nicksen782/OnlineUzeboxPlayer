@@ -1,5 +1,10 @@
 [
     {
+        "title": "Bugz",
+        "jsfile": "GamesPackaged\/2048_DATA.js",
+        "valid": 1
+    },
+    {
         "title": "2048b",
         "jsfile": "GamesPackaged\/2048_DATA.js",
         "valid": 1

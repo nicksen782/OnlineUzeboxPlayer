@@ -1,10 +1,2 @@
-[11-Dec-2016 20:07:28 America/Detroit] PHP Fatal error:  prepare{
-    "dbh": {
-
-    },
-    "statement": {
-        "queryString": "\n\t\tSELECT *\n\t\tFROM games\n\t;"
-    },
-    "error": null
-} in /home/ubuntu/workspace/web/ACTIVE/Emscripten_Uzebox_Gamechanger/v4.1/APP_gamemanager/gamemanager_p.php on line 28
-[11-Dec-2016 20:08:15 America/Detroit] PHP Fatal error:  Call to undefined function newgame() in /home/ubuntu/workspace/web/ACTIVE/Emscripten_Uzebox_Gamechanger/v4.1/APP_gamemanager/gamemanager_p.php on line 10
+[12-Dec-2016 17:09:01 America/Detroit] PHP Fatal error:  Call to a member function bindValue() on a non-object in /home/ubuntu/workspace/web/ACTIVE/Emscripten_Uzebox_Gamechanger/CURRENT/APP_gamemanager/gamemanager_p.php on line 361
+[12-Dec-2016 17:10:57 America/Detroit] PHP Fatal error:  Call to a member function execute() on a non-object in /home/ubuntu/workspace/web/ACTIVE/Emscripten_Uzebox_Gamechanger/CURRENT/APP_gamemanager/gamemanager_p.php on line 365

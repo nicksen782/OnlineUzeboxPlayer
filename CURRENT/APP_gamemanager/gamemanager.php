@@ -1,6 +1,6 @@
 <?php
 	if( $_SERVER['HTTP_HOST'] == "dev-nicksen782.c9.io" || $_SERVER['SERVER_NAME'] == "dev-nicksen782.c9.io" ){ $devenvironment=true;}else{$devenvironment=false;}
-	if(!$developmentenvironment){ echo "Not available on this domain. Sorry."; exit(); }
+	if(!$devenvironment){ echo "Not available on this domain. Sorry."; exit(); }
 ?>
 <!doctype html>
 <html lang="en-us">
@@ -65,7 +65,7 @@ add entry to database<br>
 </form>
 <br>
 scan for new files (unknown to the database.)<br>
-<input type="button" id="gamedirList_nonSD" onclick="gamedirList_nonSD();" value="Get list from dir"><br>
+<input type="button" id="gamedirList_nonSD" onclick="gamedirList_nonSD();" value="Import from import folder"><br>
 
 <br>
 

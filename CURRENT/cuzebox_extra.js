@@ -6,7 +6,7 @@ function extras_postRun(currentgame){
 	setTimeout(function(){
 		parent.iframeIsReadyNow() ;
 		parent.document.getElementById('chooseGameFromServer').value = currentgame;
-		document.getElementById('controls').style.display = 'none';
+		// document.getElementById('controls').style.display = 'none';
 		document.body.style['background-color'] = "rgba(0, 0, 0, 0.85)";
 	}, 500);
 }

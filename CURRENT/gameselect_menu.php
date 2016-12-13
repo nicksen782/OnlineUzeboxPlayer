@@ -13,8 +13,10 @@
 
 
 
-			<td colspan="2">
-				<!--<input type="button" id="btn_startGame" value="Start Emulator"><br>-->
+			<td>
+				<input type="button" id="btn_stopGame" value="Stop Emulator"><br>
+			</td>
+			<td>
 				<input type="button" id="btn_restartGame" value="Restart Emulator"><br>
 			</td>
 		</tr>
@@ -24,28 +26,22 @@
 	if( $_SERVER['HTTP_HOST'] == "dev-nicksen782.c9.io" || $_SERVER['SERVER_NAME'] == "dev-nicksen782.c9.io" ){ $devenvironment=true;}else{$devenvironment=false;}
 	if($devenvironment){ echo '<a href="APP_gamemanager/gamemanager.php" target="_blank"> test</a>'; }
 ?>
-<h3>Currently only Player 1's SNES controller is added, as follows:</h3>
-<ul>
-<li>Arrow keys: D-Pad</li>
-<li>Q: Button Y</li>
-<li>W: Button X</li>
-<li>A: Button B</li>
-<li>S: Button A</li>
-<li>Enter: Start</li>
-<li>Space: Select</li>
-<li>Left shift: Left shift</li>
-<li>Right shift: Right shift</li>
-</ul>
-
-<h4>The emulator itself can be controlled with the following keys:</h4>
-<ul>
-<li>ESC: Exit</li>
-<li>F2: Toggle low quality display (faster, but blurry and ugly)</li>
-<li>F3: Toggle debug informations (slightly faster with them off)</li>
-<li>F4: Toggle frame rate limiter</li>
-<li>F5: Toggle video capture (only if compiled in)</li>
-<li>F7: Toggle frame merging (slower, eliminates flicker in some games)</li>
-<li>F8: Toggle keymap between SNES and UZEM (Default: SNES)</li>
-<li>F11: Toggle full screen</li>
-</ul>
+<div>
+        <h3>Controls:</h3>
+        <ul>
+          <li>Arrow keys: SNES controller DPAD</li>
+          <li>Q: SNES controller 'Y'</li>
+          <li>W: SNES controller 'X'</li>
+          <li>A: SNES controller 'B'</li>
+          <li>S: SNES controller 'A'</li>
+          <li>Enter: SNES controller 'Start'</li>
+          <li>Space: SNES controller 'Select'</li>
+          <li>Right shift: SNES controller Right shoulder</li>
+          <li>Left shift: SNES controller Left shoulder</li>
+          <li>F2: Toggle low quality (helps if emulator runs too slow)</li>
+          <li>F3: Toggle emulator debug information (slower with them on)</li>
+          <li>F7: Toggle flicker reduction (slower with it on)</li>
+          <li>F8: Toggle UZEM style keymapping (A, S, Y, X instead of Q, W, A, S)</li>
+        </ul>
+      </div>
 </div>

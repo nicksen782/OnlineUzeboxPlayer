@@ -65,68 +65,90 @@ function liveEditEmu($gamefiles){
   $cuzebox_extra = file_get_contents("cuzebox_extra.js");
 
   // Comment out the auto-run part of the cuzebox.js file. Permanent.
-  $cuzeboxjs = file_get_contents("APP_cuzebox/cuzebox.js");
+  $cuzeboxjs = file_get_contents("APP_cuzebox/cuzebox.js_SMALL");
   $replacestr1 = 'memoryInitializer="cuzebox.html.mem";';
-  $newstr1     = 'memoryInitializer="APP_cuzebox/cuzebox.html.mem";';
+  $newstr1     = 'memoryInitializer="APP_cuzebox/cuzebox.html.mem_SMALL";';
   $cuzeboxjs = str_replace($replacestr1, $newstr1, $cuzeboxjs);
 
-  // $replacestr1 = 'function runCaller(){if(!Module["calledRun"])run()';
-  // $newstr1     = 'function runCaller(){/*if(!Module["calledRun"])run()*/';
-  // $cuzeboxjs = str_replace($replacestr1, $newstr1, $cuzeboxjs);
-  // file_put_contents("cuzebox.js", $cuzeboxjs);
-
   // Load, edit, send the cuzebox.html file.
-  $cuzeboxhtml = file_get_contents("APP_cuzebox/cuzebox.html");
+  $cuzeboxhtml = file_get_contents("APP_cuzebox/cuzebox_minimal.html");
 
   $script0_tofind=
-    "<script>
+  "<script type=\"text/javascript\">
 
-          (function() {
-            var memoryInitializer = 'cuzebox.html.mem';
-            if (typeof Module['locateFile'] === 'function') {
-              memoryInitializer = Module['locateFile'](memoryInitializer);
-            } else if (Module['memoryInitializerPrefixURL']) {
-              memoryInitializer = Module['memoryInitializerPrefixURL'] + memoryInitializer;
-            }
-            var xhr = Module['memoryInitializerRequest'] = new XMLHttpRequest();
-            xhr.open('GET', memoryInitializer, true);
-            xhr.responseType = 'arraybuffer';
-            xhr.send(null);
-          })();
+      var Module = {
+        canvas: (function() {
+          return document.getElementById('canvas');
+        })(),
+      };
 
-          var script = document.createElement('script');
-          script.src = \"cuzebox.js\";
-          document.body.appendChild(script);
+      (function() {
+        var memoryInitializer = 'cuzebox.html.mem';
+        var xhr = Module['memoryInitializerRequest'] = new XMLHttpRequest();
+        xhr.open('GET', memoryInitializer, true);
+        xhr.responseType = 'arraybuffer';
+        xhr.send(null);
+      })();
 
-</script>";
+      var script = document.createElement('script');
+      script.src = \"cuzebox.js\";
+      document.body.appendChild(script);
+
+    </script>";
+
   $script0_toreplace=
   "
-  <!-- cuzebox.js-->
-  <script>
-  ".$cuzeboxjs."
-  </script>
-
-  <!-- Cuzebox Extra-->
-  <script>
-  ".$cuzebox_extra."
-  </script>
-
+  <!-- Added/Replaced by system -->
+  <style>
+    html{overflow:hidden;}
+    body{overflow:hidden;}
+  </style>
   <!-- Setup the filesystem-->
   <script>
+    // Get file list.
     var filelist=(".json_encode(array($gamefiles), JSON_PRETTY_PRINT).");
     var currentgame='".$gamefiles['fullfilepath']."';
-    //Module['preInit'] = extras_preInit(filelist) ;
-    Module['preRun'] = extras_preInit(filelist) ;
-    Module['postRun'] = extras_postRun(currentgame);
-    Module.arguments.push('".$gamefiles['newname']."');
-  </script>
 
+    <!-- Cuzebox Extra-->
+    ".$cuzebox_extra."
+
+    // Configure Module
+    var Module = {
+      arguments : ['".$gamefiles['newname']."'],
+      preInit   : [function(){extras_preInit(filelist);}],
+      //preRun  : [function(){extras_preInit(filelist);}],
+      postRun   : [function(){extras_postRun(currentgame);}],
+      print: (function() {
+          var element = document.getElementById('output');
+          if (element) element.value = ''; // clear browser cache
+          return function(text) {
+            if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
+            // These replacements are necessary if you render to raw HTML
+            console.log(text);
+            if (element) {
+              element.value += text + \" \\n \";
+              element.scrollTop = element.scrollHeight; // focus on bottom
+            }
+          };
+        })(),
+        printErr: function(text) {
+          if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
+          if (0) { // XXX disabled for safety typeof dump == 'function') {
+            dump(text + '\\n'); // fast, straight to the real console
+          } else {
+            console.error(text);
+          }
+        },
+      canvas    : (function() { return document.getElementById('canvas'); })(),
+    };
+
+  <!-- cuzebox.js-->
+  ".$cuzeboxjs."
 
   <!-- mem stuff-->
-  <script>
   window.onload=function(){
     (function() {
-      var memoryInitializer = 'APP_cuzebox/cuzebox.html.mem';
+      var memoryInitializer = 'APP_cuzebox/cuzebox.html.mem_SMALL';
       if (typeof Module['locateFile'] === 'function') {
         memoryInitializer = Module['locateFile'](memoryInitializer);
       } else if (Module['memoryInitializerPrefixURL']) {
@@ -139,9 +161,7 @@ function liveEditEmu($gamefiles){
     })();
   };
   </script>
-
-  "
-  ;
+  ";
 
   $cuzeboxhtml = str_replace($script0_tofind, $script0_toreplace, $cuzeboxhtml);
 
@@ -150,9 +170,9 @@ function liveEditEmu($gamefiles){
   $noannoyingCon1 = "//console.log(text);";
   $cuzeboxhtml = str_replace($annoyingCon1, $noannoyingCon1, $cuzeboxhtml);
 
-  $annoyingCon1   = "            console.log(text);";
-  $noannoyingCon1 = "//console.log(text);";
-  $cuzeboxhtml = str_replace($annoyingCon1, $noannoyingCon1, $cuzeboxhtml);
+  $annoyingCon2   = "<textarea id=\"output\" rows=\"8\"></textarea>";
+  $noannoyingCon2 = "<!--<textarea id=\"output\" rows=\"8\"></textarea>-->";
+  $cuzeboxhtml = str_replace($annoyingCon2, $noannoyingCon2, $cuzeboxhtml);
 
 
   // Send the modified page.

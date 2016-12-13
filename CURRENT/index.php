@@ -12,23 +12,17 @@
 </head>
 
 <body>
-
-
-
-
-
-
-<!--<div style="margin:20px;width:150px;height:150px;position:absolute;left:50px;top:250px;background-color:red;"></div>-->
-<!--<div style="margin:20px;width:150px;height:150px;position:absolute;left:50px;top:50px;background-color:blue;"></div>-->
 	<!--Corner floating menu-->
 	<?php require_once("gameselect_menu.php"); ?>
 
 	<div style="clear:both;"></div>
 
 	<div id="middle">
-		<div id="mid">
-			<iframe id="emscripten_iframe" ></iframe>
-		</div>
+			<div class="gameframe_border">
+				<div id="mid">
+					<iframe id="emscripten_iframe" src="loading.html"></iframe>
+				</div>
+			</div>
 	</div>
 	<div style="clear:both;"></div>
 
@@ -54,16 +48,9 @@
 
 			document.getElementById('chooseGameFromServer').addEventListener('change',
 				function(){
-					document.getElementById('middle').style.visibility="hidden";
+					// document.getElementById('middle').style.visibility="hidden";
 					document.body.style['background-color']='slategray';
 					document.getElementsByTagName('html')[0].style['background-color']='slategray';
-
-					// var url = "gamechanger_p.php?game="+this.value ;
-					// console.log("url", url);
-					// // window.location = url ;
-					// console.info("Game change!");
-					// document.getElementById('emscripten_iframe').src=url;
-
 					loadGame();
 				}
 			);
@@ -72,24 +59,22 @@
 				document.getElementById('chooseGameFromServer').dispatchEvent(new Event('change'));
 			});
 
-			// document.getElementById('btn_startGame').addEventListener('click', function() {
-			// 	// document.getElementById('chooseGameFromServer').dispatchEvent(new Event('change'));
-			// 	console.log("start it up!");
-			// 	document.getElementById('emscripten_iframe').contentWindow.run();
-			// });
+			document.getElementById('btn_stopGame').addEventListener('click', function() {
+				document.getElementById('mid').querySelector('iframe').src = "loading.html";
+			});
 
-			document.getElementById('mid').querySelector('iframe').src = "gamechanger_p.php";
+			// document.getElementById('mid').querySelector('iframe').src = "gamechanger_p.php";
+			// document.getElementById('chooseGameFromServer').selectedIndex = 1;
+			document.getElementById('chooseGameFromServer').value = "games_nonsd/lolo-wip.uze";
 		}, 1500);
 	};
 
 	function resizeIframe() {
 		var outer = document.getElementById('emscripten_iframe');
-		var inner = document.getElementById('emscripten_iframe').contentDocument.body;
+		// var inner = document.getElementById('emscripten_iframe').contentDocument.body;
+		outer.style.height = document.getElementById('emscripten_iframe').contentWindow.document.body.clientHeight+"px";
+		outer.style.width = document.getElementById('emscripten_iframe').contentWindow.document.body.clientWidth+"px";
 		outer.focus();
-		outer.height       = inner.scrollHeight;
-		outer.width        = inner.scrollWidth;
-		outer.style.height = inner.scrollHeight+"px";
-		outer.style.width  = inner.scrollWidth+"px";
 	}
 
 	function serverPOSTrequest(dataObj, callback, url){
@@ -119,7 +104,7 @@
 		var callback = function(resp){
 			console.log("loadGame callback called");
 			// Change the background colors back to their original. Hide the iframe.
-			document.getElementById('middle').style.visibility="hidden";
+			// document.getElementById('middle').style.visibility="hidden";
 			document.body.style['background-color']='slategray';
 			document.getElementsByTagName('html')[0].style['background-color']='slategray';
 

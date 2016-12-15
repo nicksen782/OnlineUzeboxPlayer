@@ -1,2 +1,0 @@
-[12-Dec-2016 17:09:01 America/Detroit] PHP Fatal error:  Call to a member function bindValue() on a non-object in /home/ubuntu/workspace/web/ACTIVE/Emscripten_Uzebox_Gamechanger/CURRENT/APP_gamemanager/gamemanager_p.php on line 361
-[12-Dec-2016 17:10:57 America/Detroit] PHP Fatal error:  Call to a member function execute() on a non-object in /home/ubuntu/workspace/web/ACTIVE/Emscripten_Uzebox_Gamechanger/CURRENT/APP_gamemanager/gamemanager_p.php on line 365

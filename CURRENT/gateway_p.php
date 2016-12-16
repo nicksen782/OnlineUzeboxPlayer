@@ -30,14 +30,15 @@ function processClientRequest_O(){
 
 	// Several 'o' values may be used. Each may require specific privelidges.
 	// 'f' is function, 'a' is arguments, 'p' is permissions required.
-
+tattle5("processClientRequest_O", null);
 	// EMULATOR (_p/gamedbmanager_p.php)
 	$o_values["getGameList"]	= [ "func"=>"getGameList",	"args"=>[],	"perms"=>($eud_access ? 1 : 0) ] ;
 	$o_values["loadGame"]		= [ "func"=>"loadGame",		"args"=>[],	"perms"=>($eud_access ? 1 : 0) ] ;
 
 	// GAME DATABASE MANAGER (_p/gamedbmanager_p.php)
-	$o_values["loadGame_intoManager"]= [ "func"=>"loadGame_intoManager",	"args"=>[],	"perms"=>($eud_access ? 1 : 0) ] ;
-	$o_values["updateGameInfo"]= [ "func"=>"updateGameInfo",				"args"=>[],	"perms"=>($eud_access ? 1 : 0) ] ;
+	$o_values["loadGame_intoManager"]	= [ "func"=>"loadGame_intoManager",	"args"=>[],	"perms"=>($eud_access ? 1 : 0) ] ;
+	$o_values["updateGameInfo"]			= [ "func"=>"updateGameInfo",		"args"=>[],	"perms"=>($eud_access ? 1 : 0) ] ;
+	$o_values["newFileUpload"]			= [ "func"=>"newFileUpload",		"args"=>[],	"perms"=>($eud_access ? 1 : 0) ] ;
 
 
 	// Check if the 'o' value is valid.

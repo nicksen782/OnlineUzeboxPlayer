@@ -54,4 +54,3 @@ function addToFS(filename, completefilepath, checkheader) {
 
 	}), null);
 }
-

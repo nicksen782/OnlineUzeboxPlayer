@@ -107,7 +107,7 @@ window.onload=function(){
 			resp = JSON.parse(resp);
 			var gamedata = resp.result;
 			var filelist = resp.filelist;
-			console.log(gamedata['description'], gamedata, filelist);
+			// console.log(gamedata['description'], gamedata, filelist);
 
 			// Clear the form.
 			document.getElementById('completeData_1game_buttons_cancel').click(); //dispatchEvent(new Event('click'));
@@ -125,7 +125,7 @@ window.onload=function(){
 			document.getElementById('completeData_1game_description_textarea').value = gamedata['description'];
 
 
-			console.log(filelist);
+			// console.log(filelist);
 			var link;
 			document.getElementById('gamefilelist').innerHTML += " -- "
 			for(var f=0; f<filelist.length; f++){
@@ -156,7 +156,14 @@ function serverPOSTrequest(dataObj, callback, url){
 
 	var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance
 	xmlhttp.open("POST", url ? url : "index_p.php");   // Use the specified url. If no url then use the default.
-	xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+	if(!dataObj.fileupload){
+		console.log("1");
+		xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+	}
+
+	else{ console.log("2"); xmlhttp.setRequestHeader("Content-Type", "multipart/form-data"); }
+
 	// xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 	xmlhttp.onreadystatechange = function() {
 		if (xmlhttp.readyState === 4 && xmlhttp.status == "200") {
@@ -167,15 +174,21 @@ function serverPOSTrequest(dataObj, callback, url){
 		}
 	}
 
-	dataObj = Object.keys(dataObj).map(function(k) {
-		return encodeURIComponent(k) + '=' + encodeURIComponent(dataObj[k]);
-	}).join('&');
+	if(!dataObj.fileupload){
+		console.log("3");
+		dataObj = Object.keys(dataObj).map(function(k) {
+			return encodeURIComponent(k) + '=' + encodeURIComponent(dataObj[k]);
+		}).join('&');
+	}
 
 	xmlhttp.send(dataObj);
 }
 
 function resizeIframe() {
 	var outer = document.getElementById('emscripten_iframe');
+	outer.focus();
+
+	return;
 	// var inner = document.getElementById('emscripten_iframe').contentDocument.body;
 	outer.style.height = document.getElementById('emscripten_iframe').contentWindow.document.body.clientHeight+"px";
 	// outer.style.width  = document.getElementById('emscripten_iframe').contentWindow.document.body.width+"px";
@@ -183,7 +196,6 @@ function resizeIframe() {
 	outer.height = document.getElementById('emscripten_iframe').contentWindow.document.body.clientHeight+"px";
 	// outer.width  = document.getElementById('emscripten_iframe').contentWindow.document.body.width+"px";
 
-	outer.focus();
 }
 
 function iframeIsReadyNow(currentgame){
@@ -274,5 +286,73 @@ function updateGameInfo(infoObj){
 	thedata.o = "updateGameInfo";
 
 	serverPOSTrequest(	thedata, callback, "gateway_p.php" );
+}
 
+
+
+function newFileUpload(arg1, arg2){
+// var formData = new FormData();
+// formData.append("thefile", file);
+// xhr.send(formData);
+
+	var callback = function(resp){
+		console.log("uploadfile1:", resp);
+		resp = JSON.parse(resp);
+		console.log("uploadfile2:", resp);
+
+		// Reload the game list.
+		// getGameList();
+	};
+	var thedata = new FormData();
+	thedata.append("o", "newFileUpload");
+	thedata.append('fileupload', true);
+	thedata.append('files', document.getElementById('newFileUpload_browse').files);
+
+	serverPOSTrequest(	thedata, callback, "gateway_p.php" );
+
+	// Gather up some values to send to the file uploader.
+	// var fileUploadData = {
+	// 	isUpload			: isUpload,
+	// 	o					: "updateExistingFloorplan",
+	// 	uploadUrl			: "index_p.php?upload=true",
+	// 	// new_floorplan_name	: $scope.new_floorplan_name,
+	// 	// new_description 	: $scope.new_description,
+	// 	fileToUpload		: $scope.myFile2,
+	// 	plant_id			: $scope.edit_floorplan_plantid,
+
+	// 	"id"             : $scope.edit_id,
+	// 	"id2"            : $scope.edit_id,
+	// 	"description"    : $scope.edit_description,
+	// 	"floorplan_name" : $scope.edit_floorplan_name,
+	// };
+
+	// angular.module('newburyPipeline').service('fileUpload3', ['$http', function ($http) {
+	// 	this.uploadFileToUrl = function( fileUploadDataOBJ ){
+	// 		// Prepare the data to be sent to the server.
+	// 		var thedata = new FormData();
+
+	// 		// Create form data dynamically based on the passed object.
+	// 		for(var key in fileUploadDataOBJ){
+	// 			thedata.append(key, fileUploadDataOBJ[key]);
+	// 		}
+
+	// 		// Configure the params for the server data message.
+	// 		var params = {
+	// 			method: "POST",
+	// 			url: fileUploadDataOBJ.uploadUrl,
+	// 			headers: {'Content-Type': undefined},
+	// 			transformRequest: angular.identity,
+	// 			data: thedata,
+	// 		};
+
+	// 		return $http(params).then(
+	// 			function (d) {
+	// 				// console.log("operation:", o, "", "status:", d.status);
+
+	// 				// Return only the data portion of the response.
+	// 				return d.data;
+	// 			}
+	// 		);
+	// 	}
+	// }]);
 }

@@ -86,6 +86,7 @@ div#top_panel_right {
 	background-color: darkgoldenrod;
 	border-radius: 5px;
 	border: 2px solid darkcyan;
+	box-shadow: 0px 0px 5px 5px rgba(0, 0, 0, 0.5); */
 }
 
 div#top_panel_right_gamemanager {
@@ -154,6 +155,7 @@ input#restartEmulator_button {
 	background-color: darkgoldenrod;
 	border-radius: 5px;
 	border: 2px solid darkcyan;
+	box-shadow: 0px 0px 5px 5px rgba(0, 0, 0, 0.5);
 }
 
 .navButton:hover {
@@ -187,18 +189,59 @@ input#restartEmulator_button {
 }
 #VIEW_emulator{
 }
-#emscripten_iframe_container iframe { }
-#emscripten_iframe{z-index:5;height: 456px; width: 625px;margin: 0px;padding: 0px;box-shadow: 5px 5px 5px 5px rgba(0, 0, 0, 0.5);}
-.gameframe_border{
-	background-image: url('../img/uzebox-logo-best_reasonably_small.png');
-	background-repeat-y: left top;
-	display:inline-block;
-	padding: 18px;
-	background-size: 32px 32px;
-	box-shadow: 2px 2px 10px 5px rgba(138,43,226,0.5);
-	z-index:5;
-	/*position: relative;*/
+#emscripten_iframe_container iframe {/* display: none; *//* height: 458px; *//* width: 626px; */height: 100%;width: 100%;padding: 0px;margin: 0px;}
+.gameframe_{
+	width: 850px;
+	height: 508px;
+	margin: 0 auto;
+	padding: 0px;
+	/* box-shadow: 5px 5px 5px 5px rgba(0, 0, 0, 0.5); */
+	box-shadow: 0px 0px 5px 10px rgba(0, 0, 0, 0.5);
+	background-color: #3294cd;
+	overflow: hidden;
+	position: relative;
 }
+#emscripten_iframe 		 	 {z-index:5;/* height: 456px; *//* width: 625px; *//* margin: 0px; *//* padding: 0px; *//* box-shadow: 5px 5px 5px 5px rgba(0, 0, 0, 0.5); */}
+.gameframe_border_top    	 {margin: 0 auto;padding: 0px;background-size: 32px 32px;background-image: url('../img/uzebox-logo-best_reasonably_small.png');vertical-align:top;width:100%;height:25px;/* background-color:blue; */background-color: black;/* position: absolute; *//* top: 0px; */}
+.gameframe_border_left   	 {position: absolute;width: 114px;height: 458px;background-color: black;vertical-align: top;left: 0px;top: 0px;background-size: 110px;background-image: url(../img/uzebox-logo-best_reasonably_small.png);}
+#emscripten_iframe_container {
+	position: relative;
+	left: -2px;
+	height: 440px;
+	width: 630px;
+	/* display: none; */
+	/* width: 100%; */
+	/* height: 100%; */
+	margin: auto;
+	padding: 0px;
+	outline: 0px solid black;
+	border: 0px solid black;
+	height: 456px;
+	width: 620px;
+}
+.gameframe_border_right  	 {
+	position: absolute;
+	width: 115px;
+	height: 458px;
+	background-color: black;
+	vertical-align: top;
+	right: 0px;
+	top: 0px;
+	background-size: 110px;
+	background-image: url(../img/uzebox-logo-best_reasonably_small.png);
+}
+.gameframe_border_bottom    	 {margin: 0 auto;padding: 0px;background-size: 32px 32px;background-image: url('../img/uzebox-logo-best_reasonably_small.png');vertical-align:top;width:100%;height:25px;/* background-color:red; */background-color: black;position: relative;/* bottom: -15px; */top: 15px;}
+/*.gameframe_border{*/
+/*	background-image: url('../img/uzebox-logo-best_reasonably_small.png');*/
+/*	background-repeat-y: left top;*/
+/*	display:inline-block;*/
+/*	padding: 0px 100px 0px 100px;*/
+/*	background-size: 32px 32px;*/
+/*	box-shadow: 2px 2px 10px 5px rgba(138,43,226,0.5);*/
+/*	box-shadow: 5px 5px 5px 5px rgba(0, 0, 0, 0.5);*/
+/*	z-index:5;*/
+	/* position: relative; */
+/*}*/
 
 #progressBar{
 	background-image: url('../img/ProgressBar.gif');
@@ -245,3 +288,5 @@ input#restartEmulator_button {
 #completeData_1game_buttons{ text-align:center; }
 #completeData_1game_buttons input[type='button']{ width:45%; }
 #gamefilelist{min-height:2em;}
+
+#middle_cont1{position: relative;height: 443px;}

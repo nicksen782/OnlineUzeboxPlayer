@@ -356,5 +356,12 @@ function updateGameInfo(){
 	);
 
 }
+
+
+
+function newFileUpload(){
+  tattle5("uploadfile", null);
+}
+
 ?>
 

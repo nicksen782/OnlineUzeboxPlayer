@@ -57,12 +57,23 @@
 
 		<div id="middle">
 			<div id="VIEW_emulator" class="views">
-				<div class="gameframe_border">
-					<div id="emscripten_iframe_container">
-						<iframe id="emscripten_iframe" src="loading.html"></iframe>
-					</div>
+
+				<div class="gameframe_">
+				<div class="gameframe_border_top"></div>
+				<!--<div style="clear:both;"></div>-->
+
+				<div id="middle_cont1">
+					<div class="gameframe_border_left"></div>
+					<div id="emscripten_iframe_container"> <iframe id="emscripten_iframe" src="loading.html"></iframe> </div>
+					<div class="gameframe_border_right"></div>
+				</div>
+				<div style="clear:both;"></div>
+
+				<div class="gameframe_border_bottom"></div>
+				<!--<div style="clear:both;"></div>-->
 				</div>
 			</div>
+
 			<div id="VIEW_gamedbmanager" class="views">
 
 				<table id="completeData_1game">
@@ -99,14 +110,45 @@
 				</table>
 
 				<div id="completeData_1game_description_container">
-						description<br>
-						<textarea id="completeData_1game_description_textarea"></textarea>
+					description<br>
+					<textarea id="completeData_1game_description_textarea"></textarea>
 				</div>
 
 				<br>
 				<br>
-				<div>Files Found in This Game's Directory</div>
-				<div id="gamefilelist">sdfasdfsdafsdafsdfa</div>
+
+
+				<div>
+					<h3>Files Found in This Game's Directory</h3>
+					<!--<p>-->
+					<table>
+					<tr>
+						<th>File Name</th>
+						<th>Remove?</th>
+						<th>Download?</th>
+					</tr>
+					<tr>
+						<td>ae.uze</td>
+						<td><input type="button" value="Remove"></td>
+						<td><a href="games/boulderdash/boulderdash.uze" title="Download this file">boulderdash.uze</a></td>
+					</tr>
+					<tr>
+						<td>aedat.bin</td>
+						<td><input type="button" value="Remove"></td>
+						<td><a href="games/boulderdash/boulderdash.uze" title="Download this file">boulderdash.uze</a></td>
+					</tr>
+					</table>
+
+					<form id="newFileUpload_form">
+						<div>
+							<input type="file"   id="newFileUpload_browse" class="" name="newFileUpload_files" >
+							<input type="button" id="newFileUpload_save"   class="" onclick="newFileUpload(this, this.form)" value="Upload File">
+						</div>
+					</form>
+
+					<!--</p>-->
+				</div>
+				<div id="gamefilelist"></div>
 
 				<div id="completeData_1game_buttons">
 					<br>

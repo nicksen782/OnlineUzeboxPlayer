@@ -1,5 +1,5 @@
 # OnlineUzeboxPlayer
-This uses Emscripten and an Uzebox emulator (Cuzebox or Uzem) to play Uzebox games online. This program keeps a database of Uzebox roms and can easily switch between games.
+This uses Emscripten and an Uzebox emulator (Cuzebox) to play Uzebox games online. This program keeps a database of Uzebox roms and can easily switch between games.
 
 Game Changer and Emscripten Filesystem Configuration: (this program)
  Nickolas Andersen (nicksen782)

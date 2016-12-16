@@ -236,8 +236,8 @@ input#restartEmulator_button {
 #completeData_1game td:nth-child(1){text-align:left;}
 #completeData_1game td textarea{width:100%;}
 
-#completeData_1game_description{display:inline-block; width:45%;vertical-align:top;}
-#completeData_1game_description textarea{
+#completeData_1game_description_container{display:inline-block; width:45%;vertical-align:top;}
+#completeData_1game_description_textarea{
 	margin: 0px;
 	height: 200px;
 	width: 245px;

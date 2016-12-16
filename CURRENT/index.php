@@ -67,7 +67,7 @@
 
 				<table id="completeData_1game">
 					<tr>
-						<td>id</td><td><input id="completeData_1game_id" type="text" value=""></td>
+						<td>id</td><td><input disabled id="completeData_1game_id" type="text" value=""></td>
 					</tr>
 
 					<tr>
@@ -98,9 +98,9 @@
 					</tr>
 				</table>
 
-				<div id="completeData_1game_description">
+				<div id="completeData_1game_description_container">
 						description<br>
-						<textarea id="completeData_1game_description" ></textarea>
+						<textarea id="completeData_1game_description_textarea"></textarea>
 				</div>
 
 				<br>
@@ -113,6 +113,11 @@
 					<input type="button" id="completeData_1game_buttons_cancel" value="Cancel (clear form)">
 					<input type="button" id="completeData_1game_buttons_update"value="UPDATE">
 				</div>
+
+				<?php if($devenvironment == true){ ?>
+					<a href="../phpliteadmin.php" target="_blank">Full Online Database Manager</a>
+				<?php } ?>
+
 			</div>
 		</div>
 

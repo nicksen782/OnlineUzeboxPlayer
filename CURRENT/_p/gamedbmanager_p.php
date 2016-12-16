@@ -6,13 +6,25 @@ function getGameList(){
 	// Prepares this query.
 	$eud_db = $GLOBALS['eud_db'];
 	// file_get_contents($eud_db)
-	// tattle5("does this work?", array(sizeof(file_get_contents('../eud.db')), shell_exec('ls -l'), shell_exec('ls *.db'), $GLOBALS['eud_db'], $eud_db ));
 	$dbhandle  = new sqlite3_DB_PDO($eud_db) or exit("cannot open the database");
 
 	// SQL delete query.
-	$statement_SQL = "
-		SELECT * FROM games
-	;";
+	$statement_SQL = '
+    SELECT
+    "id"
+    , "title"
+    , "lastupload"
+    , "validheader"
+    , "uses_sd"
+    -- , "authors"
+    -- , "description"
+    -- , "addedby"
+    -- , "binhash"
+    -- , "gamefile"
+    -- , "gamedir"
+
+    FROM "games"
+	;';
 
 	// Prepare, bind placeholders, then execute the SQL query.
 	$dbhandle->prepare($statement_SQL);
@@ -32,8 +44,8 @@ function getGameList(){
 	);
 }
 
+// DONE!
 function loadGame(){
-
 	// List all files in the game database. Provide separate responses for SD and non-SD games.
 	// Prepares this query.
 	$eud_db = $GLOBALS['eud_db'];
@@ -42,9 +54,23 @@ function loadGame(){
 	$dbhandle  = new sqlite3_DB_PDO($eud_db) or exit("cannot open the database");
 
 	// SQL delete query.
-	$statement_SQL = "
-		SELECT id, title FROM games WHERE id = :id
-	;";
+	$statement_SQL = '
+		SELECT
+    "id"
+    , "title"
+    , "lastupload"
+    , "validheader"
+    , "uses_sd"
+    , "gamefile"
+    , "gamedir"
+    -- , "authors"
+    -- , "description"
+    -- , "addedby"
+    -- , "binhash"
+
+    FROM "games"
+    WHERE id = :id
+	;';
 
 	// Prepare, bind placeholders, then execute the SQL query.
 	$dbhandle->prepare($statement_SQL);
@@ -57,9 +83,10 @@ function loadGame(){
 
 	$gamefiles = array(
 		"id"           => $result[0]['id'],
-		"newname"      => $result[0]['title'].'.uze',
-		"fullfilepath" => "games/".$result[0]['title']."/".$result[0]['title'].'.uze',
+		"newname"      => $result[0]['gamefile'],
+		"fullfilepath" => $result[0]['gamedir'].$result[0]['gamefile'],
 	) ;
+
 
 	// Get the HTML that will be put into the iframe.
 	$iframehtml = liveEditEmu($gamefiles);
@@ -72,9 +99,10 @@ function loadGame(){
 		)
 	);
 
-  //$gamefiles = getGameFile( $game);
 }
 
+// DONE!
+// Used by 'loadGame()'
 function liveEditEmu($gamefiles){
   $cuzebox_extra = file_get_contents("js/cuzebox_extra.js");
 
@@ -189,8 +217,127 @@ function liveEditEmu($gamefiles){
   $noannoyingCon2 = "<!--<textarea id=\"output\" rows=\"8\"></textarea>-->";
   $cuzeboxhtml = str_replace($annoyingCon2, $noannoyingCon2, $cuzeboxhtml);
 
-
   // Send the modified page.
   return $cuzeboxhtml;
+}
+
+
+//
+// DONE!
+function loadGame_intoManager(){
+	// List all files in the game database.
+
+	// Prepares this query.
+	$eud_db = $GLOBALS['eud_db'];
+	// file_get_contents($eud_db)
+	$dbhandle  = new sqlite3_DB_PDO($eud_db) or exit("cannot open the database");
+
+	// SQL delete query.
+	$statement_SQL = '
+    SELECT
+    "id"
+    , "title"
+    , "lastupload"
+    , "validheader"
+    , "uses_sd"
+    , "authors"
+    , "description"
+    , "addedby"
+    -- , "binhash"
+    , "gamefile"
+    , "gamedir"
+
+    FROM "games"
+
+    WHERE id = :id
+	;';
+
+	// Prepare, bind placeholders, then execute the SQL query.
+	$dbhandle->prepare($statement_SQL);
+		$dbhandle->bind(':id', $_POST['game']);
+	$retval_execute1 = $dbhandle->execute();
+
+	// Fetch the records.
+	$result = $dbhandle->statement->fetchAll(PDO::FETCH_ASSOC) ;
+
+
+  // Now get a list of the files that are within the game's directory.
+  $directory = $result[0]['gamedir'];
+  $scanned_directory = array_values(array_diff(scandir($directory), array('..', '.', '.git')));
+  // $scanned_directory = array_values(array_diff(scandir($directory), array()));
+
+  // Gather only the directory names.
+  $filelist = array();
+  for($i=0; $i<sizeof($scanned_directory); $i++){
+  	if( ! is_dir($directory.'/'.$scanned_directory[$i]) ){
+  		array_unshift($filelist, $scanned_directory[$i]);
+  	}
+  }
+
+	// Output the data.
+	echo json_encode(
+		array(
+			"retval_execute1" => $retval_execute1,
+			"result"          => $result[0],
+			"filelist"         => $filelist
+		)
+	);
+
+}
+
+// DONE!
+function updateGameInfo(){
+	// List all files in the game database.
+tattle5("updateGameInfo", null);
+	// Prepares this query.
+	$eud_db = $GLOBALS['eud_db'];
+	// file_get_contents($eud_db)
+	$dbhandle  = new sqlite3_DB_PDO($eud_db) or exit("cannot open the database");
+
+	// SQL delete query.
+	$statement_SQL = '
+    UPDATE "games"
+      SET
+         -- "id"          = :id
+        -- ,
+        "title"       = :title
+        ,"authors"     = :authors
+        ,"description" = :description
+        ,"lastupload"  = :lastupload
+        ,"addedby"     = :addedby
+        ,"validheader" = :validheader
+        ,"binhash"     = :binhash
+        ,"gamefile"    = :gamefile
+        ,"uses_sd"     = :uses_sd
+        ,"gamedir"     = :gamedir
+    WHERE "id" = :id
+	;';
+
+	// Prepare, bind placeholders, then execute the SQL query.
+	$dbhandle->prepare($statement_SQL);
+		$dbhandle->bind(':title',       $_POST['title']);
+		$dbhandle->bind(':authors',     $_POST['authors']);
+		$dbhandle->bind(':description', $_POST['description']);
+		$dbhandle->bind(':lastupload',  $_POST['lastupload']);
+		$dbhandle->bind(':addedby',     $_POST['addedby']);
+		$dbhandle->bind(':validheader', $_POST['validheader']);
+		$dbhandle->bind(':binhash',     $_POST['binhash']);
+		$dbhandle->bind(':gamefile',    $_POST['gamefile']);
+		$dbhandle->bind(':uses_sd',     $_POST['uses_sd']);
+		$dbhandle->bind(':gamedir',     $_POST['gamedir']);
+		$dbhandle->bind(':id',          $_POST['id']);
+	$retval_execute1 = $dbhandle->execute();
+
+	// Fetch the records.
+// 	$result = $dbhandle->statement->fetchAll(PDO::FETCH_ASSOC) ;
+
+	// Output the data.
+	echo json_encode(
+		array(
+			"retval_execute1" => $retval_execute1,
+			"result"=>$result[0]
+		)
+	);
+
 }
 ?>

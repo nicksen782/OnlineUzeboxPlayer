@@ -7,7 +7,7 @@
 		$globalsSet = true;
 		// Configure error reporting
 		error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT);
-		ini_set('error_log', getcwd() . '/EUD_____php-error.txt');
+		ini_set('error_log', getcwd() . '/EUD_php-error.txt');
 		ini_set('display_errors', true);
 		date_default_timezone_set('America/Detroit');
 

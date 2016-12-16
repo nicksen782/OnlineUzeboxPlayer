@@ -1,4 +1,5 @@
 <?php
+exit();
 	// if( $_SERVER['HTTP_HOST'] == "dev-nicksen782.c9.io" || $_SERVER['SERVER_NAME'] == "dev-nicksen782.c9.io" ){ $devenvironment=true;}else{$devenvironment=false;}
 	// if(!$devenvironment){ echo "Not available on this domain. Sorry."; exit(); }
 ?>

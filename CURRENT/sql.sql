@@ -13,6 +13,5 @@ CREATE TABLE games
     );
 COMMIT;
 
-
 INSERT INTO table VALUES(1,'Super Cool Game','nicksen782','This is the best game ever created!',datetime(CURRENT_TIMESTAMP, 'localtime'),'nicksen782','1', NULL);
 

@@ -24,6 +24,7 @@ function getGameList(){
     -- , "gamedir"
 
     FROM "games"
+    ORDER BY "title" ASC
 	;';
 
 	// Prepare, bind placeholders, then execute the SQL query.
@@ -81,21 +82,37 @@ function loadGame(){
 	// Fetch the records.
 	$result = $dbhandle->statement->fetchAll(PDO::FETCH_ASSOC) ;
 
-	$gamefiles = array(
-		"id"           => $result[0]['id'],
-		"newname"      => $result[0]['gamefile'],
-		"fullfilepath" => $result[0]['gamedir'].$result[0]['gamefile'],
-	) ;
+  // Now get a list of the files that are within the game's directory.
+  $directory = $result[0]['gamedir'];
+  $scanned_directory = array_values(array_diff(scandir($directory), array('..', '.', '.git')));
+  // $scanned_directory = array_values(array_diff(scandir($directory), array()));
 
+  // Gather only the directory names.
+  $filelist = array();
+  for($i=0; $i<sizeof($scanned_directory); $i++){
+  	if( ! is_dir($directory.'/'.$scanned_directory[$i]) ){
+  		array_unshift($filelist,
+    		[ "filename"=>$scanned_directory[$i], "completefilepath"=>$directory.''.$scanned_directory[$i] ]
+  		);
+
+  	}
+  }
+
+	$dataFilesObj = [
+	  "title"=>$result[0]['title'],
+	  "uzerom"=> $result[0]['gamefile'],
+	  "datafiles"=>$filelist,
+	];
 
 	// Get the HTML that will be put into the iframe.
-	$iframehtml = liveEditEmu($gamefiles);
+	$iframehtml = liveEditEmu($dataFilesObj);
 
 	// Output the data.
 	echo json_encode(
 		array(
-			"iframehtml"	=> $iframehtml,
-			"count" 		=> sizeof($result)
+			"iframehtml"  	=> $iframehtml,
+			"count"   	  	=> sizeof($result),
+			"dataFilesObj"  => $dataFilesObj
 		)
 	);
 
@@ -103,7 +120,7 @@ function loadGame(){
 
 // DONE!
 // Used by 'loadGame()'
-function liveEditEmu($gamefiles){
+function liveEditEmu($dataFilesObj){
   $cuzebox_extra = file_get_contents("js/cuzebox_extra.js");
 
   // Comment out the auto-run part of the cuzebox.js file. Permanent.
@@ -147,20 +164,21 @@ function liveEditEmu($gamefiles){
   </style>
   <!-- Setup the filesystem-->
   <script>
-    // Get file list.
-    var filelist=(".json_encode(array($gamefiles), JSON_PRETTY_PRINT).");
-    var currentgame='".$gamefiles['fullfilepath']."';
-    var currentgameid='".$gamefiles['id']."';
 
     <!-- Cuzebox Extra-->
     ".$cuzebox_extra."
 
+    // Get file list.
+    var filelist=".json_encode(($dataFilesObj['datafiles']), JSON_PRETTY_PRINT).";
+    var currentgame='".$dataFilesObj['title']."';
+    var uzerom='".$dataFilesObj['uzerom']."';
+
     // Configure Module
     var Module = {
-      arguments : ['".$gamefiles['newname']."'],
-      preInit   : [function(){extras_preInit(filelist);}],
-      //preRun  : [function(){extras_preInit(filelist);}],
-      postRun   : [function(){extras_postRun(currentgame, currentgameid);}],
+      arguments : ['".$dataFilesObj['uzerom']."'],
+      preInit   : [function(){extras_preInit(filelist, uzerom);}],
+      //preRun  : [function(){extras_preInit(filelist, uzerom);}],
+      postRun   : [function(){extras_postRun(currentgame);}],
       print: (function() {
           var element = document.getElementById('output');
           if (element) element.value = ''; // clear browser cache
@@ -221,7 +239,6 @@ function liveEditEmu($gamefiles){
   return $cuzeboxhtml;
 }
 
-
 //
 // DONE!
 function loadGame_intoManager(){
@@ -260,7 +277,6 @@ function loadGame_intoManager(){
 	// Fetch the records.
 	$result = $dbhandle->statement->fetchAll(PDO::FETCH_ASSOC) ;
 
-
   // Now get a list of the files that are within the game's directory.
   $directory = $result[0]['gamedir'];
   $scanned_directory = array_values(array_diff(scandir($directory), array('..', '.', '.git')));
@@ -285,10 +301,10 @@ function loadGame_intoManager(){
 
 }
 
+// INSERT INTO "games" ("id","title","authors","description","lastupload","addedby","validheader","binhash","gamefile","uses_sd","gamedir") VALUES (NULL,'Alter Ego','Lee Weber','','12/16/2016 00:06','manual','1','','ae.uze','1','games/AlterEgo/')
+// UPDATE "games" SET "id"='485', "title"='Alter Ego', "authors"='Lee Weber', "description"='', "lastupload"='12/16/2016 00:06', "addedby"='manual', "validheader"='1', "binhash"='', "gamefile"='ae.uze', "uses_sd"='1', "gamedir"='games/AlterEgo/' WHERE "rowid" = 485
 // DONE!
 function updateGameInfo(){
-	// List all files in the game database.
-tattle5("updateGameInfo", null);
 	// Prepares this query.
 	$eud_db = $GLOBALS['eud_db'];
 	// file_get_contents($eud_db)
@@ -341,3 +357,4 @@ tattle5("updateGameInfo", null);
 
 }
 ?>
+

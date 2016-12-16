@@ -1,74 +1,57 @@
-function extras_preInit(filelist){
-	loadFileSystem(filelist);
+function extras_preInit(filelist, uzerom){
+	loadFileSystem(filelist, uzerom);
 }
 
-function extras_postRun(currentgame, currentgameid){
+function extras_postRun(currentgame){
 	setTimeout(function(){
-		parent.iframeIsReadyNow(currentgame, currentgameid) ;
-		// document.getElementById('controls').style.display = 'none';
-		// document.body.style['background-color'] = "rgba(0, 0, 0, 0.85)";
+		parent.iframeIsReadyNow(currentgame) ;
 	}, 500);
 }
 
 // *******
-function loadFileSystem(filelist) {
+function loadFileSystem(filelist, uzerom) {
+	var checkheader ;
 	for(var i=0; i<filelist.length; i++){
-		addToFS(filelist[i].newname, filelist[i].fullfilepath);
-		// addToFS2(filelist[i].newname, filelist[i].fullfilepath);
+		checkheader = filelist[i].filename == uzerom ? true : false ;
+		addToFS(filelist[i].filename, filelist[i].completefilepath, checkheader);
+		// addToFS2(filelist[i].filename, filelist[i].completefilepath);
 	}
 }
 
-function addToFS2(newname, fullfilepath) {
-	console.info("Adding file:", newname, ", Path:", fullfilepath);
-	FS.createPreloadedFile('/', newname  , fullfilepath      , true, true);
+function addToFS2(filename, completefilepath) {
+	console.info("Adding file:", filename, ", Path:", completefilepath);
+	FS.createPreloadedFile('/', filename  , completefilepath      , true, true);
 }
 
-function addToFS(newname, fullfilepath) {
-	Browser.asyncLoad(fullfilepath, (function(byteArray) {
-		var ab_asString = ab2str(byteArray);
+function addToFS(filename, completefilepath, checkheader) {
+	// console.log("completefilepath:", completefilepath);
+	Browser.asyncLoad(completefilepath, (function(byteArray) {
 
-		var header = ab_asString.substring(0, 6);
-		console.log(header, header==="UZEBOX");
+		if(checkheader==true){
+			console.log("Checking uzerom header...");
+			// Read the first six bytes of the byteArray. Does it spell UZEBOX?
+			var header = byteArray.slice(0,6).toString();
 
-		// if(header !== "UZEBOX"){
-		// 	var ab_asString2 = "UZEBOX" + ab_asString ;
-		// 	FS.createPreloadedFile('/', newname  , str2ab(ab_asString2)      , true, true);
-		// 	return;
-		// }
-		// console.log("**1:", ab_asString, "\n\n**2:",ab_asString2);
-		// var checkString="";
-		// for(var i=0; i<byteArray.length && i<6; i++){
-		// 	console.log("index:", i, "data:",byteArray[i], String.fromCharCode(byteArray[i]) );
-		// 	checkString+=String.fromCharCode(byteArray[i]);
-		// }
-		// console.log(checkString);
-		// byteArray[0] = "U".toLowerCase();
-		// byteArray[1] = "Z".toLowerCase();
-		// byteArray[2] = "E".toLowerCase();
-		// byteArray[3] = "B".toLowerCase();
-		// byteArray[4] = "O".toLowerCase();
-		// byteArray[5] = "X".toLowerCase();
-		// for(var i=0; i<byteArray.length && i<6; i++){
-		// 	console.log("index:", i, "data:",byteArray[i], String.fromCharCode(byteArray[i]) );
-		// 	// checkString+=String.fromCharCode(byteArray[i]);
-		// }
-		// console.log((byteArray));
-		// FS.createDataFile('/', newname, byteArray, true, true, true);
-		FS.createPreloadedFile('/', newname  , fullfilepath      , true, true);
+			// Look for UZEBOX (as an ascii string here.)
+			if(header !== "85,90,69,66,79,88"){
+				// Mising 'UZEBOX'. Set those bytes to have 'UZEBOX'.
+				byteArray[0] = 85; // U
+				byteArray[1] = 90; // Z
+				byteArray[2] = 69; // E
+				byteArray[3] = 66; // B
+				byteArray[4] = 79; // O
+				byteArray[5] = 88; // X
+				console.log("The header has been corrected.");
+			}
+			else {
+				console.log("The header is correct.");
+			}
+		}
+
+		// Add the file to the FS.
+		// FS.createDataFile('/', filename, byteArray, true, true, true);
+		FS.createPreloadedFile('/', filename  , byteArray      , true, true);
+
 	}), null);
 }
-
-
-function ab2str(buf) {
-  return String.fromCharCode.apply(null, new Uint16Array(buf));
-}
-function str2ab(str) {
-  var buf = new ArrayBuffer(str.length*2); // 2 bytes for each char
-  var bufView = new Uint16Array(buf);
-  for (var i=0, strLen=str.length; i < strLen; i++) {
-    bufView[i] = str.charCodeAt(i);
-  }
-  return buf;
-}
-
 

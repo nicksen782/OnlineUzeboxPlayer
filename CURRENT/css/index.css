@@ -34,7 +34,7 @@ div#top_panel_left {
 	top: 1px;
 	left: 0px;
 	/*background-color: #336699;*/
-	width: 450px;
+	width: 370px;
 	height: 100%;
 	display: inline-block;
 	vertical-align: top;
@@ -77,9 +77,25 @@ div#top_panel_right {
 	top: 2px;
 	right: 55px;
 	/* background-color: #336699; */
-	width: 450px;
+	width: 320px;
 	height: 36px;
-	display: inline-block;
+	/*display: inline-block;*/
+	vertical-align: top;
+	text-align: center;
+	padding: 3px;
+	background-color: darkgoldenrod;
+	border-radius: 5px;
+	border: 2px solid darkcyan;
+}
+
+div#top_panel_right_gamemanager {
+	position: absolute;
+	top: 2px;
+	right: 55px;
+	/* background-color: #336699; */
+	width: 320px;
+	height: 36px;
+	/*display: inline-block;*/
 	vertical-align: top;
 	text-align: center;
 	padding: 3px;
@@ -96,8 +112,16 @@ div#top_panel_right {
 	font-size: 12px;
 }
 
+#gameMenu_select2 {
+	width: 180px;
+	height: 50%;
+	font-weight: bold;
+	vertical-align: top;
+	font-size: 12px;
+}
+
 input#stopEmulator_button {
-	width: 125px;
+	width: 60px;
 	height: 50%;
 	/* margin-top: 1px; */
 	font-weight: bold;
@@ -106,7 +130,7 @@ input#stopEmulator_button {
 }
 
 input#restartEmulator_button {
-	width: 125px;
+	width: 60px;
 	height: 50%;
 	/* margin-top: 1px; */
 	font-weight: bold;
@@ -122,8 +146,8 @@ input#restartEmulator_button {
 	background-repeat: no-repeat;
 	background-size: 100% 100%;
 	/*position: absolute;*/
-	width: 44px;
-	height: 44px;
+	width: 42px;
+	height: 42px;
 	/* height: 92%; */
 	/*top: 1px;*/
 	/*right: 5px;*/
@@ -153,6 +177,16 @@ input#restartEmulator_button {
 
 
 #middle {text-align: center;padding-top: 15px;}
+#VIEW_gamedbmanager{
+	background-color: lightgray;
+	margin: auto;
+	margin-bottom: 15px;
+	width: 60%;
+	height: 80vh;
+	/* height: inherit; */
+}
+#VIEW_emulator{
+}
 #emscripten_iframe_container iframe { }
 #emscripten_iframe{z-index:5;height: 456px; width: 625px;margin: 0px;padding: 0px;box-shadow: 5px 5px 5px 5px rgba(0, 0, 0, 0.5);}
 .gameframe_border{
@@ -168,7 +202,7 @@ input#restartEmulator_button {
 
 #progressBar{
 	background-image: url('../img/ProgressBar.gif');
-	width: 444px;
+	width: 100%;
 	height: 48%;
 	background-size: 100% 100%;
 	background-repeat: no-repeat;
@@ -177,4 +211,38 @@ input#restartEmulator_button {
 	margin: auto;
 	display: none;
 }
-#progressBar.show{ display: block;}
+#progressBar2{
+	background-image: url('../img/ProgressBar.gif');
+	width: 100%;
+	height: 48%;
+	background-size: 100% 100%;
+	background-repeat: no-repeat;
+	position: relative;
+	top: 1px;
+	margin: auto;
+	display: none;
+}
+#progressBar.show, #progressBar2.show{ display: block;}
+
+.views{display:none;}
+.views.show{display:block;}
+
+.panels{display:none;}
+.panels.show{display:block;}
+
+
+#completeData_1game{display:inline-block;width:50%;vertical-align:top;}
+#completeData_1game td input[type='text']{width:100%;}
+#completeData_1game td:nth-child(1){text-align:left;}
+#completeData_1game td textarea{width:100%;}
+
+#completeData_1game_description{display:inline-block; width:45%;vertical-align:top;}
+#completeData_1game_description textarea{
+	margin: 0px;
+	height: 200px;
+	width: 245px;
+}
+
+#completeData_1game_buttons{ text-align:center; }
+#completeData_1game_buttons input[type='button']{ width:45%; }
+#gamefilelist{min-height:2em;}

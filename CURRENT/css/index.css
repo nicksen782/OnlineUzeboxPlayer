@@ -230,7 +230,6 @@ input#restartEmulator_button {
 .panels{display:none;}
 .panels.show{display:block;}
 
-
 #completeData_1game{display:inline-block;width:50%;vertical-align:top;}
 #completeData_1game td input[type='text']{width:100%;}
 #completeData_1game td:nth-child(1){text-align:left;}

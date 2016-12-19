@@ -172,7 +172,7 @@ input#restartEmulator_button {
 
 #content{
 	border: 2px solid darkcyan;
-	min-height: 550px;
+	min-height: 600px;
 	background-color: #336699;
 	margin: 0px 1px 0px 1px;
 }
@@ -180,33 +180,39 @@ input#restartEmulator_button {
 
 #middle {text-align: center;padding-top: 15px;}
 #VIEW_gamedbmanager{
-	background-color: lightgray;
+	background-color: darkgray;
 	margin: auto;
 	margin-bottom: 15px;
-	width: 60%;
-	height: 80vh;
+	width: 600px;
+	/* height: 80vh; */
 	/* height: inherit; */
+	/* padding: 5px; */
+	padding-bottom: 10px;
+	overflow: auto;
+	border-radius: 15px;
 }
 #VIEW_emulator{
 }
 #emscripten_iframe_container iframe {/* display: none; *//* height: 458px; *//* width: 626px; */height: 100%;width: 100%;padding: 0px;margin: 0px;}
 .gameframe_{
 	width: 850px;
-	height: 508px;
+	height: 528px;
 	margin: 0 auto;
 	padding: 0px;
 	/* box-shadow: 5px 5px 5px 5px rgba(0, 0, 0, 0.5); */
 	box-shadow: 0px 0px 5px 10px rgba(0, 0, 0, 0.5);
-	background-color: #3294cd;
+	background-color: #b8860b;
 	overflow: hidden;
 	position: relative;
+	border-radius: 20px;
 }
+.gameframe_borders{background-color: darkgoldenrod;}
 #emscripten_iframe 		 	 {z-index:5;/* height: 456px; *//* width: 625px; *//* margin: 0px; *//* padding: 0px; *//* box-shadow: 5px 5px 5px 5px rgba(0, 0, 0, 0.5); */}
-.gameframe_border_top    	 {margin: 0 auto;padding: 0px;background-size: 32px 32px;background-image: url('../img/uzebox-logo-best_reasonably_small.png');vertical-align:top;width:100%;height:25px;/* background-color:blue; */background-color: black;/* position: absolute; *//* top: 0px; */}
-.gameframe_border_left   	 {position: absolute;width: 114px;height: 458px;background-color: black;vertical-align: top;left: 0px;top: 0px;background-size: 110px;background-image: url(../img/uzebox-logo-best_reasonably_small.png);}
+.gameframe_border_top    	 {margin: 0 auto;padding: 0px;background-size: 36px;background-image: url('../img/uzebox-logo-best_reasonably_small.png');vertical-align:top;width:100%;height: 35px;/* background-color:blue; *//* background-color: black; */position: relative;/* top: 0px; */}
+.gameframe_border_left   	 {position: absolute;width: 114px;height: 458px;/* background-color: black; *//* background-color: blue; *//* background-color: yellow; */vertical-align: top;left: 0px;top: 0px;background-size: 115px;background-image: url(../img/uzebox-logo-best_reasonably_small.png);}
 #emscripten_iframe_container {
 	position: relative;
-	left: -2px;
+	left: 0px;
 	height: 440px;
 	width: 630px;
 	/* display: none; */
@@ -216,21 +222,24 @@ input#restartEmulator_button {
 	padding: 0px;
 	outline: 0px solid black;
 	border: 0px solid black;
-	height: 456px;
-	width: 620px;
+	height: 458px;
+	width: 622px;
+	border-radius: 20px;
+	overflow: hidden;
 }
 .gameframe_border_right  	 {
 	position: absolute;
 	width: 115px;
 	height: 458px;
-	background-color: black;
+	/*background-color: black;*/
+	/*background-color: blue;*/
 	vertical-align: top;
 	right: 0px;
 	top: 0px;
-	background-size: 110px;
+	background-size: 115px;
 	background-image: url(../img/uzebox-logo-best_reasonably_small.png);
 }
-.gameframe_border_bottom    	 {margin: 0 auto;padding: 0px;background-size: 32px 32px;background-image: url('../img/uzebox-logo-best_reasonably_small.png');vertical-align:top;width:100%;height:25px;/* background-color:red; */background-color: black;position: relative;/* bottom: -15px; */top: 15px;}
+.gameframe_border_bottom    	 {margin: 0 auto;padding: 0px;background-size: 36px;background-image: url('../img/uzebox-logo-best_reasonably_small.png');vertical-align:top;width:100%;height: 35px;/* background-color:red; *//* background-color: black; *//* background-color: blue; */position: relative;/* bottom: -15px; */top: 15px;}
 /*.gameframe_border{*/
 /*	background-image: url('../img/uzebox-logo-best_reasonably_small.png');*/
 /*	background-repeat-y: left top;*/
@@ -281,12 +290,50 @@ input#restartEmulator_button {
 #completeData_1game_description_container{display:inline-block; width:45%;vertical-align:top;}
 #completeData_1game_description_textarea{
 	margin: 0px;
-	height: 200px;
+	height: 160px;
 	width: 245px;
 }
 
 #completeData_1game_buttons{ text-align:center; }
 #completeData_1game_buttons input[type='button']{ width:45%; }
-#gamefilelist{min-height:2em;}
+/*#gamefilelist{min-height:2em;}*/
 
 #middle_cont1{position: relative;height: 443px;}
+
+
+#filemanager_section{
+	text-align: left;
+	width: 550px;
+	margin: auto;
+	border: 1px solid black;
+	margin-top: 10px;
+	padding: 10px;
+	background-color: lightgray;
+	border-radius: 10px;
+}
+#filemanager_section h3{
+	text-align: center;
+}
+
+#filesInDirectory_table{
+	margin:auto;
+	width: 100%;
+}
+
+input#newFileUpload_save {
+	width: 29%;
+}
+
+input#newFileUpload_browse {
+	width: 69%;
+}
+
+#gamedata_section{
+	border:1px solid black;
+	margin: auto;
+	margin-top: 10px;
+	padding: 10px;
+	width: 550px;
+	background-color: lightgray;
+	border-radius: 10px;
+}

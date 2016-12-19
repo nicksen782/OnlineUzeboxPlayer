@@ -13,10 +13,10 @@
 	if( $returnvalue['error'] ){
 		echo "error. " . $returnvalue['error_text'] . "<br>\n";
 		echo "<pre>";
-		echo "POST: " ; print_r($_POST);
-		echo "GET: " ; print_r($_GET);
-		echo "FILES: " ; print_r($_FILES);
-		echo "returnvalue: " ; print_r($returnvalue);
+		echo "POST: " ; print_r($_POST)."\n\n";
+		echo "GET: " ; print_r($_GET)."\n\n";
+		echo "FILES: " ; print_r($_FILES)."\n\n";
+		echo "returnvalue: " ; print_r($returnvalue)."\n\n";
 		echo "</pre>";
 	}
 	exit();
@@ -30,7 +30,6 @@ function processClientRequest_O(){
 
 	// Several 'o' values may be used. Each may require specific privelidges.
 	// 'f' is function, 'a' is arguments, 'p' is permissions required.
-tattle5("processClientRequest_O", null);
 	// EMULATOR (_p/gamedbmanager_p.php)
 	$o_values["getGameList"]	= [ "func"=>"getGameList",	"args"=>[],	"perms"=>($eud_access ? 1 : 0) ] ;
 	$o_values["loadGame"]		= [ "func"=>"loadGame",		"args"=>[],	"perms"=>($eud_access ? 1 : 0) ] ;
@@ -38,7 +37,9 @@ tattle5("processClientRequest_O", null);
 	// GAME DATABASE MANAGER (_p/gamedbmanager_p.php)
 	$o_values["loadGame_intoManager"]	= [ "func"=>"loadGame_intoManager",	"args"=>[],	"perms"=>($eud_access ? 1 : 0) ] ;
 	$o_values["updateGameInfo"]			= [ "func"=>"updateGameInfo",		"args"=>[],	"perms"=>($eud_access ? 1 : 0) ] ;
+
 	$o_values["newFileUpload"]			= [ "func"=>"newFileUpload",		"args"=>[],	"perms"=>($eud_access ? 1 : 0) ] ;
+	$o_values["removeGameFile"]			= [ "func"=>"removeGameFile",		"args"=>[],	"perms"=>($eud_access ? 1 : 0) ] ;
 
 
 	// Check if the 'o' value is valid.

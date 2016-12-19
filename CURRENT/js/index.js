@@ -1,40 +1,43 @@
-function viewSwitcher(view){
+function viewSwitcher(view) {
 	// First, hide everything.
 	[].map.call(document.querySelectorAll('.views'),
 		function(elem, index, elems) {
 			elem.classList.remove('show');
-	});
+		});
 	[].map.call(document.querySelectorAll('.panels'),
 		function(elem, index, elems) {
 			elem.classList.remove('show');
-	});
+		});
 
 	// Now show the selected app view.
-	switch(view) {
-	    case "emu":{
-			document.getElementById('top_panel_right').classList.add('show');
-			document.getElementById('VIEW_emulator').classList.add('show');
-	        break;
-	    }
-	    case "gamedbman":{
-			document.getElementById('top_panel_right_gamemanager').classList.add('show');
-			document.getElementById('VIEW_gamedbmanager').classList.add('show');
-	        break;
-	    }
-	    default:{
-	    	document.getElementById('top_panel_right').classList.add('show');
-			document.getElementById('VIEW_emulator').classList.add('show');
-	        break;
-	    }
+	switch (view) {
+		case "emu":
+			{
+				document.getElementById('top_panel_right').classList.add('show');
+				document.getElementById('VIEW_emulator').classList.add('show');
+				break;
+			}
+		case "gamedbman":
+			{
+				document.getElementById('top_panel_right_gamemanager').classList.add('show');
+				document.getElementById('VIEW_gamedbmanager').classList.add('show');
+				break;
+			}
+		default:
+			{
+				document.getElementById('top_panel_right').classList.add('show');
+				document.getElementById('VIEW_emulator').classList.add('show');
+				break;
+			}
 
-	    // document.getElementById('stopEmulator_button').click();
+			// document.getElementById('stopEmulator_button').click();
 	}
 
 
 
 }
 
-window.onload=function(){
+window.onload = function() {
 	getGameList();
 
 	viewSwitcher("emu");
@@ -42,19 +45,20 @@ window.onload=function(){
 
 	// Emulator
 	document.getElementById('emscripten_iframe_container').addEventListener('mouseenter', function() {
-		this.focus(); resizeIframe();
+		this.focus();
+		resizeIframe();
 	});
-	document.getElementById('emscripten_iframe_container').addEventListener('click', function(){
+	document.getElementById('emscripten_iframe_container').addEventListener('click', function() {
 		// document.getElementById('emscripten_iframe_container').querySelector('iframe').src = "loading.html";
 	});
-	document.getElementById('stopEmulator_button').addEventListener('click', function(){
+	document.getElementById('stopEmulator_button').addEventListener('click', function() {
 		document.getElementById('emscripten_iframe_container').querySelector('iframe').src = "loading.html";
 	});
-	document.getElementById('restartEmulator_button').addEventListener('click', function(){
+	document.getElementById('restartEmulator_button').addEventListener('click', function() {
 		document.getElementById('gameMenu_select').dispatchEvent(new Event('change'));
 	});
-	document.getElementById('gameMenu_select').addEventListener('change', function(){
-		var callback = function(resp){
+	document.getElementById('gameMenu_select').addEventListener('change', function() {
+		var callback = function(resp) {
 			resp = JSON.parse(resp);
 			// console.log("loadGame callback called. Number found:", resp.count, "(should be 1.)");
 
@@ -62,107 +66,150 @@ window.onload=function(){
 			document.getElementById('emscripten_iframe').remove();
 
 			var iframe = document.createElement('iframe');
-			iframe.id="emscripten_iframe";
+			iframe.setAttribute("frameBorder", "0");
+			// iframe.set
+			iframe.id = "emscripten_iframe";
 			document.getElementById('emscripten_iframe_container').appendChild(iframe);
 			iframe.contentWindow.document.open();
 			iframe.contentWindow.document.write(resp.iframehtml);
 			iframe.contentWindow.document.close();
 		};
 
-		var game = document.getElementById('gameMenu_select').value ;
+		var game = document.getElementById('gameMenu_select').value;
 
-		var thedata = { o:"loadGame", game:game };
-		serverPOSTrequest(	thedata, callback, "gateway_p.php" );
+		var thedata = {
+			o: "loadGame",
+			game: game
+		};
+		serverPOSTrequest(thedata, callback, "gateway_p.php");
 
 	});
 
 	// Games DB
-	document.getElementById('completeData_1game_buttons_cancel').addEventListener('click', function(){
+	document.querySelector('#newFileUpload_save').addEventListener('click', function(e) {
+		var gameid=document.querySelector("#completeData_1game_id").value;
+		newFileUpload(gameid);
+	}, false);
+
+	document.getElementById('completeData_1game_buttons_cancel').addEventListener('click', function() {
 		// Clear the form.
 		[].map.call(document.querySelectorAll('#VIEW_gamedbmanager input[type="text"], #VIEW_gamedbmanager textarea'),
-		function(elem, index, elems) { elem.value = ""; });
-
-		document.getElementById('gamefilelist').innerHTML = "" ;
-
+			function(elem, index, elems) {
+				elem.value = "";
+			});
+		// document.getElementById('gamefilelist').innerHTML = "";
+		var thetable = document.querySelector("#filesInDirectory_table");
+		for(var i = 1; i < thetable.rows.length;){
+			thetable.deleteRow(i);
+		}
+		document.querySelector('#newFileUpload_browse').value = "";
 	});
-	document.getElementById('completeData_1game_buttons_update').addEventListener('click', function(){
+	document.getElementById('completeData_1game_buttons_update').addEventListener('click', function() {
 		// Get the data from the form and pass it as an object to the game update function.
 		var infoObj = {};
-		infoObj.id          = document.getElementById('completeData_1game_id').value          ;
-		infoObj.title       = document.getElementById('completeData_1game_title').value       ;
-		infoObj.authors     = document.getElementById('completeData_1game_authors').value     ;
-		infoObj.gamedir     = document.getElementById('completeData_1game_gamedir').value     ;
-		infoObj.gamefile    = document.getElementById('completeData_1game_gamefile').value    ;
-		infoObj.uses_sd     = document.getElementById('completeData_1game_uses_sd').value     ;
-		infoObj.addedby     = document.getElementById('completeData_1game_addedby').value     ;
-		infoObj.lastupload  = document.getElementById('completeData_1game_lastupload').value  ;
-		infoObj.validheader = document.getElementById('completeData_1game_validheader').value ;
-		infoObj.description = document.getElementById('completeData_1game_description_textarea').value ;
+		infoObj.id = document.getElementById('completeData_1game_id').value;
+		infoObj.title = document.getElementById('completeData_1game_title').value;
+		infoObj.authors = document.getElementById('completeData_1game_authors').value;
+		infoObj.gamedir = document.getElementById('completeData_1game_gamedir').value;
+		infoObj.gamefile = document.getElementById('completeData_1game_gamefile').value;
+		infoObj.uses_sd = document.getElementById('completeData_1game_uses_sd').value;
+		infoObj.addedby = document.getElementById('completeData_1game_addedby').value;
+		infoObj.lastupload = document.getElementById('completeData_1game_lastupload').value;
+		infoObj.validheader = document.getElementById('completeData_1game_validheader').value;
+		infoObj.description = document.getElementById('completeData_1game_description_textarea').value;
 
 		updateGameInfo(infoObj);
 		document.getElementById('completeData_1game_buttons_cancel').click(); //dispatchEvent(new Event('click'));
 	});
-	document.getElementById('gameMenu_select2').addEventListener('change', function(){
-		var callback = function(resp){
+	document.getElementById('gameMenu_select2').addEventListener('change', function() {
+		var callback = function(resp) {
 			resp = JSON.parse(resp);
 			var gamedata = resp.result;
 			var filelist = resp.filelist;
-			// console.log(gamedata['description'], gamedata, filelist);
 
 			// Clear the form.
 			document.getElementById('completeData_1game_buttons_cancel').click(); //dispatchEvent(new Event('click'));
 
 			// Load the form with data.
-			document.getElementById('completeData_1game_id').value          = gamedata.id;
-			document.getElementById('completeData_1game_title').value       = gamedata.title;
-			document.getElementById('completeData_1game_authors').value     = gamedata.authors;
-			document.getElementById('completeData_1game_gamedir').value     = gamedata.gamedir;
-			document.getElementById('completeData_1game_gamefile').value    = gamedata.gamefile;
-			document.getElementById('completeData_1game_uses_sd').value     = gamedata.uses_sd;
-			document.getElementById('completeData_1game_addedby').value     = gamedata.addedby;
-			document.getElementById('completeData_1game_lastupload').value  = gamedata.lastupload;
+			document.getElementById('completeData_1game_id').value = gamedata.id;
+			document.getElementById('completeData_1game_title').value = gamedata.title;
+			document.getElementById('completeData_1game_authors').value = gamedata.authors;
+			document.getElementById('completeData_1game_gamedir').value = gamedata.gamedir;
+			document.getElementById('completeData_1game_gamefile').value = gamedata.gamefile;
+			document.getElementById('completeData_1game_uses_sd').value = gamedata.uses_sd;
+			document.getElementById('completeData_1game_addedby').value = gamedata.addedby;
+			document.getElementById('completeData_1game_lastupload').value = gamedata.lastupload;
 			document.getElementById('completeData_1game_validheader').value = gamedata.validheader;
 			document.getElementById('completeData_1game_description_textarea').value = gamedata['description'];
 
-
-			// console.log(filelist);
-			var link;
-			document.getElementById('gamefilelist').innerHTML += " -- "
-			for(var f=0; f<filelist.length; f++){
-				// link = document.createElement('a');
-				// link.setAttribute('href', );
-				// link.innerHTML = filelist[f];
-				// document.getElementById('gamefilelist').appendChild(link);
-				document.getElementById('gamefilelist').innerHTML += "<a href='"+gamedata.gamedir+filelist[f]+"' title='Download this file'>"+filelist[f]+"</a> -- ";
-			}
+			reloadGameFileList(gamedata, filelist);
 
 			// Make visible the save and cancel buttons.
 		};
 
-		var game = document.getElementById('gameMenu_select2').value ;
+		var game = document.getElementById('gameMenu_select2').value;
 
-		var thedata = { o:"loadGame_intoManager", game:game };
-		serverPOSTrequest(	thedata, callback, "gateway_p.php" );
+		var thedata = {
+			o: "loadGame_intoManager",
+			game: game
+		};
+		serverPOSTrequest(thedata, callback, "gateway_p.php");
 
 	});
 
 };
 
 // DONE!
-function serverPOSTrequest(dataObj, callback, url){
+function reloadGameFileList(gamedata, filelist){
+	// Get a handle on the table and then clear the table.
+	var thetable = document.querySelector("#filesInDirectory_table");
+	for(var i = 1; i < thetable.rows.length;){
+		thetable.deleteRow(i);
+	}
+	var tbody = thetable.querySelector("tbody");
+	var row ;
+	var removeBtn;
+	var removeGameFile_onclick_text;
+	// document.getElementById('gamefilelist').innerHTML += " -- ";
+	for (var f = 0; f < filelist.length; f++) {
+		// Insert a new row for each file entry returned.
+		row = thetable.insertRow(1);
+
+		// Add contents to the new row's cells.
+		var cell0 = row.insertCell(0); cell0.innerHTML = filelist[f] ;
+		var cell1 = row.insertCell(1); cell1.innerHTML = "" ;
+		removeBtn = document.createElement('button');
+		removeGameFile_onclick_text = "removeGameFile('"+filelist[f]+"', '"+gamedata.id+"');";
+		removeBtn.setAttribute('onclick', removeGameFile_onclick_text);
+		removeBtn.setAttribute('title', "removeGameFile"+filelist[f]+" <--");
+		removeBtn.innerHTML = "REMOVE";
+		cell1.appendChild(removeBtn);
+		var cell2 = row.insertCell(2); cell2.innerHTML = "<a href='" + gamedata.gamedir + filelist[f] + "' title='Download this file'>" + filelist[f] + "</a>" ;
+
+		// Add the new row to the table body.
+		tbody.appendChild(row);
+
+		// document.getElementById('gamefilelist').innerHTML += "<a href='" + gamedata.gamedir + filelist[f] + "' title='Download this file'>" + filelist[f] + "</a> -- ";
+
+	}
+}
+
+// DONE!
+function serverPOSTrequest(dataObj, callback, url) {
 	// Display the progress animation.
 	document.getElementById('progressBar').classList.add('show');
 	document.getElementById('progressBar2').classList.add('show');
 
-	var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance
-	xmlhttp.open("POST", url ? url : "index_p.php");   // Use the specified url. If no url then use the default.
+	var xmlhttp = new XMLHttpRequest(); // new HttpRequest instance
+	xmlhttp.open("POST", url ? url : "index_p.php"); // Use the specified url. If no url then use the default.
 
-	if(!dataObj.fileupload){
-		console.log("1");
+	if (!dataObj.fileupload) {
 		xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 	}
 
-	else{ console.log("2"); xmlhttp.setRequestHeader("Content-Type", "multipart/form-data"); }
+	else {
+		xmlhttp.setRequestHeader("Content-Type", "multipart/form-data");
+	}
 
 	// xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 	xmlhttp.onreadystatechange = function() {
@@ -174,8 +221,7 @@ function serverPOSTrequest(dataObj, callback, url){
 		}
 	}
 
-	if(!dataObj.fileupload){
-		console.log("3");
+	if (!dataObj.fileupload) {
 		dataObj = Object.keys(dataObj).map(function(k) {
 			return encodeURIComponent(k) + '=' + encodeURIComponent(dataObj[k]);
 		}).join('&');
@@ -190,15 +236,15 @@ function resizeIframe() {
 
 	return;
 	// var inner = document.getElementById('emscripten_iframe').contentDocument.body;
-	outer.style.height = document.getElementById('emscripten_iframe').contentWindow.document.body.clientHeight+"px";
+	outer.style.height = document.getElementById('emscripten_iframe').contentWindow.document.body.clientHeight + "px";
 	// outer.style.width  = document.getElementById('emscripten_iframe').contentWindow.document.body.width+"px";
 
-	outer.height = document.getElementById('emscripten_iframe').contentWindow.document.body.clientHeight+"px";
+	outer.height = document.getElementById('emscripten_iframe').contentWindow.document.body.clientHeight + "px";
 	// outer.width  = document.getElementById('emscripten_iframe').contentWindow.document.body.width+"px";
 
 }
 
-function iframeIsReadyNow(currentgame){
+function iframeIsReadyNow(currentgame) {
 	// Iframe reports that it is ready!
 	console.info("Iframe reports that it is ready!", "Game Title:", currentgame, "\n\n");
 	resizeIframe();
@@ -209,10 +255,10 @@ function iframeIsReadyNow(currentgame){
 
 // DONE!
 function getGameList() {
-	var callback = function(resp){
+	var callback = function(resp) {
 		// Parse the array right away.
 		resp = JSON.parse(resp);
-		resp=resp.result;
+		resp = resp.result;
 
 		// Stop the emulator.
 		document.getElementById('stopEmulator_button').click();
@@ -225,10 +271,12 @@ function getGameList() {
 		var i;
 		var optgroup;
 		// Needs to be a for loop... I guess.
-		for(var m=0; m<menus.length; m++){
+		for (var m = 0; m < menus.length; m++) {
 			// Clear menu options and optgroups.
-			menus[m].length=1;
-			[].map.call(menus[m].querySelectorAll('optgroup'), function(elem, index, elems) { elem.remove(); });
+			menus[m].length = 1;
+			[].map.call(menus[m].querySelectorAll('optgroup'), function(elem, index, elems) {
+				elem.remove();
+			});
 
 			// Create/Add option group.
 			optgroup = document.createElement('optgroup');
@@ -236,8 +284,8 @@ function getGameList() {
 			menus[m].appendChild(optgroup);
 
 			// Add games with valid headers to the list.
-			for(i=0; i<resp.length; i++){
-				if(resp[i].validheader==1){
+			for (i = 0; i < resp.length; i++) {
+				if (resp[i].validheader == 1) {
 					option = document.createElement('option');
 					option.setAttribute('value', resp[i].id);
 					option.innerHTML = resp[i].title;
@@ -256,8 +304,8 @@ function getGameList() {
 			menus[m].appendChild(optgroup);
 
 			// Add games with invalid headers to the list.
-			for(i=0; i<resp.length; i++){
-				if(resp[i].validheader==0){
+			for (i = 0; i < resp.length; i++) {
+				if (resp[i].validheader == 0) {
 					option = document.createElement('option');
 					option.setAttribute('value', resp[i].id);
 					option.innerHTML = " " + resp[i].title;
@@ -269,90 +317,119 @@ function getGameList() {
 
 	};
 
-	var thedata = { o:"getGameList" };
-	this.serverPOSTrequest(	thedata, callback, "gateway_p.php" );
+	var thedata = {
+		o: "getGameList"
+	};
+	this.serverPOSTrequest(thedata, callback, "gateway_p.php");
 }
 
 // DONE!
-function updateGameInfo(infoObj){
-	var callback = function(resp){
+function updateGameInfo(infoObj) {
+	var callback = function(resp) {
 		resp = JSON.parse(resp);
 
 		// Reload the game list.
 		getGameList();
 	};
 
-	var thedata = infoObj ;
+	var thedata = infoObj;
 	thedata.o = "updateGameInfo";
 
-	serverPOSTrequest(	thedata, callback, "gateway_p.php" );
+	serverPOSTrequest(thedata, callback, "gateway_p.php");
 }
 
+// DONE!
+function newFileUpload(id) {
+	// Get a handle on the browse files button. It has the files.
+	var files = document.querySelector('#newFileUpload_browse').files;
 
+	// Quick sanity checks.
+	if(!id){ alert("You will need to choose a game before you can actually add a file to it."); return; }
+	if(!files.length){ alert("You will need to choose files to upload before you can actually upload them."); return; }
 
-function newFileUpload(arg1, arg2){
-// var formData = new FormData();
-// formData.append("thefile", file);
-// xhr.send(formData);
+	// Create new FormData.
+	var fd = new FormData();
 
-	var callback = function(resp){
-		console.log("uploadfile1:", resp);
-		resp = JSON.parse(resp);
-		console.log("uploadfile2:", resp);
+	// Apply 'o' value.
+	fd.append("o", "newFileUpload");
+	fd.append("gameid", id);
 
-		// Reload the game list.
-		// getGameList();
+	// Add files.
+	for (var f = 0; f < files.length; f++) {
+		fd.append("file_" + f, files[f]);
+	}
+
+	// Create new xhr.
+	var xhr = new XMLHttpRequest();
+	xhr.open('POST', 'gateway_p.php', true);
+
+	// Configure onprogress (progress bar)
+	xhr.upload.onprogress = function(e) {
+		if (e.lengthComputable) {
+			var percentComplete = (e.loaded / e.total) * 100;
+			//console.log(percentComplete + '% uploaded');
+		}
 	};
-	var thedata = new FormData();
-	thedata.append("o", "newFileUpload");
-	thedata.append('fileupload', true);
-	thedata.append('files', document.getElementById('newFileUpload_browse').files);
 
-	serverPOSTrequest(	thedata, callback, "gateway_p.php" );
+	// Configure what to do with the response.
+	xhr.onload = function() {
+		if (this.status == 200) {
+			// Reset the filelist.
+			document.querySelector('#newFileUpload_browse').value = "";
+			var resp = JSON.parse(this.response);
+			console.log('Server got:', resp);
+		}
+	};
 
-	// Gather up some values to send to the file uploader.
-	// var fileUploadData = {
-	// 	isUpload			: isUpload,
-	// 	o					: "updateExistingFloorplan",
-	// 	uploadUrl			: "index_p.php?upload=true",
-	// 	// new_floorplan_name	: $scope.new_floorplan_name,
-	// 	// new_description 	: $scope.new_description,
-	// 	fileToUpload		: $scope.myFile2,
-	// 	plant_id			: $scope.edit_floorplan_plantid,
+	// Send the xhr.
+	xhr.send(fd);
+}
 
-	// 	"id"             : $scope.edit_id,
-	// 	"id2"            : $scope.edit_id,
-	// 	"description"    : $scope.edit_description,
-	// 	"floorplan_name" : $scope.edit_floorplan_name,
-	// };
+// DONE!
+function removeGameFile(filename, gameid){
 
-	// angular.module('newburyPipeline').service('fileUpload3', ['$http', function ($http) {
-	// 	this.uploadFileToUrl = function( fileUploadDataOBJ ){
-	// 		// Prepare the data to be sent to the server.
-	// 		var thedata = new FormData();
+	var conf1 = confirm("Are you sure that you want to delete the file:\n\n"+filename+"?");
+	console.log( "removeGameFile", filename, gameid, conf1 );
 
-	// 		// Create form data dynamically based on the passed object.
-	// 		for(var key in fileUploadDataOBJ){
-	// 			thedata.append(key, fileUploadDataOBJ[key]);
-	// 		}
+	if(!conf1){ alert("File deletion has been canceled."); return; }
+	else{
+		var conf2 = confirm("Last chance! This file is TOAST if you click OK. Are you sure that you want to delete the file:\n\n"+filename+"?");
+		if(!conf2){ alert("File deletion has been canceled. (although you clicked OK once. Please be careful."); return; }
+	}
 
-	// 		// Configure the params for the server data message.
-	// 		var params = {
-	// 			method: "POST",
-	// 			url: fileUploadDataOBJ.uploadUrl,
-	// 			headers: {'Content-Type': undefined},
-	// 			transformRequest: angular.identity,
-	// 			data: thedata,
-	// 		};
+	// Ask the system to remove the file.
 
-	// 		return $http(params).then(
-	// 			function (d) {
-	// 				// console.log("operation:", o, "", "status:", d.status);
+	// Create new FormData.
+	var fd = new FormData();
 
-	// 				// Return only the data portion of the response.
-	// 				return d.data;
-	// 			}
-	// 		);
-	// 	}
-	// }]);
+	// Apply 'o' value.
+	fd.append("o", "removeGameFile");
+	fd.append("filename", filename);
+	fd.append("gameid", gameid);
+
+	// Create new xhr.
+	var xhr = new XMLHttpRequest();
+	xhr.open('POST', 'gateway_p.php', true);
+
+	// Configure onprogress (progress bar)
+	xhr.upload.onprogress = function(e) {
+		if (e.lengthComputable) {
+			var percentComplete = (e.loaded / e.total) * 100;
+			console.log(percentComplete + '% uploaded');
+		}
+	};
+
+	// Configure what to do with the response.
+	xhr.onload = function() {
+		if (this.status == 200) {
+			// Reset the filelist.
+			var resp = JSON.parse(this.response);
+			console.log('Server got:', resp);
+			reloadGameFileList(resp.gamedata, resp.filelist);
+		}
+	};
+
+	// Send the xhr.
+	xhr.send(fd);
+
 }

@@ -131,25 +131,13 @@
 						<th>Remove?</th>
 						<th>Download?</th>
 					</tr>
-					<!--<tr>-->
-					<!--	<td>ae.uze</td>-->
-					<!--	<td><input type="button" value="Remove"></td>-->
-					<!--	<td><a href="games/boulderdash/boulderdash.uze" title="Download this file">boulderdash.uze</a></td>-->
-					<!--</tr>-->
-					<!--<tr>-->
-					<!--	<td>aedat.bin</td>-->
-					<!--	<td><input type="button" value="Remove"></td>-->
-					<!--	<td><a href="games/boulderdash/boulderdash.uze" title="Download this file">boulderdash.uze</a></td>-->
-					<!--</tr>-->
 					</table>
 
-					<!--<form id="newFileUpload_form" enctype="multipart/form-data">-->
-						<div>
-							<br>
-							<input type="file"   id="newFileUpload_browse" name="newFileUpload_browse" class="" multiple>
-							<input type="button" id="newFileUpload_save"   name="newFileUpload_save"   class="" value="Upload File">
-						</div>
-					<!--</form>-->
+					<div>
+						<h3>Add new files to this Game's Directory?</h3>
+						<input type="file"   id="newFileUpload_browse" name="newFileUpload_browse" class="" multiple>
+						<input type="button" id="newFileUpload_save"   name="newFileUpload_save"   class="" value="Upload File">
+					</div>
 
 					<!--</p>-->
 

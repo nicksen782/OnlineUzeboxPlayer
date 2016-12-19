@@ -46,7 +46,7 @@ window.onload = function() {
 	// Emulator
 	document.getElementById('emscripten_iframe_container').addEventListener('mouseenter', function() {
 		this.focus();
-		resizeIframe();
+		// resizeIframe();
 	});
 	document.getElementById('emscripten_iframe_container').addEventListener('click', function() {
 		// document.getElementById('emscripten_iframe_container').querySelector('iframe').src = "loading.html";
@@ -230,24 +230,25 @@ function serverPOSTrequest(dataObj, callback, url) {
 	xmlhttp.send(dataObj);
 }
 
-function resizeIframe() {
-	var outer = document.getElementById('emscripten_iframe');
-	outer.focus();
+// function resizeIframe() {
+// 	var outer = document.getElementById('emscripten_iframe').focus();
+// 	outer.focus();
 
-	return;
-	// var inner = document.getElementById('emscripten_iframe').contentDocument.body;
-	outer.style.height = document.getElementById('emscripten_iframe').contentWindow.document.body.clientHeight + "px";
-	// outer.style.width  = document.getElementById('emscripten_iframe').contentWindow.document.body.width+"px";
+// 	return;
+// 	// var inner = document.getElementById('emscripten_iframe').contentDocument.body;
+// 	outer.style.height = document.getElementById('emscripten_iframe').contentWindow.document.body.clientHeight + "px";
+// 	// outer.style.width  = document.getElementById('emscripten_iframe').contentWindow.document.body.width+"px";
 
-	outer.height = document.getElementById('emscripten_iframe').contentWindow.document.body.clientHeight + "px";
-	// outer.width  = document.getElementById('emscripten_iframe').contentWindow.document.body.width+"px";
+// 	outer.height = document.getElementById('emscripten_iframe').contentWindow.document.body.clientHeight + "px";
+// 	// outer.width  = document.getElementById('emscripten_iframe').contentWindow.document.body.width+"px";
 
-}
+// }
 
 function iframeIsReadyNow(currentgame) {
 	// Iframe reports that it is ready!
 	console.info("Iframe reports that it is ready!", "Game Title:", currentgame, "\n\n");
-	resizeIframe();
+	document.getElementById('emscripten_iframe').focus();
+	// resizeIframe();
 	// document.body.style['background-color']='#263535';
 	// document.getElementsByTagName('html')[0].style['background-color']='#263535';
 	// document.getElementById('middle').style.visibility="visible";

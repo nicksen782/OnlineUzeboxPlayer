@@ -1,3 +1,37 @@
+function sendKeyToIframe(keyCode){
+	var evt = new Event('keydown');
+	evt.keyCode = keyCode;
+	document.querySelector('#emscripten_iframe').contentDocument.dispatchEvent(evt)
+}
+
+function resizeEmulatorView(){
+	// emulatorControls_resize
+
+	var outer = document.getElementById('emscripten_iframe');
+	var inner = outer.contentDocument.body;
+
+	// Get the emulator inner canvas
+	var emuCanvas = outer.contentDocument.querySelector('#canvas');
+
+	// Get the emulator container
+	var thisIframeContainer = document.querySelector('#emscripten_iframe_container');
+
+	// Get the emulator iframe
+	var thisIframe = document.querySelector('#emscripten_iframe');
+
+	// Get the middle emulator view container
+	var middle_cont1 = document.querySelector('#middle_cont1');
+
+	var iframeHTMLdimensions = document.getElementById('emscripten_iframe').contentDocument.querySelector('html').getBoundingClientRect();
+
+	thisIframe.style.width           = iframeHTMLdimensions.width+"px";//emuCanvas.style.width;
+	thisIframeContainer.style.width  = iframeHTMLdimensions.width+"px";//emuCanvas.style.width;
+
+	thisIframe.style.height          = iframeHTMLdimensions.height+"px";//emuCanvas.style.height;
+	thisIframeContainer.style.height = iframeHTMLdimensions.height+"px";//emuCanvas.style.height;
+	middle_cont1.style.height        = iframeHTMLdimensions.height+"px";//emuCanvas.style.height;
+}
+
 function viewSwitcher(view) {
 	// First, hide everything.
 	[].map.call(document.querySelectorAll('.views'),
@@ -33,26 +67,64 @@ function viewSwitcher(view) {
 			// document.getElementById('stopEmulator_button').click();
 	}
 
-
-
 }
 
 window.onload = function() {
-	getGameList();
+	getGameList(false);
 
 	viewSwitcher("emu");
 	// viewSwitcher("gamedbman");
 
 	// Emulator
 	document.getElementById('emscripten_iframe_container').addEventListener('mouseenter', function() {
-		this.focus();
+		// this.focus();
+		document.getElementById('emscripten_iframe').focus();
 		// resizeIframe();
 	});
+// (  0 112 112 )   F1
+// (  0 113 113 )   F2
+// (  0 114 114 )   F3
+// (  0 115 115 )   F4
+// (  0 116 116 )   F5
+// (  0 117 117 )   F6
+// (  0 118 118 )   F7
+// (  0 119 119 )   F8
+// (  0 120 120 )   F9
+// (  0 121 121 )   F10
+// (  0 122 122 )   F11
+// (  0 123 123 )   F12
+
+
+
+	document.getElementById('emulatorControls_resize').addEventListener('click', function() {
+		resizeEmulatorView();
+	});
+
+	document.getElementById('emulatorControls_F2').addEventListener('click', function() {
+		sendKeyToIframe(113); // F2
+	});
+
+	document.getElementById('emulatorControls_F3').addEventListener('click', function() {
+		sendKeyToIframe(114); // F3
+		setTimeout(function(){ resizeEmulatorView(); }, 500);
+
+	});
+
+	document.getElementById('emulatorControls_F7').addEventListener('click', function() {
+		sendKeyToIframe(118); // F7
+	});
+
+	document.getElementById('emulatorControls_F8').addEventListener('click', function() {
+		sendKeyToIframe(119); // F8
+	});
+
 	document.getElementById('emscripten_iframe_container').addEventListener('click', function() {
 		// document.getElementById('emscripten_iframe_container').querySelector('iframe').src = "loading.html";
 	});
 	document.getElementById('stopEmulator_button').addEventListener('click', function() {
 		document.getElementById('emscripten_iframe_container').querySelector('iframe').src = "loading.html";
+		document.getElementById('emulatorControls_title').innerHTML="TITLE:<br>"+"";
+		document.getElementById('emulatorControls_gamefile').innerHTML="GAMEFILE:<br>"+"";
 	});
 	document.getElementById('restartEmulator_button').addEventListener('click', function() {
 		document.getElementById('gameMenu_select').dispatchEvent(new Event('change'));
@@ -67,9 +139,10 @@ window.onload = function() {
 
 			var iframe = document.createElement('iframe');
 			iframe.setAttribute("frameBorder", "0");
-			// iframe.set
 			iframe.id = "emscripten_iframe";
+
 			document.getElementById('emscripten_iframe_container').appendChild(iframe);
+
 			iframe.contentWindow.document.open();
 			iframe.contentWindow.document.write(resp.iframehtml);
 			iframe.contentWindow.document.close();
@@ -90,6 +163,27 @@ window.onload = function() {
 		var gameid=document.querySelector("#completeData_1game_id").value;
 		newFileUpload(gameid);
 	}, false);
+
+	document.getElementById('gamedb_new').addEventListener('click', function() {
+		show_modal_1(true);
+	});
+
+	document.getElementById('modal_1_SAVE').addEventListener('click', function() {
+		newGameRecord();
+	});
+
+	document.getElementById('darkener_modal_1').addEventListener('click', function() {
+		// Cancel out the modal.
+		document.getElementById('modal_1_CANCEL').click();
+	});
+
+	document.getElementById('modal_1_CANCEL').addEventListener('click', function() {
+		// Hide the modal.
+		show_modal_1(false);
+
+		// Clear the data in the modal.
+	});
+
 
 	document.getElementById('completeData_1game_buttons_cancel').addEventListener('click', function() {
 		// Clear the form.
@@ -114,12 +208,13 @@ window.onload = function() {
 		infoObj.gamefile = document.getElementById('completeData_1game_gamefile').value;
 		infoObj.uses_sd = document.getElementById('completeData_1game_uses_sd').value;
 		infoObj.addedby = document.getElementById('completeData_1game_addedby').value;
+		infoObj.complete = document.getElementById('completeData_1game_complete').value;
 		infoObj.lastupload = document.getElementById('completeData_1game_lastupload').value;
 		infoObj.validheader = document.getElementById('completeData_1game_validheader').value;
 		infoObj.description = document.getElementById('completeData_1game_description_textarea').value;
 
 		updateGameInfo(infoObj);
-		document.getElementById('completeData_1game_buttons_cancel').click(); //dispatchEvent(new Event('click'));
+		// document.getElementById('completeData_1game_buttons_cancel').click(); //dispatchEvent(new Event('click'));
 	});
 	document.getElementById('gameMenu_select2').addEventListener('change', function() {
 		var callback = function(resp) {
@@ -138,6 +233,7 @@ window.onload = function() {
 			document.getElementById('completeData_1game_gamefile').value = gamedata.gamefile;
 			document.getElementById('completeData_1game_uses_sd').value = gamedata.uses_sd;
 			document.getElementById('completeData_1game_addedby').value = gamedata.addedby;
+			document.getElementById('completeData_1game_complete').value = gamedata.complete;
 			document.getElementById('completeData_1game_lastupload').value = gamedata.lastupload;
 			document.getElementById('completeData_1game_validheader').value = gamedata.validheader;
 			document.getElementById('completeData_1game_description_textarea').value = gamedata['description'];
@@ -159,6 +255,11 @@ window.onload = function() {
 
 };
 
+function setGameFile(gamefile){
+	document.getElementById('completeData_1game_gamefile').value = gamefile;
+	document.getElementById('completeData_1game_buttons_update').click();
+}
+
 // DONE!
 function reloadGameFileList(gamedata, filelist){
 	// Get a handle on the table and then clear the table.
@@ -170,6 +271,9 @@ function reloadGameFileList(gamedata, filelist){
 	var row ;
 	var removeBtn;
 	var removeGameFile_onclick_text;
+	var gamefileBtn;
+	var gamefileBtn_onclick_text;
+
 	// document.getElementById('gamefilelist').innerHTML += " -- ";
 	for (var f = 0; f < filelist.length; f++) {
 		// Insert a new row for each file entry returned.
@@ -178,20 +282,27 @@ function reloadGameFileList(gamedata, filelist){
 		// Add contents to the new row's cells.
 		var cell0 = row.insertCell(0); cell0.innerHTML = filelist[f] ;
 		var cell1 = row.insertCell(1); cell1.innerHTML = "" ;
+		var cell2 = row.insertCell(2); cell2.innerHTML = "<a href='" + gamedata.gamedir + filelist[f] + "' title='Download this file'>" + filelist[f] + "</a>" ;
+		var cell3 = row.insertCell(3); cell3.innerHTML = "" ;
+
 		removeBtn = document.createElement('button');
 		removeGameFile_onclick_text = "removeGameFile('"+filelist[f]+"', '"+gamedata.id+"');";
 		removeBtn.setAttribute('onclick', removeGameFile_onclick_text);
 		removeBtn.setAttribute('title', "removeGameFile"+filelist[f]+" <--");
 		removeBtn.innerHTML = "REMOVE";
 		cell1.appendChild(removeBtn);
-		var cell2 = row.insertCell(2); cell2.innerHTML = "<a href='" + gamedata.gamedir + filelist[f] + "' title='Download this file'>" + filelist[f] + "</a>" ;
+
+		gamefileBtn = document.createElement('button');
+		gamefileBtn_onclick_text = "setGameFile('"+filelist[f]+"');";
+		gamefileBtn.setAttribute('onclick', gamefileBtn_onclick_text);
+		gamefileBtn.setAttribute('title', "setGameFile('"+filelist[f]+"'); <--");
+		gamefileBtn.innerHTML = "Set as gamefile (Auto-save)";
+		cell3.appendChild(gamefileBtn);
 
 		// Add the new row to the table body.
 		tbody.appendChild(row);
-
-		// document.getElementById('gamefilelist').innerHTML += "<a href='" + gamedata.gamedir + filelist[f] + "' title='Download this file'>" + filelist[f] + "</a> -- ";
-
 	}
+
 }
 
 // DONE!
@@ -230,32 +341,26 @@ function serverPOSTrequest(dataObj, callback, url) {
 	xmlhttp.send(dataObj);
 }
 
-// function resizeIframe() {
-// 	var outer = document.getElementById('emscripten_iframe').focus();
-// 	outer.focus();
-
-// 	return;
-// 	// var inner = document.getElementById('emscripten_iframe').contentDocument.body;
-// 	outer.style.height = document.getElementById('emscripten_iframe').contentWindow.document.body.clientHeight + "px";
-// 	// outer.style.width  = document.getElementById('emscripten_iframe').contentWindow.document.body.width+"px";
-
-// 	outer.height = document.getElementById('emscripten_iframe').contentWindow.document.body.clientHeight + "px";
-// 	// outer.width  = document.getElementById('emscripten_iframe').contentWindow.document.body.width+"px";
-
-// }
-
-function iframeIsReadyNow(currentgame) {
+function iframeIsReadyNow(currentgame, uzerom) {
 	// Iframe reports that it is ready!
-	console.info("Iframe reports that it is ready!", "Game Title:", currentgame, "\n\n");
+	console.info(
+		"The emulator is ready!",
+		"\n Game Title: ", currentgame,
+		"\n Game File:  ", uzerom,
+		"\n\n"
+	);
+
+	document.getElementById('emulatorControls_title').innerHTML="TITLE:<br>"+currentgame;
+	document.getElementById('emulatorControls_gamefile').innerHTML="GAMEFILE:<br>"+uzerom;
+
 	document.getElementById('emscripten_iframe').focus();
-	// resizeIframe();
-	// document.body.style['background-color']='#263535';
-	// document.getElementsByTagName('html')[0].style['background-color']='#263535';
-	// document.getElementById('middle').style.visibility="visible";
+
+	setTimeout(function(){ resizeEmulatorView(); }, 500);
+
 }
 
 // DONE!
-function getGameList() {
+function getGameList(gameid) {
 	var callback = function(resp) {
 		// Parse the array right away.
 		resp = JSON.parse(resp);
@@ -313,7 +418,33 @@ function getGameList() {
 					menus[m].appendChild(option);
 				}
 			}
+
+			// Create/Add option group.
+			optgroup = document.createElement('optgroup');
+			optgroup.setAttribute('label', "");
+			menus[m].appendChild(optgroup);
+
+			// Create/Add option group.
+			optgroup = document.createElement('optgroup');
+			optgroup.setAttribute('label', "Incomplete");
+			menus[m].appendChild(optgroup);
+
+			// Add games to the list that are not ready yet.
+			for (i = 0; i < resp.length; i++) {
+				if (resp[i].complete != 1) {
+					option = document.createElement('option');
+					option.setAttribute('value', resp[i].id);
+					option.innerHTML = " " + resp[i].title;
+					menus[m].appendChild(option);
+				}
+			}
+
 			menus[m].selectedIndex = "";
+		}
+
+		if(gameid){
+			console.info("POPULATED! gameid", gameid);
+			document.getElementById('gameMenu_select2').value = gameid;
 		}
 
 	};
@@ -330,7 +461,7 @@ function updateGameInfo(infoObj) {
 		resp = JSON.parse(resp);
 
 		// Reload the game list.
-		getGameList();
+		getGameList(infoObj.id);
 	};
 
 	var thedata = infoObj;
@@ -379,6 +510,8 @@ function newFileUpload(id) {
 			document.querySelector('#newFileUpload_browse').value = "";
 			var resp = JSON.parse(this.response);
 			console.log('Server got:', resp);
+
+			reloadGameFileList(resp.gamedata, resp.filelist);
 		}
 	};
 
@@ -432,5 +565,107 @@ function removeGameFile(filename, gameid){
 
 	// Send the xhr.
 	xhr.send(fd);
+
+}
+
+function newGameRecord(){
+	// This creates a mostly new blank games db record and then loads it.
+
+	// Send the new title to the server
+	var fd = new FormData();
+
+	// Apply 'o' value.
+	fd.append("o", "newGameRecord");
+	// Read the values in the modal's inputs.
+	fd.append("title", document.querySelector("#modal_1_title").value);
+	fd.append("gamedir", document.querySelector("#modal_1_gamedir").value);
+
+	// Create new xhr.
+	var xhr = new XMLHttpRequest();
+	xhr.open('POST', 'gateway_p.php', true);
+
+	// Configure onprogress (progress bar)
+	xhr.upload.onprogress = function(e) {
+		if (e.lengthComputable) {
+			var percentComplete = (e.loaded / e.total) * 100;
+			console.log(percentComplete + '% uploaded');
+		}
+	};
+
+	// Configure what to do with the response.
+	xhr.onload = function() {
+		if (this.status == 200) {
+			// Cancel out the modal.
+			document.getElementById('modal_1_CANCEL').click();
+
+			// Reset the filelist.
+			var resp = JSON.parse(this.response);
+			console.info("From server:", resp);
+
+			// reloadGameFileList(resp.gamedata, resp.filelist);
+
+
+
+		var callback = function(resp) {
+			resp = JSON.parse(resp);
+			var gamedata = resp.result;
+			var filelist = resp.filelist;
+
+			// Clear the form.
+			document.getElementById('completeData_1game_buttons_cancel').click(); //dispatchEvent(new Event('click'));
+
+			// Load the form with data.
+			document.getElementById('completeData_1game_id').value = gamedata.id;
+			document.getElementById('completeData_1game_title').value = gamedata.title;
+			document.getElementById('completeData_1game_authors').value = gamedata.authors;
+			document.getElementById('completeData_1game_gamedir').value = gamedata.gamedir;
+			document.getElementById('completeData_1game_gamefile').value = gamedata.gamefile;
+			document.getElementById('completeData_1game_uses_sd').value = gamedata.uses_sd;
+			document.getElementById('completeData_1game_addedby').value = gamedata.addedby;
+			document.getElementById('completeData_1game_complete').value = gamedata.complete;
+			document.getElementById('completeData_1game_lastupload').value = gamedata.lastupload;
+			document.getElementById('completeData_1game_validheader').value = gamedata.validheader;
+			document.getElementById('completeData_1game_description_textarea').value = gamedata['description'];
+
+			// reloadGameFileList(gamedata, filelist);
+			console.log(gamedata.id);
+			getGameList(gamedata.id);
+
+			// Make visible the save and cancel buttons.
+		};
+
+		var game = resp.gamedata.id;
+
+		var thedata = {
+			o: "loadGame_intoManager",
+			game: game
+		};
+		serverPOSTrequest(thedata, callback, "gateway_p.php");
+
+
+
+		}
+	};
+
+	// Send the xhr.
+	xhr.send(fd);
+
+
+}
+
+function show_modal_1(display){
+	var darkener = document.querySelector("#darkener_modal_1");
+	var modal = document.querySelector("#modal_1");
+
+	if(display==true){
+		// Show the modal darkener and the modal.
+		darkener.classList.add('show');
+		modal.classList.add('show');
+	}
+	else{
+		// Hide the modal darkener and the modal.
+		darkener.classList.remove('show');
+		modal.classList.remove('show');
+	}
 
 }

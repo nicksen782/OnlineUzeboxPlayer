@@ -2,18 +2,16 @@ function extras_preInit(filelist, uzerom){
 	loadFileSystem(filelist, uzerom);
 }
 
-function extras_postRun(currentgame){
+function extras_postRun(currentgame, uzerom){
 	setTimeout(function(){
-		parent.iframeIsReadyNow(currentgame) ;
+		parent.iframeIsReadyNow(currentgame, uzerom) ;
 	}, 500);
 }
 
 // *******
 function loadFileSystem(filelist, uzerom) {
-	var checkheader ;
 	for(var i=0; i<filelist.length; i++){
-		checkheader = filelist[i].filename == uzerom ? true : false ;
-		addToFS(filelist[i].filename, filelist[i].completefilepath, checkheader);
+		addToFS(filelist[i].filename, filelist[i].completefilepath, uzerom);
 		// addToFS2(filelist[i].filename, filelist[i].completefilepath);
 	}
 }
@@ -23,12 +21,13 @@ function addToFS2(filename, completefilepath) {
 	FS.createPreloadedFile('/', filename  , completefilepath      , true, true);
 }
 
-function addToFS(filename, completefilepath, checkheader) {
+function addToFS(filename, completefilepath, uzerom) {
 	// console.log("completefilepath:", completefilepath);
 	Browser.asyncLoad(completefilepath, (function(byteArray) {
 
-		if(checkheader==true){
-			console.log("Checking uzerom header...");
+		// Only check the headers on .uze files. Don't check on .hex files.
+		if( filename==uzerom && filename.substr(-4, 4) == ".uze" ){
+			// console.log("Checking uzerom header... GAMEFILE:", filename);
 			// Read the first six bytes of the byteArray. Does it spell UZEBOX?
 			var header = byteArray.slice(0,6).toString();
 
@@ -41,10 +40,10 @@ function addToFS(filename, completefilepath, checkheader) {
 				byteArray[3] = 66; // B
 				byteArray[4] = 79; // O
 				byteArray[5] = 88; // X
-				console.log("The header has been corrected.");
+				console.log("GAMEFILE:", filename, " -- The header has been corrected.");
 			}
 			else {
-				console.log("The header is correct.");
+				// console.log("The header is correct.");
 			}
 		}
 

@@ -41,6 +41,8 @@ function processClientRequest_O(){
 	$o_values["newFileUpload"]			= [ "func"=>"newFileUpload",		"args"=>[],	"perms"=>($eud_access ? 1 : 0) ] ;
 	$o_values["removeGameFile"]			= [ "func"=>"removeGameFile",		"args"=>[],	"perms"=>($eud_access ? 1 : 0) ] ;
 
+	$o_values["newGameRecord"]			= [ "func"=>"newGameRecord",		"args"=>[],	"perms"=>($eud_access ? 1 : 0) ] ;
+
 
 	// Check if the 'o' value is valid.
 	$valid_o = false;

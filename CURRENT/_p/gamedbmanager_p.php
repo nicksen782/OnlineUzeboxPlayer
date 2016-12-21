@@ -123,12 +123,6 @@ function loadGame(){
 function liveEditEmu($dataFilesObj){
   $cuzebox_extra = file_get_contents("js/cuzebox_extra.js");
 
-  // Comment out the auto-run part of the cuzebox.js file. Permanent.
-  $cuzeboxjs = file_get_contents("cuzebox.js");
-  $replacestr1 = 'memoryInitializer="cuzebox.html.mem";';
-  $newstr1     = 'memoryInitializer="cuzebox.html.mem";';
-  $cuzeboxjs = str_replace($replacestr1, $newstr1, $cuzeboxjs);
-
   // Load, edit, send the cuzebox.html file.
   $cuzeboxhtml = file_get_contents("cuzebox_minimal.html");
 
@@ -167,12 +161,14 @@ function liveEditEmu($dataFilesObj){
   <script>
 
 	<!-- Cuzebox Extra-->
-	".$cuzebox_extra."
+	var script = document.createElement('script');
+	script.src = \"js/cuzebox_extra.js\";
+	document.body.appendChild(script);
 
 	// Get file list.
-	var filelist=".json_encode(($dataFilesObj['datafiles']), JSON_PRETTY_PRINT).";
-	var currentgame='".$dataFilesObj['title']."';
-	var uzerom='".$dataFilesObj['uzerom']."';
+	var filelist    =".json_encode(($dataFilesObj['datafiles']), JSON_PRETTY_PRINT).";
+	var currentgame ='".$dataFilesObj['title']."';
+	var uzerom      ='".$dataFilesObj['uzerom']."';
 
 	// Configure Module
 	var Module = {
@@ -205,7 +201,9 @@ function liveEditEmu($dataFilesObj){
 	};
 
   <!-- cuzebox.js-->
-  ".$cuzeboxjs."
+	var script = document.createElement('script');
+	script.src = \"cuzebox.js\";
+	document.body.appendChild(script);
 
   <!-- mem stuff-->
   window.onload=function(){
@@ -226,15 +224,6 @@ function liveEditEmu($dataFilesObj){
   ";
 
   $cuzeboxhtml = str_replace($script0_tofind, $script0_toreplace, $cuzeboxhtml);
-
-  // I do not like all messages being output to the dev console. Remove this feature.
-  $annoyingCon1   = "            console.log(text);";
-  $noannoyingCon1 = "//console.log(text);";
-  $cuzeboxhtml = str_replace($annoyingCon1, $noannoyingCon1, $cuzeboxhtml);
-
-  $annoyingCon2   = "<textarea id=\"output\" rows=\"8\"></textarea>";
-  $noannoyingCon2 = "<!--<textarea id=\"output\" rows=\"8\"></textarea>-->";
-  $cuzeboxhtml = str_replace($annoyingCon2, $noannoyingCon2, $cuzeboxhtml);
 
   // Send the modified page.
   return $cuzeboxhtml;

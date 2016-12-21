@@ -11,7 +11,7 @@ function resizeEmulatorView(){
 	var inner = outer.contentDocument.body;
 
 	// Get the emulator inner canvas
-	var emuCanvas = outer.contentDocument.querySelector('#canvas');
+	// var emuCanvas = outer.contentDocument.querySelector('#canvas');
 
 	// Get the emulator container
 	var thisIframeContainer = document.querySelector('#emscripten_iframe_container');
@@ -30,6 +30,14 @@ function resizeEmulatorView(){
 	thisIframe.style.height          = iframeHTMLdimensions.height+"px";//emuCanvas.style.height;
 	thisIframeContainer.style.height = iframeHTMLdimensions.height+"px";//emuCanvas.style.height;
 	middle_cont1.style.height        = iframeHTMLdimensions.height+"px";//emuCanvas.style.height;
+
+	var midContainer = document.getElementById('middle_cont1') ;
+	var lBorder = document.getElementById('gameframe_border_left')
+	var rBorder = document.getElementById('gameframe_border_right')
+
+	document.querySelector('.gameframe_border_left').style.width  = (midContainer.getBoundingClientRect().width - iframeHTMLdimensions.width)/2 + "px";
+	document.querySelector('.gameframe_border_right').style.width = (midContainer.getBoundingClientRect().width - iframeHTMLdimensions.width)/2 + "px";
+
 }
 
 function viewSwitcher(view) {
@@ -75,52 +83,33 @@ window.onload = function() {
 	viewSwitcher("emu");
 	// viewSwitcher("gamedbman");
 
+resizeEmulatorView();
+
 	// Emulator
 	document.getElementById('emscripten_iframe_container').addEventListener('mouseenter', function() {
-		// this.focus();
 		document.getElementById('emscripten_iframe').focus();
-		// resizeIframe();
 	});
-// (  0 112 112 )   F1
-// (  0 113 113 )   F2
-// (  0 114 114 )   F3
-// (  0 115 115 )   F4
-// (  0 116 116 )   F5
-// (  0 117 117 )   F6
-// (  0 118 118 )   F7
-// (  0 119 119 )   F8
-// (  0 120 120 )   F9
-// (  0 121 121 )   F10
-// (  0 122 122 )   F11
-// (  0 123 123 )   F12
 
-
-
+	// Emulator - Side panel (left)
 	document.getElementById('emulatorControls_resize').addEventListener('click', function() {
 		resizeEmulatorView();
 	});
-
 	document.getElementById('emulatorControls_F2').addEventListener('click', function() {
 		sendKeyToIframe(113); // F2
 	});
-
 	document.getElementById('emulatorControls_F3').addEventListener('click', function() {
 		sendKeyToIframe(114); // F3
-		setTimeout(function(){ resizeEmulatorView(); }, 500);
+		setTimeout(function(){ resizeEmulatorView(); }, 250);
 
 	});
-
 	document.getElementById('emulatorControls_F7').addEventListener('click', function() {
 		sendKeyToIframe(118); // F7
 	});
-
 	document.getElementById('emulatorControls_F8').addEventListener('click', function() {
 		sendKeyToIframe(119); // F8
 	});
 
-	document.getElementById('emscripten_iframe_container').addEventListener('click', function() {
-		// document.getElementById('emscripten_iframe_container').querySelector('iframe').src = "loading.html";
-	});
+	// Emulator - Top-right panel
 	document.getElementById('stopEmulator_button').addEventListener('click', function() {
 		document.getElementById('emscripten_iframe_container').querySelector('iframe').src = "loading.html";
 		document.getElementById('emulatorControls_title').innerHTML="TITLE:<br>"+"";
@@ -159,63 +148,6 @@ window.onload = function() {
 	});
 
 	// Games DB
-	document.querySelector('#newFileUpload_save').addEventListener('click', function(e) {
-		var gameid=document.querySelector("#completeData_1game_id").value;
-		newFileUpload(gameid);
-	}, false);
-
-	document.getElementById('gamedb_new').addEventListener('click', function() {
-		show_modal_1(true);
-	});
-
-	document.getElementById('modal_1_SAVE').addEventListener('click', function() {
-		newGameRecord();
-	});
-
-	document.getElementById('darkener_modal_1').addEventListener('click', function() {
-		// Cancel out the modal.
-		document.getElementById('modal_1_CANCEL').click();
-	});
-
-	document.getElementById('modal_1_CANCEL').addEventListener('click', function() {
-		// Hide the modal.
-		show_modal_1(false);
-
-		// Clear the data in the modal.
-	});
-
-
-	document.getElementById('completeData_1game_buttons_cancel').addEventListener('click', function() {
-		// Clear the form.
-		[].map.call(document.querySelectorAll('#VIEW_gamedbmanager input[type="text"], #VIEW_gamedbmanager textarea'),
-			function(elem, index, elems) {
-				elem.value = "";
-			});
-		// document.getElementById('gamefilelist').innerHTML = "";
-		var thetable = document.querySelector("#filesInDirectory_table");
-		for(var i = 1; i < thetable.rows.length;){
-			thetable.deleteRow(i);
-		}
-		document.querySelector('#newFileUpload_browse').value = "";
-	});
-	document.getElementById('completeData_1game_buttons_update').addEventListener('click', function() {
-		// Get the data from the form and pass it as an object to the game update function.
-		var infoObj = {};
-		infoObj.id = document.getElementById('completeData_1game_id').value;
-		infoObj.title = document.getElementById('completeData_1game_title').value;
-		infoObj.authors = document.getElementById('completeData_1game_authors').value;
-		infoObj.gamedir = document.getElementById('completeData_1game_gamedir').value;
-		infoObj.gamefile = document.getElementById('completeData_1game_gamefile').value;
-		infoObj.uses_sd = document.getElementById('completeData_1game_uses_sd').value;
-		infoObj.addedby = document.getElementById('completeData_1game_addedby').value;
-		infoObj.complete = document.getElementById('completeData_1game_complete').value;
-		infoObj.lastupload = document.getElementById('completeData_1game_lastupload').value;
-		infoObj.validheader = document.getElementById('completeData_1game_validheader').value;
-		infoObj.description = document.getElementById('completeData_1game_description_textarea').value;
-
-		updateGameInfo(infoObj);
-		// document.getElementById('completeData_1game_buttons_cancel').click(); //dispatchEvent(new Event('click'));
-	});
 	document.getElementById('gameMenu_select2').addEventListener('change', function() {
 		var callback = function(resp) {
 			resp = JSON.parse(resp);
@@ -252,9 +184,60 @@ window.onload = function() {
 		serverPOSTrequest(thedata, callback, "gateway_p.php");
 
 	});
+	document.querySelector('#newFileUpload_save').addEventListener('click', function(e) {
+		var gameid=document.querySelector("#completeData_1game_id").value;
+		newFileUpload(gameid);
+	}, false);
+	document.getElementById('gamedb_new').addEventListener('click', function() {
+		show_modal_1(true);
+	});
+	document.getElementById('modal_1_SAVE').addEventListener('click', function() {
+		newGameRecord();
+	});
+	document.getElementById('darkener_modal_1').addEventListener('click', function() {
+		// Cancel out the modal.
+		document.getElementById('modal_1_CANCEL').click();
+	});
+	document.getElementById('modal_1_CANCEL').addEventListener('click', function() {
+		// Hide the modal.
+		show_modal_1(false);
+	});
+	document.getElementById('completeData_1game_buttons_cancel').addEventListener('click', function() {
+		// Clear the form.
+		[].map.call(document.querySelectorAll('#VIEW_gamedbmanager input[type="text"], #VIEW_gamedbmanager textarea'),
+			function(elem, index, elems) {
+				elem.value = "";
+			});
+		// document.getElementById('gamefilelist').innerHTML = "";
+		var thetable = document.querySelector("#filesInDirectory_table");
+		for(var i = 1; i < thetable.rows.length;){
+			thetable.deleteRow(i);
+		}
+		document.querySelector('#newFileUpload_browse').value = "";
+	});
+	document.getElementById('completeData_1game_buttons_update').addEventListener('click', function() {
+		// Get the data from the form and pass it as an object to the game update function.
+		var infoObj = {};
+		infoObj.id = document.getElementById('completeData_1game_id').value;
+		infoObj.title = document.getElementById('completeData_1game_title').value;
+		infoObj.authors = document.getElementById('completeData_1game_authors').value;
+		infoObj.gamedir = document.getElementById('completeData_1game_gamedir').value;
+		infoObj.gamefile = document.getElementById('completeData_1game_gamefile').value;
+		infoObj.uses_sd = document.getElementById('completeData_1game_uses_sd').value;
+		infoObj.addedby = document.getElementById('completeData_1game_addedby').value;
+		infoObj.complete = document.getElementById('completeData_1game_complete').value;
+		infoObj.lastupload = document.getElementById('completeData_1game_lastupload').value;
+		infoObj.validheader = document.getElementById('completeData_1game_validheader').value;
+		infoObj.description = document.getElementById('completeData_1game_description_textarea').value;
+
+		updateGameInfo(infoObj);
+		// document.getElementById('completeData_1game_buttons_cancel').click(); //dispatchEvent(new Event('click'));
+	});
+
 
 };
 
+// DONE!
 function setGameFile(gamefile){
 	document.getElementById('completeData_1game_gamefile').value = gamefile;
 	document.getElementById('completeData_1game_buttons_update').click();
@@ -274,7 +257,6 @@ function reloadGameFileList(gamedata, filelist){
 	var gamefileBtn;
 	var gamefileBtn_onclick_text;
 
-	// document.getElementById('gamefilelist').innerHTML += " -- ";
 	for (var f = 0; f < filelist.length; f++) {
 		// Insert a new row for each file entry returned.
 		row = thetable.insertRow(1);
@@ -302,7 +284,6 @@ function reloadGameFileList(gamedata, filelist){
 		// Add the new row to the table body.
 		tbody.appendChild(row);
 	}
-
 }
 
 // DONE!
@@ -470,6 +451,32 @@ function updateGameInfo(infoObj) {
 	serverPOSTrequest(thedata, callback, "gateway_p.php");
 }
 
+function AJAX_datarequest(){
+	var xhr = new XMLHttpRequest();
+	xhr.upload.addEventListener("progress", updateProgress);
+	xhr.upload.addEventListener("load", transferComplete);
+	xhr.upload.addEventListener("error", transferFailed);
+	xhr.upload.addEventListener("abort", transferCanceled);
+
+	// progress on transfers from the server to the client (downloads)
+	function updateProgress (oEvent) {
+	  if (oEvent.lengthComputable) {
+	    var percentComplete = oEvent.loaded / oEvent.total;
+	    // ...
+	  } else {
+	    // Unable to compute progress information since the total size is unknown
+	    // ?
+	  }
+	}
+
+	function transferComplete(evt) { console.log("The transfer is complete.");}
+
+	function transferFailed(evt) { console.log("An error occurred while transferring the file."); }
+
+	function transferCanceled(evt) { console.log("The transfer has been canceled by the user."); }
+
+}
+
 // DONE!
 function newFileUpload(id) {
 	// Get a handle on the browse files button. It has the files.
@@ -497,6 +504,7 @@ function newFileUpload(id) {
 
 	// Configure onprogress (progress bar)
 	xhr.upload.onprogress = function(e) {
+		var updateBtn = document.getElementById('completeData_1game_buttons_update');
 		if (e.lengthComputable) {
 			var percentComplete = (e.loaded / e.total) * 100;
 			//console.log(percentComplete + '% uploaded');

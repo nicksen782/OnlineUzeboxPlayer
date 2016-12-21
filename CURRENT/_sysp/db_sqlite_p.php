@@ -22,7 +22,7 @@ class sqlite3_DB_PDO{
 		// Options
 			$options = array(
 				PDO::ATTR_TIMEOUT => 10, 						// timeout in seconds
-				// PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION	// Show all exception errors.
+				PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION	// Show all exception errors.
 				// PDO::ATTR_PERSISTENT => true					// Connect is persistant.
 			);
 
@@ -30,6 +30,7 @@ class sqlite3_DB_PDO{
 		try{
 			// Connect to the database.
 			$this->dbh = new PDO($file_db_loc, $this->user, $this->pass, $options);
+			// $this->dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 		}
 
 		// Catch any PDOException errors

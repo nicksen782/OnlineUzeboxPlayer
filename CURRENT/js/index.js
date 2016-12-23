@@ -6,7 +6,6 @@ function sendKeyToIframe(keyCode){
 
 function resizeEmulatorView(){
 	// emulatorControls_resize
-
 	var outer = document.getElementById('emscripten_iframe');
 	var inner = outer.contentDocument.body;
 
@@ -23,6 +22,7 @@ function resizeEmulatorView(){
 	var middle_cont1 = document.querySelector('#middle_cont1');
 
 	var iframeHTMLdimensions = document.getElementById('emscripten_iframe').contentDocument.querySelector('html').getBoundingClientRect();
+	// var iframeHTMLdimensions = document.getElementById('emscripten_iframe').contentDocument.querySelector('#canvas').getBoundingClientRect();
 
 	thisIframe.style.width           = iframeHTMLdimensions.width+"px";//emuCanvas.style.width;
 	thisIframeContainer.style.width  = iframeHTMLdimensions.width+"px";//emuCanvas.style.width;
@@ -35,8 +35,8 @@ function resizeEmulatorView(){
 	var lBorder = document.getElementById('gameframe_border_left')
 	var rBorder = document.getElementById('gameframe_border_right')
 
-	document.querySelector('.gameframe_border_left').style.width  = (midContainer.getBoundingClientRect().width - iframeHTMLdimensions.width)/2 + "px";
-	document.querySelector('.gameframe_border_right').style.width = (midContainer.getBoundingClientRect().width - iframeHTMLdimensions.width)/2 + "px";
+	document.querySelector('.gameframe_border_left').style.width  = ((midContainer.getBoundingClientRect().width - iframeHTMLdimensions.width)/2) + "px";
+	document.querySelector('.gameframe_border_right').style.width = ((midContainer.getBoundingClientRect().width - iframeHTMLdimensions.width)/2) + "px";
 
 }
 
@@ -77,7 +77,125 @@ function viewSwitcher(view) {
 
 }
 
+	function loadGameIntoEmu(game){
+		var callback = function(resp) {
+			resp = JSON.parse(resp);
+			// console.log("loadGame callback called. Number found:", resp.count, "(should be 1.)");
+
+			// Remove previous iframe. Create another one.
+			document.getElementById('emscripten_iframe').remove();
+
+			var iframe = document.createElement('iframe');
+			iframe.setAttribute("frameBorder", "0");
+			iframe.id = "emscripten_iframe";
+
+			document.getElementById('emscripten_iframe_container').appendChild(iframe);
+
+			iframe.contentWindow.document.open();
+			iframe.contentWindow.document.write(resp.iframehtml);
+			iframe.contentWindow.document.close();
+		};
+
+		// var game = document.getElementById('gameMenu_select').value;
+
+		var thedata = {
+			o: "loadGame",
+			game: game
+		};
+		serverPOSTrequest(thedata, callback, "gateway_p.php");
+	}
+
+	function addfiles(obj) {
+		// Has different FileReaders for different types of data uploads.
+		// This uses the correct FileReader which then within its callback function will store the actual file data and meta data.
+		var filedata;
+		var reader;
+		var _this = this;
+
+		// Cycle through all uploaded files and add them one at a time.
+		for (var i = 0; i < obj.files.length; i++) {
+			// Get the file extension.
+			obj.files[i].fileext = obj.files[i].name.substr((~-obj.files[i].name.lastIndexOf(".") >>> 0) + 2);
+
+			// Create FileReader to handle this type of data.
+			// Store the file after reading it.
+			reader = new FileReader();
+			reader.fileobj = obj.files[i];
+			reader.onload = (function(e) {
+				var filedata = e.target.result.split('"').join('');
+				_this.addfiletoFS(this.fileobj, filedata);
+			});
+
+			// Get the data.
+			if (
+				obj.files[i].fileext == "inc" ||
+				obj.files[i].fileext == "xml" ||
+				obj.files[i].fileext == "json" ||
+				obj.files[i]['type'] == "text/plain") {
+				// console.log("Reading file as text");
+				filedata = reader.readAsText((obj.files[i]));
+			}
+			else {
+				// Handle binary (non-plain-text files.)
+				// console.log("Reading file as dataurl");
+				filedata = reader.readAsDataURL(obj.files[i], obj);
+			}
+		}
+	}
+
 window.onload = function() {
+	if (window.opener && window.opener !== window) {
+		// We have been opened by some other window. If compatible it will have a variable that we can read.
+		console.log("**** Seems we have been opened up by Javascript! ****", window.opener.pageTitle);
+	}
+
+	document.getElementById('FilesFromUser').addEventListener('change', function() {
+		console.log("files:", this.files);
+		var _this = this;
+		// var _this = document.getElementById('FilesFromUser');
+
+		// NOTHING SHOULD ACTUALLY UPLOAD TO THE SERVER!
+
+	// Get file list.
+// 	var filelist    = [
+//     {
+//         "filename": "aedat.bin",
+//         "completefilepath": "games\/AlterEgo\/aedat.bin"
+//     },
+//     {
+//         "filename": "ae.uze",
+//         "completefilepath": "games\/AlterEgo\/ae.uze"
+//     }
+// ];
+// 	var currentgame = 'Alter Ego';
+// 	var uzerom      = 'ae.uze';
+// 	var arguments   = 'ae.uze'
+
+		// Create a local (global) variable of file data.
+		thefiles=[];
+		// Use the filereader api to convert data to blob/arraybuffer.
+		for (var i = 0; i < _this.files.length; i++) {
+			var reader = new FileReader();
+			reader.onload = (function(e) {
+				var filedata = e.target.result;
+				console.log("e", e);
+				console.info(i, this.fileobj.name, this.fileext, filedata);
+				thefiles.push(
+					{filename:this.fileobj.name, completefilepath:filedata, ext:this.fileext}
+				);
+
+			});
+			// Get the file extension.
+			reader.fileobj = _this.files[i];
+			reader.fileext = reader.fileobj.name.substr((~-reader.fileobj.name.lastIndexOf(".") >>> 0) + 2);
+			reader.readAsArrayBuffer(reader.fileobj);
+		}
+
+
+		// Trigger the new game load. It will use a different function to load the emulator.
+
+	});
+
 	getGameList(false);
 
 	viewSwitcher("emu");
@@ -118,7 +236,12 @@ resizeEmulatorView();
 	document.getElementById('restartEmulator_button').addEventListener('click', function() {
 		document.getElementById('gameMenu_select').dispatchEvent(new Event('change'));
 	});
+
+
 	document.getElementById('gameMenu_select').addEventListener('change', function() {
+		var game = document.getElementById('gameMenu_select').value;
+		loadGameIntoEmu(game);
+		return;
 		var callback = function(resp) {
 			resp = JSON.parse(resp);
 			// console.log("loadGame callback called. Number found:", resp.count, "(should be 1.)");
@@ -322,12 +445,13 @@ function serverPOSTrequest(dataObj, callback, url) {
 	xmlhttp.send(dataObj);
 }
 
-function iframeIsReadyNow(currentgame, uzerom) {
+function iframeIsReadyNow(currentgame, uzerom, filelist) {
 	// Iframe reports that it is ready!
 	console.info(
 		"The emulator is ready!",
 		"\n Game Title: ", currentgame,
 		"\n Game File:  ", uzerom,
+		"\n Filelist:   ", filelist,
 		"\n\n"
 	);
 

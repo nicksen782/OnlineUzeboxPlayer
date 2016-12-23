@@ -2,9 +2,12 @@ html {
 	background-color: #000060;
 	/*height: 100vh;*/
 	margin: auto;
+	margin-top: 5px;
 	/* padding: 2px; */
-	border: 1px solid darkslategray;
+	/* border: 1px solid darkslategray; */
 	width:1300px;
+	width: 1330px;
+	padding: 2px 2px 2px 2px;
 }
 
 body {
@@ -13,22 +16,30 @@ body {
 	/*background-color: #336699;*/
 	/*height: 100vh;*/
 	margin: auto;
-	padding: 3px;
+	/* padding: 3px; */
 	overflow: hidden;
-	width:1300px;
+	/* width:1300px; */
+	/* width: 1355px; */
+	width: 100%;
 }
 
 div#wrapAll {
-	padding: 0px;
+	padding: 5px;
 	background-color: #000060;
+	background-color: rgb(57, 60, 169);
+	border-radius: 10px;
 }
 
 div#top_panel {
 	position: relative;
+	left: 1px;
 	background-color: antiquewhite;
 	/* background-color: #336699; */
 	background-color: #000060;
-	height: 50px;
+	height: 45px;
+	width: 1316px;
+	padding: 5px 0px 0px 0px;
+	border-radius: 10px;
 }
 
 div#top_panel_left {
@@ -43,68 +54,69 @@ div#top_panel_left {
 }
 
 div#topNavMenu {
-	height: 47px;
+	height: 42px;
 	border-top-left-radius: 20px;
 	border-top-right-radius: 20px;
 	position: relative;
-	border: 2px solid darkcyan;
+	border: 2px solid #000060;
 	border-bottom: 0px solid black;
 	background-color: #336699;
 	position: relative;
-	top: 2px;
-	left: 1px;
+	top: 0px;
+	padding-top: 2px;
+	left: 0px;
 }
 
 .navButton {
 	display: inline-block;
 	/* vertical-align:top; */
 	background-color: goldenrod;
-	height: 32px;
+	height: 23px;
 	border-top-left-radius: 10px;
 	border-top-right-radius: 10px;
-	border: 2px solid darkcyan;
+	border: 2px solid #000060;
 	padding: 5px;
 	font-size: 24px;
-	line-height: 30px;
+	line-height: 23px;
 	position: relative;
 	text-decoration: underline;
 	font-weight: bold;
 	top: 3px;
-	left: 4px;
+	left: 5px;
 	color: #1d1e21;
 }
 
 div#top_panel_right {
 	position: absolute;
-	top: 2px;
+	top: 6px;
 	right: 55px;
 	/* background-color: #336699; */
 	width: 320px;
-	height: 36px;
+	height: 32px;
 	/*display: inline-block;*/
 	vertical-align: top;
 	text-align: center;
 	padding: 3px;
 	background-color: darkgoldenrod;
 	border-radius: 5px;
-	border: 2px solid darkcyan;
+	border: 2px solid #000060;
 	box-shadow: 0px 0px 5px 5px rgba(0, 0, 0, 0.5); */
 }
 
 div#top_panel_right_gamemanager {
 	position: absolute;
-	top: 2px;
+	top: 6px;
 	right: 55px;
 	/* background-color: #336699; */
 	width: 320px;
-	height: 36px;
+	height: 32px;
 	/*display: inline-block;*/
 	vertical-align: top;
 	text-align: center;
 	padding: 3px;
 	background-color: darkgoldenrod;
 	border-radius: 5px;
-	border: 2px solid darkcyan;
+	border: 2px solid #000060;
 }
 
 #gameMenu_select {
@@ -143,20 +155,20 @@ input#restartEmulator_button {
 
 #top_panel_settings_gear {
 	position: absolute;
-	top: 2px;
-	right: 3px;
+	top: 6px;
+	right: 5px;
 	background-image: url(../img/settingsGear.png);
 	background-repeat: no-repeat;
 	background-size: 100% 100%;
 	/*position: absolute;*/
 	width: 42px;
-	height: 42px;
+	height: 38px;
 	/* height: 92%; */
 	/*top: 1px;*/
 	/*right: 5px;*/
 	background-color: darkgoldenrod;
 	border-radius: 5px;
-	border: 2px solid darkcyan;
+	border: 2px solid #000060;
 	box-shadow: 0px 0px 5px 5px rgba(0, 0, 0, 0.5);
 }
 
@@ -173,11 +185,12 @@ input#restartEmulator_button {
 }
 
 #content{
-	border: 2px solid darkcyan;
+	border: 2px solid #000060;
 	/* min-height: 650px; */
 	background-color: #336699;
 	margin: 0px 1px 0px 1px;
 	padding-bottom: 15px;
+	border-radius: 0px 0px 10px 10px;
 }
 
 
@@ -224,6 +237,7 @@ input#restartEmulator_button {
 	position: relative;
 	border-radius: 20px;
 	border: 5px solid #000060;
+	border: 5px solid rgb(57, 60, 169);
 }
 .gameframe_borders{background-color: darkgoldenrod;}
 #emscripten_iframe 		 	 {z-index:5;}
@@ -271,7 +285,7 @@ input#restartEmulator_button {
 #progressBar{
 	background-image: url('../img/ProgressBar.gif');
 	width: 100%;
-	height: 48%;
+	height: 40%;
 	background-size: 100% 100%;
 	background-repeat: no-repeat;
 	position: relative;
@@ -282,7 +296,7 @@ input#restartEmulator_button {
 #progressBar2{
 	background-image: url('../img/ProgressBar.gif');
 	width: 100%;
-	height: 48%;
+	height: 40%;
 	background-size: 100% 100%;
 	background-repeat: no-repeat;
 	position: relative;
@@ -362,7 +376,7 @@ input#newFileUpload_browse {
 	position:absolute;
 	right: 10px;
 	top: 2px;
-	border: 2px solid darkcyan;
+	border: 2px solid #000060;
 	font-weight: bold;
 	font-size: 16px;
 	line-height: 25px;
@@ -376,7 +390,7 @@ input#newFileUpload_browse {
 	position:absolute;
 	right: 65px;
 	top: 2px;
-	border: 2px solid darkcyan;
+	border: 2px solid #000060;
 	font-weight: bold;
 	font-size: 16px;
 	line-height: 25px;
@@ -400,7 +414,7 @@ input#newFileUpload_browse {
 #modal_1{
 	background-color: rgba(89, 160, 230, 1);
 	color: black;
-	border: 5px solid darkcyan;
+	border: 5px solid #000060;
 	border-radius: 10px;
 	z-index: 101;
 	display:none;
@@ -422,12 +436,22 @@ input#newFileUpload_browse {
 	display:block;
 }
 
+#userFileControls{
+	position:absolute;
+	top: 5px;
+	right: 5px;
+	width: 170px;
+	height: 300px;
+	padding: 0px 0px 0px 0px;
+	background-color:goldenrod;
+}
+
 #emulatorControls{
 	position:absolute;
 	top: 5px;
 	left: 5px;
-	/* width:200px; */
-	/* height:600px; */
+	 /*width:150px;*/
+	 /*height:200px;*/
 	padding: 0px 0px 0px 0px;
 	background-color:goldenrod;
 }
@@ -442,7 +466,6 @@ input#newFileUpload_browse {
 	padding: 5px;
 	text-align: left;
 }
-
 .emulatorControls_buttons:hover{ background-color:gold;transform: scale(1.05); }
 .emulatorControls_buttons:active{ transform: scale(0.95); }
 

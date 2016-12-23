@@ -12,3 +12,6 @@ Cuzebox Uzebox emulator:
 
 Uzebox Webpage:
  http://www.belogic.com/uzebox/
+
+You will need PHP, Linux (Ubuntu/CentOS has worked), and Sqlite drivers. You can install the drivers with this command:
+sudo apt-get install php5-sqlite

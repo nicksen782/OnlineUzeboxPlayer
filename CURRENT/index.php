@@ -1,4 +1,4 @@
-<?php $properAccess=true; require_once("globals_p.php"); ?>
+<?php $properAccess=true; require_once("globals_p.php"); tattle5("TEST", "TEST"); ?>
 <!doctype html>
 <html lang="en-us">
 
@@ -69,6 +69,25 @@
 					<div class="emulatorControls_buttons" id="emulatorControls_resize">Resize Emulator</div>
 
 				</div>
+
+				<div id="userFileControls">
+					Click the game to start!
+					<table>
+						<tr>
+							<th>File</th>
+							<th>Remove</th>
+						</tr>
+						<tr>
+							<td>gamefile.uze</td>
+							<td><input type="button" value="DEL"></td>
+						</tr>
+
+					</table>
+						<input style="display:none;" id="FilesFromUser" type="file" value="CHOOSE" multiple>
+						<input type="button" value="INPUT CHOOSE" onclick="document.querySelector('#FilesFromUser').click();">
+
+				</div>
+
 
 
 				<div class="gameframe_">

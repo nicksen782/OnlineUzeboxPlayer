@@ -23,15 +23,15 @@
 			$devenvironment=true;
 
 			// Load my debugger.
-			$GLOBALS['dt5_db'] = "sqlite://home/ubuntu/workspace/web/ACTIVE/dt5/dt5.db";
 			require_once("/home/ubuntu/workspace/web/ACTIVE/dt5/index_p.php");
-			// tattle5("GLOBALS_P", "test?");
 		}
 		else{
 			// This is NOT the dev environment.
 			$devenvironment=false;
 
-			function tattle5($arg1, $arg2){}
+			// Create blank function for tattle5 just incase I left some still active in the code.
+			if( file_exists( "dt5/index_p.php" )){ include_once("dt5/index_p.php"); }
+			else                                 { function tattle5(){ return "This is a placeholder for tattle5."; } }
 
 			// Bring in the common files.
 			// require_once("../../index_p.php");

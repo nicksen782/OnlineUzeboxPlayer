@@ -105,7 +105,7 @@ function loadGame(){
 	];
 
 	// Get the HTML that will be put into the iframe.
-	$iframehtml = liveEditEmu($dataFilesObj);
+	$iframehtml = liveEditEmu($dataFilesObj, true);
 
 	// Output the data.
 	echo json_encode(
@@ -119,13 +119,30 @@ function loadGame(){
 }
 
 // DONE!
-// Used by 'loadGame()'
-function liveEditEmu($dataFilesObj){
-  $cuzebox_extra = file_get_contents("js/cuzebox_extra.js");
+function loadUserGameIntoEmu(){
+	// $_POST['gamefile'];
 
+	// Get the HTML that will be put into the iframe.
+	$iframehtml = liveEditEmu(null, $gameOnServer);
+
+	// Output the data.
+	echo json_encode(
+		array(
+			"iframehtml"  	=> $iframehtml,
+			"count"   	  	=> sizeof($result),
+			"dataFilesObj"  => $dataFilesObj
+		)
+	);
+}
+
+// DONE!
+// Used by 'loadGame()'
+function liveEditEmu($dataFilesObj, $gameOnServer){
   // Load, edit, send the cuzebox.html file.
   $cuzeboxhtml = file_get_contents("cuzebox_minimal.html");
 
+// Original script text
+{
 //   $script0_tofind=
 //   "<script type=\"text/javascript\">
 
@@ -148,7 +165,9 @@ function liveEditEmu($dataFilesObj){
 //       document.body.appendChild(script);
 
 //     </script>";
-	$script0_tofind=base64_decode("PHNjcmlwdCB0eXBlPSJ0ZXh0L2phdmFzY3JpcHQiPgoKICAgICAgdmFyIE1vZHVsZSA9IHsKICAgICAgICBjYW52YXM6IChmdW5jdGlvbigpIHsKICAgICAgICAgIHJldHVybiBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnY2FudmFzJyk7CiAgICAgICAgfSkoKSwKICAgICAgfTsKCiAgICAgIChmdW5jdGlvbigpIHsKICAgICAgICB2YXIgbWVtb3J5SW5pdGlhbGl6ZXIgPSAnY3V6ZWJveC5odG1sLm1lbSc7CiAgICAgICAgdmFyIHhociA9IE1vZHVsZVsnbWVtb3J5SW5pdGlhbGl6ZXJSZXF1ZXN0J10gPSBuZXcgWE1MSHR0cFJlcXVlc3QoKTsKICAgICAgICB4aHIub3BlbignR0VUJywgbWVtb3J5SW5pdGlhbGl6ZXIsIHRydWUpOwogICAgICAgIHhoci5yZXNwb25zZVR5cGUgPSAnYXJyYXlidWZmZXInOwogICAgICAgIHhoci5zZW5kKG51bGwpOwogICAgICB9KSgpOwoKICAgICAgdmFyIHNjcmlwdCA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoJ3NjcmlwdCcpOwogICAgICBzY3JpcHQuc3JjID0gImN1emVib3guanMiOwogICAgICBkb2N1bWVudC5ib2R5LmFwcGVuZENoaWxkKHNjcmlwdCk7CgogICAgPC9zY3JpcHQ+");
+}
+
+$script0_tofind=base64_decode("PHNjcmlwdCB0eXBlPSJ0ZXh0L2phdmFzY3JpcHQiPgoKICAgICAgdmFyIE1vZHVsZSA9IHsKICAgICAgICBjYW52YXM6IChmdW5jdGlvbigpIHsKICAgICAgICAgIHJldHVybiBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnY2FudmFzJyk7CiAgICAgICAgfSkoKSwKICAgICAgfTsKCiAgICAgIChmdW5jdGlvbigpIHsKICAgICAgICB2YXIgbWVtb3J5SW5pdGlhbGl6ZXIgPSAnY3V6ZWJveC5odG1sLm1lbSc7CiAgICAgICAgdmFyIHhociA9IE1vZHVsZVsnbWVtb3J5SW5pdGlhbGl6ZXJSZXF1ZXN0J10gPSBuZXcgWE1MSHR0cFJlcXVlc3QoKTsKICAgICAgICB4aHIub3BlbignR0VUJywgbWVtb3J5SW5pdGlhbGl6ZXIsIHRydWUpOwogICAgICAgIHhoci5yZXNwb25zZVR5cGUgPSAnYXJyYXlidWZmZXInOwogICAgICAgIHhoci5zZW5kKG51bGwpOwogICAgICB9KSgpOwoKICAgICAgdmFyIHNjcmlwdCA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoJ3NjcmlwdCcpOwogICAgICBzY3JpcHQuc3JjID0gImN1emVib3guanMiOwogICAgICBkb2N1bWVudC5ib2R5LmFwcGVuZENoaWxkKHNjcmlwdCk7CgogICAgPC9zY3JpcHQ+");
 
   $script0_toreplace=
   "
@@ -160,13 +179,32 @@ function liveEditEmu($dataFilesObj){
 
   <!-- Setup the filesystem-->
   <script>
+";
 
-	// Get file list.
+if($gameOnServer){
+ $script0_toreplace.= "
+	// SERVER SUPPLILED GAME, CHOSEN BY USER.
 	var filelist    = ".json_encode(($dataFilesObj['datafiles']), JSON_PRETTY_PRINT).";
 	var currentgame = '".$dataFilesObj['title']."';
 	var uzerom      = '".$dataFilesObj['uzerom']."';
 	var arguments   = '".$dataFilesObj['uzerom']."'
+	var gameOnServer = true;
+";
+}
+else{
+	$script0_toreplace.=
+	"
+	// USER SUPPLIED GAME.
+		var filelist    = {} ;
+		var currentgame = '". $_POST['gamefile'] ."';
+		var uzerom      = '". $_POST['gamefile'] ."';
+		var arguments   = '". $_POST['gamefile'] ."'
+		var gameOnServer=false;
+	";
+}
 
+$script0_toreplace.=
+	"
 	// Cuzebox Extra
 	var script = document.createElement('script');
 	script.src = \"js/cuzebox_extra.js\";

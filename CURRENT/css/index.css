@@ -481,3 +481,13 @@ input#newFileUpload_browse {
 	word-wrap: break-word;
 	text-align: left;
 }
+
+.userGameFileLink{
+	text-decoration:underline;
+	color:blue;
+	font-weight:bold;
+}
+.userGameFileLink:hover{
+	text-color:blue;
+	color:yellow;
+}

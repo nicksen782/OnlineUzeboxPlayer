@@ -72,15 +72,14 @@
 
 				<div id="userFileControls">
 					Click the game to start!
-					<table>
+					<table id="userGameFiles">
 						<tr>
 							<th>File</th>
-							<th>Remove</th>
 						</tr>
-						<tr>
-							<td>gamefile.uze</td>
-							<td><input type="button" value="DEL"></td>
-						</tr>
+						<!--<tr>-->
+						<!--	<td>gamefile.uze</td>-->
+						<!--	<td><input type="button" value="DEL"></td>-->
+						<!--</tr>-->
 
 					</table>
 						<input style="display:none;" id="FilesFromUser" type="file" value="CHOOSE" multiple>

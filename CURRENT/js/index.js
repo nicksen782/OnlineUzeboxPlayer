@@ -1,3 +1,65 @@
+function reloadUserGameFileList(filelist){
+	// Get a handle on the table and then clear the table.
+	var thetable = document.querySelector("#userGameFiles");
+	for(var i = 1; i < thetable.rows.length;){
+		thetable.deleteRow(i);
+	}
+	var tbody = thetable.querySelector("tbody");
+	var row ;
+	var removeBtn;
+	var removeGameFile_onclick_text;
+	var gamefileBtn;
+	var gamefileBtn_onclick_text;
+
+	for (var f = 0; f< filelist.length; f++) {
+		// Insert a new row for each file entry returned.
+		row = thetable.insertRow(1);
+
+		// Add contents to the new row's cells.
+		var cell0 = row.insertCell(0); cell0.innerHTML = filelist[f] ;
+		var cell1 = row.insertCell(1); cell1.innerHTML = "" ;
+
+		removeBtn = document.createElement('button');
+		removeGameFile_onclick_text = "removeGameFile('"+filelist[f]+"', '"+gamedata.id+"');";
+		removeBtn.setAttribute('onclick', removeGameFile_onclick_text);
+		removeBtn.setAttribute('title', "removeGameFile"+filelist[f]+" <--");
+		removeBtn.innerHTML = "REMOVE";
+		cell1.appendChild(removeBtn);
+
+		// Add the new row to the table body.
+		tbody.appendChild(row);
+	}
+}
+
+
+function loadUserGameIntoEmu(gamefile){
+
+	var callback = function(resp) {
+		resp = JSON.parse(resp);
+
+		// Remove previous iframe. Create another one.
+		document.getElementById('emscripten_iframe').remove();
+
+		var iframe = document.createElement('iframe');
+		iframe.setAttribute("frameBorder", "0");
+		iframe.id = "emscripten_iframe";
+
+		document.getElementById('emscripten_iframe_container').appendChild(iframe);
+
+		iframe.contentWindow.document.open();
+		iframe.contentWindow.document.write(resp.iframehtml);
+		iframe.contentWindow.document.close();
+	};
+
+	// var game = document.getElementById('gameMenu_select').value;
+
+	var thedata = {
+		o: "loadUserGameIntoEmu",
+		gamefile: gamefile
+	};
+	serverPOSTrequest(thedata, callback, "gateway_p.php");
+}
+
 function sendKeyToIframe(keyCode){
 	var evt = new Event('keydown');
 	evt.keyCode = keyCode;
@@ -105,43 +167,43 @@ function viewSwitcher(view) {
 		serverPOSTrequest(thedata, callback, "gateway_p.php");
 	}
 
-	function addfiles(obj) {
-		// Has different FileReaders for different types of data uploads.
-		// This uses the correct FileReader which then within its callback function will store the actual file data and meta data.
-		var filedata;
-		var reader;
-		var _this = this;
+	// function addfiles(obj) {
+	// 	// Has different FileReaders for different types of data uploads.
+	// 	// This uses the correct FileReader which then within its callback function will store the actual file data and meta data.
+	// 	var filedata;
+	// 	var reader;
+	// 	var _this = this;
 
-		// Cycle through all uploaded files and add them one at a time.
-		for (var i = 0; i < obj.files.length; i++) {
-			// Get the file extension.
-			obj.files[i].fileext = obj.files[i].name.substr((~-obj.files[i].name.lastIndexOf(".") >>> 0) + 2);
+	// 	// Cycle through all uploaded files and add them one at a time.
+	// 	for (var i = 0; i < obj.files.length; i++) {
+	// 		// Get the file extension.
+	// 		obj.files[i].fileext = obj.files[i].name.substr((~-obj.files[i].name.lastIndexOf(".") >>> 0) + 2);
 
-			// Create FileReader to handle this type of data.
-			// Store the file after reading it.
-			reader = new FileReader();
-			reader.fileobj = obj.files[i];
-			reader.onload = (function(e) {
-				var filedata = e.target.result.split('"').join('');
-				_this.addfiletoFS(this.fileobj, filedata);
-			});
+	// 		// Create FileReader to handle this type of data.
+	// 		// Store the file after reading it.
+	// 		reader = new FileReader();
+	// 		reader.fileobj = obj.files[i];
+	// 		reader.onload = (function(e) {
+	// 			var filedata = e.target.result.split('"').join('');
+	// 			_this.addfiletoFS(this.fileobj, filedata);
+	// 		});
 
-			// Get the data.
-			if (
-				obj.files[i].fileext == "inc" ||
-				obj.files[i].fileext == "xml" ||
-				obj.files[i].fileext == "json" ||
-				obj.files[i]['type'] == "text/plain") {
-				// console.log("Reading file as text");
-				filedata = reader.readAsText((obj.files[i]));
-			}
-			else {
-				// Handle binary (non-plain-text files.)
-				// console.log("Reading file as dataurl");
-				filedata = reader.readAsDataURL(obj.files[i], obj);
-			}
-		}
-	}
+	// 		// Get the data.
+	// 		if (
+	// 			obj.files[i].fileext == "inc" ||
+	// 			obj.files[i].fileext == "xml" ||
+	// 			obj.files[i].fileext == "json" ||
+	// 			obj.files[i]['type'] == "text/plain") {
+	// 			// console.log("Reading file as text");
+	// 			filedata = reader.readAsText((obj.files[i]));
+	// 		}
+	// 		else {
+	// 			// Handle binary (non-plain-text files.)
+	// 			// console.log("Reading file as dataurl");
+	// 			filedata = reader.readAsDataURL(obj.files[i], obj);
+	// 		}
+	// 	}
+	// }
 
 window.onload = function() {
 	if (window.opener && window.opener !== window) {
@@ -152,24 +214,21 @@ window.onload = function() {
 	document.getElementById('FilesFromUser').addEventListener('change', function() {
 		console.log("files:", this.files);
 		var _this = this;
+
+		// Clear the rows of the table.
+		// Get a handle on the table and then clear the table.
+		var thetable = document.querySelector("#userGameFiles");
+		for(var i = 1; i < thetable.rows.length;){
+			thetable.deleteRow(i);
+		}
+		var tbody = thetable.querySelector("tbody");
+		var row ;
+		var removeBtn;
+		var removeGameFile_onclick_text;
+
 		// var _this = document.getElementById('FilesFromUser');
 
 		// NOTHING SHOULD ACTUALLY UPLOAD TO THE SERVER!
-
-	// Get file list.
-// 	var filelist    = [
-//     {
-//         "filename": "aedat.bin",
-//         "completefilepath": "games\/AlterEgo\/aedat.bin"
-//     },
-//     {
-//         "filename": "ae.uze",
-//         "completefilepath": "games\/AlterEgo\/ae.uze"
-//     }
-// ];
-// 	var currentgame = 'Alter Ego';
-// 	var uzerom      = 'ae.uze';
-// 	var arguments   = 'ae.uze'
 
 		// Create a local (global) variable of file data.
 		thefiles=[];
@@ -178,11 +237,22 @@ window.onload = function() {
 			var reader = new FileReader();
 			reader.onload = (function(e) {
 				var filedata = e.target.result;
-				console.log("e", e);
-				console.info(i, this.fileobj.name, this.fileext, filedata);
+				var filedata2 = new Int8Array(filedata);
+				console.log("the file data:", filedata);
+				// console.log("e", e);
+				// console.info(i, this.fileobj.name, this.fileext, filedata);
 				thefiles.push(
-					{filename:this.fileobj.name, completefilepath:filedata, ext:this.fileext}
+					{filename:this.fileobj.name, completefilepath:filedata2, ext:this.fileext}
 				);
+
+				// Insert a new row for each file entry returned.
+				row = thetable.insertRow(1);
+
+				// Add contents to the new row's cells.
+				var cell0 = row.insertCell(0); cell0.innerHTML = "<span class='userGameFileLink' onclick='loadUserGameIntoEmu(\""+this.fileobj.name+"\");'>" + this.fileobj.name + "</span>";
+
+				// Add the new row to the table body.
+				tbody.appendChild(row);
 
 			});
 			// Get the file extension.

@@ -31,8 +31,9 @@ function processClientRequest_O(){
 	// Several 'o' values may be used. Each may require specific privelidges.
 	// 'f' is function, 'a' is arguments, 'p' is permissions required.
 	// EMULATOR (_p/gamedbmanager_p.php)
-	$o_values["getGameList"]	= [ "func"=>"getGameList",	"args"=>[],	"perms"=>($eud_access ? 1 : 0) ] ;
-	$o_values["loadGame"]		= [ "func"=>"loadGame",		"args"=>[],	"perms"=>($eud_access ? 1 : 0) ] ;
+	$o_values["getGameList"]			= [ "func"=>"getGameList",			"args"=>[],		"perms"=>($eud_access ? 1 : 0) ] ;
+	$o_values["loadGame"]				= [ "func"=>"loadGame",				"args"=>[],		"perms"=>($eud_access ? 1 : 0) ] ;
+	$o_values["loadUserGameIntoEmu"]	= [ "func"=>"loadUserGameIntoEmu",	"args"=>[null],	"perms"=>($eud_access ? 1 : 0) ] ;
 
 	// GAME DATABASE MANAGER (_p/gamedbmanager_p.php)
 	$o_values["loadGame_intoManager"]	= [ "func"=>"loadGame_intoManager",	"args"=>[],	"perms"=>($eud_access ? 1 : 0) ] ;
@@ -42,7 +43,6 @@ function processClientRequest_O(){
 	$o_values["removeGameFile"]			= [ "func"=>"removeGameFile",		"args"=>[],	"perms"=>($eud_access ? 1 : 0) ] ;
 
 	$o_values["newGameRecord"]			= [ "func"=>"newGameRecord",		"args"=>[],	"perms"=>($eud_access ? 1 : 0) ] ;
-
 
 	// Check if the 'o' value is valid.
 	$valid_o = false;

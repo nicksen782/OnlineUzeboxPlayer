@@ -94,14 +94,19 @@ div#top_panel_right {
 	width: 320px;
 	height: 32px;
 	/*display: inline-block;*/
+	display: none;
 	vertical-align: top;
 	text-align: center;
 	padding: 3px;
 	background-color: darkgoldenrod;
 	border-radius: 5px;
 	border: 2px solid #000060;
-	box-shadow: 0px 0px 5px 5px rgba(0, 0, 0, 0.5); */
+	box-shadow: 0px 0px 5px 5px rgba(0, 0, 0, 0.5);
 }
+
+
+
+
 
 div#top_panel_right_gamemanager {
 	position: absolute;
@@ -120,8 +125,8 @@ div#top_panel_right_gamemanager {
 }
 
 #gameMenu_select {
-	width: 180px;
-	height: 50%;
+	/* width: 180px; */
+	height: 32px;
 	font-weight: bold;
 	vertical-align: top;
 	font-size: 12px;
@@ -136,17 +141,19 @@ div#top_panel_right_gamemanager {
 }
 
 input#stopEmulator_button {
-	width: 60px;
-	height: 50%;
+	/*width: 60px;*/
+	/* height: 50%; */
+	/*width: 48%;*/
 	/* margin-top: 1px; */
-	font-weight: bold;
-	vertical-align: top;
-	font-size: 12px;
+	/*font-weight: bold;*/
+	/*vertical-align: top;*/
+	/*font-size: 12px;*/
 }
 
 input#restartEmulator_button {
-	width: 60px;
-	height: 50%;
+	/* width: 60px; */
+	/* height: 50%; */
+	width: 100%;
 	/* margin-top: 1px; */
 	font-weight: bold;
 	vertical-align: top;
@@ -237,7 +244,7 @@ input#restartEmulator_button {
 	position: relative;
 	border-radius: 20px;
 	border: 5px solid #000060;
-	border: 5px solid rgb(57, 60, 169);
+	border: 3px solid rgb(57, 60, 169);
 }
 .gameframe_borders{background-color: darkgoldenrod;}
 #emscripten_iframe 		 	 {z-index:5;}
@@ -437,30 +444,35 @@ input#newFileUpload_browse {
 }
 
 #userFileControls{
-	position:absolute;
+	/* position:absolute; */
 	top: 5px;
 	right: 5px;
-	width: 170px;
-	height: 300px;
+	/* width: 170px; */
+	/* height: 300px; */
 	padding: 0px 0px 0px 0px;
-	background-color:goldenrod;
+	/* background-color:goldenrod; */
 }
 
 #emulatorControls{
 	position:absolute;
-	top: 5px;
+	/* top: 5px; */
 	left: 5px;
-	 /*width:150px;*/
-	 /*height:200px;*/
+	width: 185px;
+	/*height:200px;*/
 	padding: 0px 0px 0px 0px;
 	background-color:goldenrod;
+	border-radius: 5px;
+	border: 2px solid #000060;
+	border: 3px solid rgb(57, 60, 169);
+	box-shadow: 0px 0px 5px 2px;
+	box-shadow: 0px 0px 5px 10px rgba(0, 0, 0, 0.5);
 }
 .emulatorControls_buttons{
-	width: 150px;
+	width: 145px;
 	height: 18px;
 	/* line-height: 50px; */
 	font-weight: bold;
-	font-size: 18px;
+	font-size: 16px;
 	background-color:darkgoldenrod;
 	margin: 5px;
 	padding: 5px;
@@ -469,25 +481,89 @@ input#newFileUpload_browse {
 .emulatorControls_buttons:hover{ background-color:gold;transform: scale(1.05); }
 .emulatorControls_buttons:active{ transform: scale(0.95); }
 
-.emulatorControls_info{
-	width: 150px;
-	height: 70px;
+
+
+#top_panel_right_user{
+	position: absolute;
+	top: 6px;
+	right: 60px;
+	/* background-color: #336699; */
+	width: 350px;
+	height: 32px;
+	/*display: inline-block;*/
+	vertical-align: top;
+	text-align: center;
+	padding: 3px;
+	background-color: darkgoldenrod;
+	border-radius: 5px;
+	border: 2px solid #000060;
+	box-shadow: 0px 0px 5px 5px rgba(0, 0, 0, 0.5);
+}
+
+.emulatorControls_section{
+	width: 165px;
+	/* height: 70px; */
 	/*line-height: 50px;*/
 	font-weight: bold;
-	font-size: 18px;
+	font-size: 16px;
 	background-color:darkgoldenrod;
 	margin: 5px;
 	padding: 5px;
 	word-wrap: break-word;
 	text-align: left;
+	border-radius: 10px;
+	border: 1px solid black;
+}
+.emulatorControls_section_title{
+	font-weight:bold;
+	background-color: orange;
+	text-align: center;
+	margin-bottom: 5px;
+	text-decoration: underline;
+	border-radius: 5px;
+	padding: 2px;
+	border: 1px solid black;
+}
+
+.emulatorControls_info{
+	/*width: 165px;*/
+	/*height: 50%;*/
+	/* line-height: 32px; */
+	font-weight: bold;
+	font-size: 16px;
+	/* background-color:darkgoldenrod; */
+	margin: 0px;
+	padding: 0px;
+	word-wrap: break-word;
+	text-align: left;
+	/* margin-right: 10px; */
 }
 
 .userGameFileLink{
 	text-decoration:underline;
 	color:blue;
 	font-weight:bold;
+	margin-left:5px;
 }
 .userGameFileLink:hover{
 	text-color:blue;
 	color:yellow;
 }
+
+input#FilesFromUser_viewableBtn {
+	width: 100%;
+	font-weight: bold;
+	margin-top: 5px;
+}
+
+#top_panel_right_user table{
+	height:inherit;
+	margin: 0px !important;
+	padding: 0px !important;
+	overflow:scroll;
+	border-collapse: collapse;
+}
+#top_panel_right_user table td:nth-child(1){
+	width: 120px;
+}
+#top_panel_right_user table td:nth-child(2){}

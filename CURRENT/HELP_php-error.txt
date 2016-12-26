@@ -1,4 +1,0 @@
-[23-Dec-2016 12:11:02 America/Detroit] PHP Warning:  file_get_contents(sql.sql): failed to open stream: No such file or directory in /home/ubuntu/workspace/web/ACTIVE/dt5/index_p.php on line 13
-[23-Dec-2016 12:11:02 America/Detroit] PHP Fatal error:  Call to a member function bindValue() on a non-object in /home/ubuntu/workspace/web/ACTIVE/dt5/index_p.php on line 322
-[23-Dec-2016 12:11:52 America/Detroit] PHP Fatal error:  Call to a member function bindValue() on a non-object in /home/ubuntu/workspace/web/ACTIVE/dt5/index_p.php on line 322
-[23-Dec-2016 12:11:53 America/Detroit] PHP Fatal error:  Call to a member function bindValue() on a non-object in /home/ubuntu/workspace/web/ACTIVE/dt5/index_p.php on line 322

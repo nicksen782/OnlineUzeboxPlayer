@@ -30,13 +30,27 @@
 		</div>
 
 		<div id="top_panel_right" class="panels">
-			<select id="gameMenu_select">
-				<option value=""> - Choose a game - </option>
-			</select>
-			<input id="stopEmulator_button" type="button" value="Stop">
-			<input id="restartEmulator_button" type="button" value="Restart">
-			<br>
-			<div id="progressBar"></div>
+			<!--<select id="gameMenu_select">-->
+			<!--	<option value=""> - Choose a game - </option>-->
+			<!--</select>-->
+			<!--<input id="stopEmulator_button" type="button" value="Stop">-->
+			<!--<input id="restartEmulator_button" type="button" value="Restart">-->
+			<!--<br>-->
+			<!--<div id="progressBar"></div>-->
+		</div>
+
+		<div id="top_panel_right_user" class="panels">
+			<table>
+				<tr class="emulatorControls_info">
+					<td>TITLE:</td>
+					<td id="emulatorControls_title"></td>
+				</tr>
+				<tr class="emulatorControls_info">
+					<td>GAMEFILE:</td>
+					<td id="emulatorControls_gamefile"></td>
+				</tr>
+			</table>
+
 		</div>
 
 		<div id="top_panel_right_gamemanager" class="panels">
@@ -57,37 +71,38 @@
 
 		<div id="middle">
 			<div id="VIEW_emulator" class="views">
+
 				<div id="emulatorControls">
-					<div class="emulatorControls_info" id="emulatorControls_title">TITLE:<br></div>
-					<br>
-					<div class="emulatorControls_info" id="emulatorControls_gamefile">GAMEFILE:<br></div>
-					<br>
-					<div class="emulatorControls_buttons" id="emulatorControls_F2">F2: Quality</div>
-					<div class="emulatorControls_buttons" id="emulatorControls_F3">F3: Debug</div>
-					<div class="emulatorControls_buttons" id="emulatorControls_F7">F7: Flicker</div>
-					<div class="emulatorControls_buttons" id="emulatorControls_F8">F8: Controls</div>
-					<div class="emulatorControls_buttons" id="emulatorControls_resize">Resize Emulator</div>
 
-				</div>
-
-				<div id="userFileControls">
-					Click the game to start!
-					<table id="userGameFiles">
-						<tr>
-							<th>File</th>
-						</tr>
-						<!--<tr>-->
-						<!--	<td>gamefile.uze</td>-->
-						<!--	<td><input type="button" value="DEL"></td>-->
-						<!--</tr>-->
-
-					</table>
+					<hr>
+					<div class="emulatorControls_section">
+						<div class="emulatorControls_section_title">(server) Game:</div>
+						<select id="gameMenu_select">
+							<option value=""> - Choose a game - </option>
+						</select>
+						<input id="restartEmulator_button" type="button" value="Restart this game">
+						<br>
+						<div id="progressBar"></div>
+					</div>
+					<hr>
+					<div class="emulatorControls_section">
+						<div class="emulatorControls_section_title">(user) Files:</div>
+						<div id="userGameFiles"></div>
 						<input style="display:none;" id="FilesFromUser" type="file" value="CHOOSE" multiple>
-						<input type="button" value="INPUT CHOOSE" onclick="document.querySelector('#FilesFromUser').click();">
-
+						<input type="button" id="FilesFromUser_viewableBtn" value="Import File(s)" onclick="document.querySelector('#FilesFromUser').click();">
+					</div>
+					<hr>
+					<div class="emulatorControls_section">
+						<div class="emulatorControls_section_title">Emulator Controls:</div>
+						<div class="emulatorControls_buttons" id="emulatorControls_F2">F2: Quality</div>
+						<div class="emulatorControls_buttons" id="emulatorControls_F3">F3: Debug</div>
+						<div class="emulatorControls_buttons" id="emulatorControls_F7">F7: Flicker</div>
+						<div class="emulatorControls_buttons" id="emulatorControls_F8">F8: Controls</div>
+						<div class="emulatorControls_buttons" id="emulatorControls_resize">Resize Emulator</div>
+						<div class="emulatorControls_buttons" id="stopEmulator_button">Stop Emulator</div>
+					</div>
+					<hr>
 				</div>
-
-
 
 				<div class="gameframe_">
 				<div class="gameframe_border_top gameframe_borders"></div>

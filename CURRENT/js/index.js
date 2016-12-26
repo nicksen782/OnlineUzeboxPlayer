@@ -51,7 +51,7 @@ function loadUserGameIntoEmu(gamefile){
 		iframe.contentWindow.document.close();
 	};
 
-	// var game = document.getElementById('gameMenu_select').value;
+	document.getElementById('gameMenu_select').value = "";
 
 	var thedata = {
 		o: "loadUserGameIntoEmu",
@@ -83,8 +83,15 @@ function resizeEmulatorView(){
 	// Get the middle emulator view container
 	var middle_cont1 = document.querySelector('#middle_cont1');
 
-	var iframeHTMLdimensions = document.getElementById('emscripten_iframe').contentDocument.querySelector('html').getBoundingClientRect();
-	// var iframeHTMLdimensions = document.getElementById('emscripten_iframe').contentDocument.querySelector('#canvas').getBoundingClientRect();
+	// Check if the inner #canvas exists.
+	var iframeHTMLdimensions;
+	try{
+		iframeHTMLdimensions = document.getElementById('emscripten_iframe').contentDocument.querySelector('#canvas').getBoundingClientRect();
+	}
+	catch(e){
+		console.info("The inner #canvas did not exist. Using inner html dimensions instead.");
+		iframeHTMLdimensions = document.getElementById('emscripten_iframe').contentDocument.querySelector('html').getBoundingClientRect();
+	}
 
 	thisIframe.style.width           = iframeHTMLdimensions.width+"px";//emuCanvas.style.width;
 	thisIframeContainer.style.width  = iframeHTMLdimensions.width+"px";//emuCanvas.style.width;
@@ -118,6 +125,7 @@ function viewSwitcher(view) {
 		case "emu":
 			{
 				document.getElementById('top_panel_right').classList.add('show');
+				document.getElementById('top_panel_right_user').classList.add('show');
 				document.getElementById('VIEW_emulator').classList.add('show');
 				break;
 			}
@@ -217,23 +225,17 @@ window.onload = function() {
 
 		// Clear the rows of the table.
 		// Get a handle on the table and then clear the table.
-		var thetable = document.querySelector("#userGameFiles");
-		for(var i = 1; i < thetable.rows.length;){
-			thetable.deleteRow(i);
-		}
-		var tbody = thetable.querySelector("tbody");
-		var row ;
-		var removeBtn;
-		var removeGameFile_onclick_text;
-
-		// var _this = document.getElementById('FilesFromUser');
+		var userGameFiles = document.querySelector("#userGameFiles");
+		userGameFiles.innerHTML = "";
 
 		// NOTHING SHOULD ACTUALLY UPLOAD TO THE SERVER!
 
 		// Create a local (global) variable of file data.
 		thefiles=[];
+
 		// Use the filereader api to convert data to blob/arraybuffer.
 		for (var i = 0; i < _this.files.length; i++) {
+			if(i==0){ userGameFiles.innerHTML += "Click gamefile to start:<br>"; }
 			var reader = new FileReader();
 			reader.onload = (function(e) {
 				var filedata = e.target.result;
@@ -245,20 +247,14 @@ window.onload = function() {
 					{filename:this.fileobj.name, completefilepath:filedata2, ext:this.fileext}
 				);
 
-				// Insert a new row for each file entry returned.
-				row = thetable.insertRow(1);
-
 				// Add contents to the new row's cells.
-				var cell0 = row.insertCell(0); cell0.innerHTML = "<span class='userGameFileLink' onclick='loadUserGameIntoEmu(\""+this.fileobj.name+"\");'>" + this.fileobj.name + "</span>";
-
-				// Add the new row to the table body.
-				tbody.appendChild(row);
-
+				userGameFiles.innerHTML += "<div class='userGameFileLink' onclick='loadUserGameIntoEmu(\""+this.fileobj.name+"\");'>" + this.fileobj.name + "</div>";
 			});
 			// Get the file extension.
 			reader.fileobj = _this.files[i];
 			reader.fileext = reader.fileobj.name.substr((~-reader.fileobj.name.lastIndexOf(".") >>> 0) + 2);
 			reader.readAsArrayBuffer(reader.fileobj);
+
 		}
 
 
@@ -271,7 +267,7 @@ window.onload = function() {
 	viewSwitcher("emu");
 	// viewSwitcher("gamedbman");
 
-resizeEmulatorView();
+	resizeEmulatorView();
 
 	// Emulator
 	document.getElementById('emscripten_iframe_container').addEventListener('mouseenter', function() {
@@ -300,8 +296,8 @@ resizeEmulatorView();
 	// Emulator - Top-right panel
 	document.getElementById('stopEmulator_button').addEventListener('click', function() {
 		document.getElementById('emscripten_iframe_container').querySelector('iframe').src = "loading.html";
-		document.getElementById('emulatorControls_title').innerHTML="TITLE:<br>"+"";
-		document.getElementById('emulatorControls_gamefile').innerHTML="GAMEFILE:<br>"+"";
+		document.querySelector('#emulatorControls_title').innerHTML    ="";
+		document.querySelector('#emulatorControls_gamefile').innerHTML ="";
 	});
 	document.getElementById('restartEmulator_button').addEventListener('click', function() {
 		document.getElementById('gameMenu_select').dispatchEvent(new Event('change'));
@@ -525,8 +521,8 @@ function iframeIsReadyNow(currentgame, uzerom, filelist) {
 		"\n\n"
 	);
 
-	document.getElementById('emulatorControls_title').innerHTML="TITLE:<br>"+currentgame;
-	document.getElementById('emulatorControls_gamefile').innerHTML="GAMEFILE:<br>"+uzerom;
+	document.querySelector('#emulatorControls_title').innerHTML    =""+currentgame;
+	document.querySelector('#emulatorControls_gamefile').innerHTML =""+uzerom;
 
 	document.getElementById('emscripten_iframe').focus();
 

@@ -8,23 +8,14 @@ function getGameList(){
 	// file_get_contents($eud_db)
 	$dbhandle  = new sqlite3_DB_PDO($eud_db) or exit("cannot open the database");
 
-	// SQL delete query.
 	$statement_SQL = '
 	SELECT
-	"id"
+	  "id"
 	, "title"
-	, "lastupload"
-	, "validheader"
-	, "uses_sd"
-	, "complete"
-	-- , "authors"
-	-- , "description"
-	-- , "addedby"
-	-- , "binhash"
-	-- , "gamefile"
-	-- , "gamedir"
+	, "when_added"
+	, "status"
 
-	FROM "games"
+	FROM "gamelist"
 	ORDER BY "title" ASC
 	;';
 
@@ -48,7 +39,6 @@ function getGameList(){
 
 // DONE!
 function loadGame(){
-	// List all files in the game database. Provide separate responses for SD and non-SD games.
 	// Prepares this query.
 	$eud_db = $GLOBALS['eud_db'];
 	// file_get_contents($eud_db)
@@ -56,20 +46,13 @@ function loadGame(){
 
 	// SQL delete query.
 	$statement_SQL = '
-		SELECT
+	SELECT
 	  "id"
 	, "title"
-	, "lastupload"
-	, "validheader"
-	, "uses_sd"
 	, "gamefile"
 	, "gamedir"
-	-- , "authors"
-	-- , "description"
-	-- , "addedby"
-	-- , "binhash"
 
-	FROM "games"
+	FROM "gamelist"
 	WHERE id = :id
 	;';
 
@@ -152,9 +135,7 @@ function loadaAutoFilelistIntoEmu(){
 	);
 }
 
-
 // DONE!
-// Used by 'loadGame()'
 function liveEditEmu($dataFilesObj, $filelistType){
   // Load, edit, send the cuzebox.html file.
   $cuzeboxhtml = file_get_contents("cuzebox_minimal.html");
@@ -179,10 +160,10 @@ if($filelistType==1){
 	"
 		// SERVER SUPPLILED GAME, CHOSEN BY USER.
 		var filelist    = ".json_encode(($dataFilesObj['datafiles']), JSON_PRETTY_PRINT).";
-		var currentgame = '".$dataFilesObj['title']."';
-		var uzerom      = '".$dataFilesObj['uzerom']."';
-		var arguments   = '".$dataFilesObj['uzerom']."';
-		var filelistType= '". $filelistType ."';
+		var currentgame = \"".$dataFilesObj['title']."\";
+		var uzerom      = \"".$dataFilesObj['uzerom']."\";
+		var arguments   = \"".$dataFilesObj['uzerom']."\";
+		var filelistType= \"". $filelistType ."\";
 	";
 }
 else if($filelistType==2){
@@ -190,10 +171,10 @@ else if($filelistType==2){
 	"
 	// USER SUPPLIED FILELIST.
 		var filelist    = [] ;
-		var currentgame = '". $_POST['gamefile'] ."';
-		var uzerom      = '". $_POST['gamefile'] ."';
-		var arguments   = '". $_POST['gamefile'] ."';
-		var filelistType= '". $filelistType ."';
+		var currentgame = \"". $_POST['gamefile'] ."\";
+		var uzerom      = \"". $_POST['gamefile'] ."\";
+		var arguments   = \"". $_POST['gamefile'] ."\";
+		var filelistType= \"". $filelistType ."\";
 	";
 }
 else if($filelistType==3){
@@ -201,10 +182,10 @@ else if($filelistType==3){
 	"
 	// AUTO FILE LIST (FROM UAM).
 		var filelist    = [] ;
-		var currentgame = '". $_POST['gamefile'] ."';
-		var uzerom      = '". $_POST['gamefile'] ."';
-		var arguments   = '". $_POST['gamefile'] ."';
-		var filelistType= '". $filelistType ."';
+		var currentgame = \"". $_POST['gamefile'] ."\";
+		var uzerom      = \"". $_POST['gamefile'] ."\";
+		var arguments   = \"". $_POST['gamefile'] ."\";
+		var filelistType= \"". $filelistType ."\";
 	";
 }
 
@@ -224,7 +205,6 @@ $script0_toreplace.=
   return $cuzeboxhtml;
 }
 
-//
 // DONE!
 function loadGame_intoManager(){
 	// List all files in the game database.
@@ -237,20 +217,17 @@ function loadGame_intoManager(){
 	// SQL delete query.
 	$statement_SQL = '
 	SELECT
-	"id"
-	, "title"
-	, "lastupload"
-	, "validheader"
-	, "uses_sd"
-	, "authors"
-	, "description"
-	, "addedby"
-	, "gamefile"
-	, "gamedir"
-	, "complete"
-	-- , "binhash"
+	 "id"
+	,"title"
+	,"authors"
+	,"description"
+	,"when_added"
+	,"added_by"
+	,"gamedir"
+	,"gamefile"
+	,"status"
 
-	FROM "games"
+	FROM "gamelist"
 
 	WHERE id = :id
 	;';
@@ -288,31 +265,24 @@ function loadGame_intoManager(){
 
 }
 
-// INSERT INTO "games" ("id","title","authors","description","lastupload","addedby","validheader","binhash","gamefile","uses_sd","gamedir") VALUES (NULL,'Alter Ego','Lee Weber','','12/16/2016 00:06','manual','1','','ae.uze','1','games/AlterEgo/')
-// UPDATE "games" SET "id"='485', "title"='Alter Ego', "authors"='Lee Weber', "description"='', "lastupload"='12/16/2016 00:06', "addedby"='manual', "validheader"='1', "binhash"='', "gamefile"='ae.uze', "uses_sd"='1', "gamedir"='games/AlterEgo/' WHERE "rowid" = 485
 // DONE!
 function updateGameInfo(){
 	// Prepares this query.
 	$eud_db = $GLOBALS['eud_db'];
 	$dbhandle  = new sqlite3_DB_PDO($eud_db) or exit("cannot open the database");
 
-	// SQL delete query.
 	$statement_SQL = '
-	UPDATE "games"
+	UPDATE "gamelist"
 	  SET
-		 -- "id"          = :id
-		-- ,
 		  "title"       = :title
 		, "authors"     = :authors
 		, "description" = :description
-		, "lastupload"  = :lastupload
-		, "addedby"     = :addedby
-		, "validheader" = :validheader
-		, "binhash"     = :binhash
 		, "gamefile"    = :gamefile
-		, "uses_sd"     = :uses_sd
-		, "gamedir"     = :gamedir
-		, "complete"    = :complete
+		, "status"      = :status
+		-- , "id"          = :id
+		-- , "when_added"  = :when_added
+		-- , "added_by"    = :added_by
+		-- , "gamedir"     = :gamedir
 	WHERE "id" = :id
 	;';
 
@@ -321,15 +291,12 @@ function updateGameInfo(){
 		$dbhandle->bind(':title',       $_POST['title']);
 		$dbhandle->bind(':authors',     $_POST['authors']);
 		$dbhandle->bind(':description', $_POST['description']);
-		$dbhandle->bind(':lastupload',  $_POST['lastupload']);
-		$dbhandle->bind(':addedby',     $_POST['addedby']);
-		$dbhandle->bind(':validheader', $_POST['validheader']);
-		$dbhandle->bind(':binhash',     $_POST['binhash']);
 		$dbhandle->bind(':gamefile',    $_POST['gamefile']);
-		$dbhandle->bind(':uses_sd',     $_POST['uses_sd']);
-		$dbhandle->bind(':gamedir',     $_POST['gamedir']);
-		$dbhandle->bind(':complete',    $_POST['complete']);
+		$dbhandle->bind(':status',      $_POST['status']);
 		$dbhandle->bind(':id',          $_POST['id']);
+		// $dbhandle->bind(':when_added',  $_POST['when_added']);
+		// $dbhandle->bind(':added_by',    $_POST['added_by']);
+		// $dbhandle->bind(':gamedir',     $_POST['gamedir']);
 	$retval_execute1 = $dbhandle->execute();
 
 	// Fetch the records.
@@ -346,7 +313,6 @@ function updateGameInfo(){
 
 }
 
-
 // DONE!
 function newFileUpload(){
 	// Add the file(s) to the game dir.
@@ -356,8 +322,9 @@ function newFileUpload(){
 	$dbhandle  = new sqlite3_DB_PDO($eud_db) or exit("cannot open the database");
 	$statement_SQL = '
 		SELECT
-			"gamedir"
-		FROM "games"
+			  "id"
+			, "gamedir"
+		FROM "gamelist"
 		WHERE "id" = :id
 	;';
 	$dbhandle->prepare($statement_SQL);
@@ -369,7 +336,7 @@ function newFileUpload(){
 	$targetpath=getcwd()."/".$result[0]["gamedir"];
 
 	// List of allowed extensions.
-	$allowedEXTs = array("uze", "hex", "dat", "bin", "lvl");
+	$allowedEXTs = array("UZE", "uze", "HEX", "hex", "DAT", "dat", "bin", "lvl", "mid", "midi", "mp3", "umm", "ger", "eng");
 
 	// Go through the filelist. Check file extensions. Move files.
 	foreach($_FILES as $key => $value) {
@@ -419,16 +386,9 @@ function removeGameFile(){
 		SELECT
 		"id"
 		, "title"
-		, "lastupload"
-		, "validheader"
-		, "uses_sd"
-		, "authors"
-		, "description"
-		, "addedby"
-		-- , "binhash"
 		, "gamefile"
 		, "gamedir"
-		FROM "games"
+		FROM "gamelist"
 		WHERE "id" = :id
 	;';
 	$dbhandle->prepare($statement_SQL);
@@ -470,30 +430,24 @@ function removeGameFile(){
 	);
 }
 
-//
+// DONE!
 function newGameRecord(){
 	// This just creates a new record with nothing in it other than it's new id. The user will need to edit and save the data after this function is used.
 
 	$eud_db = $GLOBALS['eud_db'];
 	$dbhandle  = new sqlite3_DB_PDO($eud_db) or exit("cannot open the database");
 	$statement_SQL = '
-		INSERT INTO "games" (
-			-- "id",
-			"title",
-			"addedby",
-			"lastupload",
-			"gamedir",
-			"validheader",
-			"complete"
+		INSERT INTO "gamelist" (
+			 "title"
+			, "added_by"
+			, "when_added"
+			, "gamedir"
 		)
 		VALUES (
-			-- NULL,
-			:title,
-			"Game DB Manager",
-			CURRENT_TIMESTAMP,
-			:gamedir,
-			"0",
-			"0"
+			  :title
+			, "Game DB Manager"
+			, CURRENT_TIMESTAMP
+			, :gamedir
 		)
 	';
 	$gamedir="games/".basename($_POST['gamedir'])."/";
@@ -505,7 +459,6 @@ function newGameRecord(){
 	if (!$stmt1) {
 	    print_r($stmt1, true);
 	}
-
 
 	$statement_SQL = ' SELECT last_insert_rowid() as lastInsertId; ';
 	$dbhandle->prepare($statement_SQL);

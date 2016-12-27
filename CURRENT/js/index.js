@@ -4,38 +4,6 @@ var sometest="";
 // 	console.info("arg1:", arg1);
 // }
 
-function reloadUserGameFileList(filelist){
-	// Get a handle on the table and then clear the table.
-	var thetable = document.querySelector("#userGameFiles");
-	for(var i = 1; i < thetable.rows.length;){
-		thetable.deleteRow(i);
-	}
-	var tbody = thetable.querySelector("tbody");
-	var row ;
-	var removeBtn;
-	var removeGameFile_onclick_text;
-	var gamefileBtn;
-	var gamefileBtn_onclick_text;
-
-	for (var f = 0; f< filelist.length; f++) {
-		// Insert a new row for each file entry returned.
-		row = thetable.insertRow(1);
-
-		// Add contents to the new row's cells.
-		var cell0 = row.insertCell(0); cell0.innerHTML = filelist[f] ;
-		var cell1 = row.insertCell(1); cell1.innerHTML = "" ;
-
-		removeBtn = document.createElement('button');
-		removeGameFile_onclick_text = "removeGameFile('"+filelist[f]+"', '"+gamedata.id+"');";
-		removeBtn.setAttribute('onclick', removeGameFile_onclick_text);
-		removeBtn.setAttribute('title', "removeGameFile"+filelist[f]+" <--");
-		removeBtn.innerHTML = "REMOVE";
-		cell1.appendChild(removeBtn);
-
-		// Add the new row to the table body.
-		tbody.appendChild(row);
-	}
-}
 function loadUserGameIntoEmu(gamefile){
 
 	var callback = function(resp) {
@@ -217,7 +185,7 @@ function loadGameIntoEmu(game){
 
 	}
 	function mouseEnterEmuIframe(){
-		console.log('enter');
+		// console.log('enter');
 		document.getElementById('emscripten_iframe').focus();
 	}
 	function emulatorControls_F2(){
@@ -244,6 +212,8 @@ function loadGameIntoEmu(game){
 	function serverGameMenu_select(){
 		var game = document.getElementById('gameMenu_select').value;
 		loadGameIntoEmu(game);
+		document.getElementById('gameMenu_select2').value = game;
+		document.getElementById('gameMenu_select2').dispatchEvent(new Event('change'));
 	}
 	function serverGameDbMenu(){
 		var callback = function(resp) {
@@ -260,11 +230,9 @@ function loadGameIntoEmu(game){
 			document.getElementById('completeData_1game_authors').value = gamedata.authors;
 			document.getElementById('completeData_1game_gamedir').value = gamedata.gamedir;
 			document.getElementById('completeData_1game_gamefile').value = gamedata.gamefile;
-			document.getElementById('completeData_1game_uses_sd').value = gamedata.uses_sd;
-			document.getElementById('completeData_1game_addedby').value = gamedata.addedby;
-			document.getElementById('completeData_1game_complete').value = gamedata.complete;
-			document.getElementById('completeData_1game_lastupload').value = gamedata.lastupload;
-			document.getElementById('completeData_1game_validheader').value = gamedata.validheader;
+			document.getElementById('completeData_1game_added_by').value = gamedata.added_by;
+			document.getElementById('completeData_1game_status').value = gamedata.status;
+			document.getElementById('completeData_1game_when_added').value = gamedata.when_added;
 			document.getElementById('completeData_1game_description_textarea').value = gamedata['description'];
 
 			reloadGameFileList(gamedata, filelist);
@@ -326,7 +294,13 @@ function loadGameIntoEmu(game){
 			var resp = JSON.parse(this.response);
 			console.log('Server got:', resp);
 
-			reloadGameFileList(resp.gamedata, resp.filelist);
+			if(resp.unauthorized){ alert("You have no business using this feature. It has been disabled for a reason."); window.location.reload(); return; }
+			else{
+				console.log('Server got:', resp);
+				// Reload the game list.
+				reloadGameFileList(resp.gamedata, resp.filelist);
+			}
+
 		}
 	};
 
@@ -368,16 +342,14 @@ function loadGameIntoEmu(game){
 	function gameDbForm_update(){
 		// Get the data from the form and pass it as an object to the game update function.
 		var infoObj = {};
-		infoObj.id = document.getElementById('completeData_1game_id').value;
-		infoObj.title = document.getElementById('completeData_1game_title').value;
-		infoObj.authors = document.getElementById('completeData_1game_authors').value;
-		infoObj.gamedir = document.getElementById('completeData_1game_gamedir').value;
-		infoObj.gamefile = document.getElementById('completeData_1game_gamefile').value;
-		infoObj.uses_sd = document.getElementById('completeData_1game_uses_sd').value;
-		infoObj.addedby = document.getElementById('completeData_1game_addedby').value;
-		infoObj.complete = document.getElementById('completeData_1game_complete').value;
-		infoObj.lastupload = document.getElementById('completeData_1game_lastupload').value;
-		infoObj.validheader = document.getElementById('completeData_1game_validheader').value;
+		infoObj.id          = document.getElementById('completeData_1game_id').value;
+		infoObj.title       = document.getElementById('completeData_1game_title').value;
+		infoObj.authors     = document.getElementById('completeData_1game_authors').value;
+		infoObj.gamedir     = document.getElementById('completeData_1game_gamedir').value;
+		infoObj.gamefile    = document.getElementById('completeData_1game_gamefile').value;
+		infoObj.added_by    = document.getElementById('completeData_1game_added_by').value;
+		infoObj.status      = document.getElementById('completeData_1game_status').value;
+		infoObj.when_added  = document.getElementById('completeData_1game_when_added').value;
 		infoObj.description = document.getElementById('completeData_1game_description_textarea').value;
 
 		updateGameInfo(infoObj);
@@ -453,18 +425,24 @@ function reloadGameFileList(gamedata, filelist){
 		var cell2 = row.insertCell(2); cell2.innerHTML = "<a href='" + gamedata.gamedir + filelist[f] + "' title='Download this file'>" + filelist[f] + "</a>" ;
 		var cell3 = row.insertCell(3); cell3.innerHTML = "" ;
 
-		removeBtn = document.createElement('button');
+		removeBtn = document.createElement('input');
 		removeGameFile_onclick_text = "removeGameFile('"+filelist[f]+"', '"+gamedata.id+"');";
+		removeBtn.setAttribute('class', 'writeButton');
 		removeBtn.setAttribute('onclick', removeGameFile_onclick_text);
-		removeBtn.setAttribute('title', "removeGameFile"+filelist[f]+" <--");
-		removeBtn.innerHTML = "REMOVE";
+		removeBtn.setAttribute('type', 'button');
+		removeBtn.setAttribute('title', "removeGameFile"+filelist[f]+" ");
+		removeBtn.setAttribute('value', "11REMOVE");
+		// removeBtn.classList.add('writeButton');
 		cell1.appendChild(removeBtn);
 
-		gamefileBtn = document.createElement('button');
+		gamefileBtn = document.createElement('input');
 		gamefileBtn_onclick_text = "setGameFile('"+filelist[f]+"');";
+		gamefileBtn.setAttribute('class', 'writeButton');
 		gamefileBtn.setAttribute('onclick', gamefileBtn_onclick_text);
-		gamefileBtn.setAttribute('title', "setGameFile('"+filelist[f]+"'); <--");
-		gamefileBtn.innerHTML = "Set as gamefile (Auto-save)";
+		gamefileBtn.setAttribute('type', 'button');
+		gamefileBtn.setAttribute('title', "setGameFile('"+filelist[f]+"'); ");
+		gamefileBtn.setAttribute('value', "22Set as gamefile (Auto-save)");
+		// gamefileBtn.classList.add('writeButton');
 		cell3.appendChild(gamefileBtn);
 
 		// Add the new row to the table body.
@@ -611,8 +589,8 @@ function getGameList(autostartGame, gameDbValue) {
 			loadGameIntoEmu(game);
 		}
 		if(gameDbValue){
-			console.info("POPULATED! gameid", gameid);
-			document.getElementById('gameMenu_select2').value = gameid;
+			console.info("POPULATED! gameDbValue", gameDbValue);
+			document.getElementById('gameMenu_select2').value = gameDbValue;
 		}
 
 	};
@@ -626,8 +604,14 @@ function updateGameInfo(infoObj) {
 	var callback = function(resp) {
 		resp = JSON.parse(resp);
 
-		// Reload the game list.
-		getGameList(null, infoObj.id);
+		if(resp.unauthorized){ alert("You have no business using this feature. It has been disabled for a reason."); window.location.reload(); return; }
+		else{
+			console.log('Server got:', resp);
+			// Reload the game list.
+			getGameList(null, infoObj.id);
+			// reloadGameFileList(resp.gamedata, resp.filelist);
+		}
+
 	};
 
 	var thedata = infoObj;
@@ -698,8 +682,11 @@ function removeGameFile(filename, gameid){
 		if (this.status == 200) {
 			// Reset the filelist.
 			var resp = JSON.parse(this.response);
-			console.log('Server got:', resp);
-			reloadGameFileList(resp.gamedata, resp.filelist);
+			if(resp.unauthorized){ alert("You have no business using this feature. It has been disabled for a reason."); window.location.reload(); return; }
+			else{
+				console.log('Server got:', resp);
+				reloadGameFileList(resp.gamedata, resp.filelist);
+			}
 		}
 	};
 
@@ -742,48 +729,44 @@ function newGameRecord(){
 			var resp = JSON.parse(this.response);
 			console.info("From server:", resp);
 
-			// reloadGameFileList(resp.gamedata, resp.filelist);
+			if(resp.unauthorized){ alert("You have no business using this feature. It has been disabled for a reason."); window.location.reload(); return; }
+			else{
+				var callback = function(resp) {
+					resp = JSON.parse(resp);
+						console.log('Server got:', resp);
 
+						var gamedata = resp.result;
+						var filelist = resp.filelist;
 
+						// Clear the form.
+						document.getElementById('completeData_1game_buttons_cancel').click(); //dispatchEvent(new Event('click'));
 
-		var callback = function(resp) {
-			resp = JSON.parse(resp);
-			var gamedata = resp.result;
-			var filelist = resp.filelist;
+						// Load the form with data.
+						document.getElementById('completeData_1game_id').value = gamedata.id;
+						document.getElementById('completeData_1game_title').value = gamedata.title;
+						document.getElementById('completeData_1game_authors').value = gamedata.authors;
+						document.getElementById('completeData_1game_gamedir').value = gamedata.gamedir;
+						document.getElementById('completeData_1game_gamefile').value = gamedata.gamefile;
+						document.getElementById('completeData_1game_added_by').value = gamedata.added_by;
+						document.getElementById('completeData_1game_status').value = gamedata.status;
+						document.getElementById('completeData_1game_when_added').value = gamedata.when_added;
+						document.getElementById('completeData_1game_description_textarea').value = gamedata['description'];
 
-			// Clear the form.
-			document.getElementById('completeData_1game_buttons_cancel').click(); //dispatchEvent(new Event('click'));
+						console.log(null, gamedata.id);
+						getGameList(null, gamedata.id);
 
-			// Load the form with data.
-			document.getElementById('completeData_1game_id').value = gamedata.id;
-			document.getElementById('completeData_1game_title').value = gamedata.title;
-			document.getElementById('completeData_1game_authors').value = gamedata.authors;
-			document.getElementById('completeData_1game_gamedir').value = gamedata.gamedir;
-			document.getElementById('completeData_1game_gamefile').value = gamedata.gamefile;
-			document.getElementById('completeData_1game_uses_sd').value = gamedata.uses_sd;
-			document.getElementById('completeData_1game_addedby').value = gamedata.addedby;
-			document.getElementById('completeData_1game_complete').value = gamedata.complete;
-			document.getElementById('completeData_1game_lastupload').value = gamedata.lastupload;
-			document.getElementById('completeData_1game_validheader').value = gamedata.validheader;
-			document.getElementById('completeData_1game_description_textarea').value = gamedata['description'];
+						// Make visible the save and cancel buttons.
+				};
 
-			// reloadGameFileList(gamedata, filelist);
-			console.log(null, gamedata.id);
-			getGameList(null, gamedata.id);
+				var game = resp.gamedata.id;
 
-			// Make visible the save and cancel buttons.
-		};
+				var thedata = {
+					o: "loadGame_intoManager",
+					game: game
+				};
+				serverPOSTrequest(thedata, callback, "gateway_p.php");
 
-		var game = resp.gamedata.id;
-
-		var thedata = {
-			o: "loadGame_intoManager",
-			game: game
-		};
-		serverPOSTrequest(thedata, callback, "gateway_p.php");
-
-
-
+			}
 		}
 	};
 

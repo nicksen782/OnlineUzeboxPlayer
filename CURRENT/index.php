@@ -11,8 +11,23 @@
 	<script src="js/polyfills.js"></script>
 	<script>
 		// Get the game id from the querystring if one was passed.
-		var gameid_GET = '<?php echo $_GET['gameid']; ?>';
+		var gameid_GET = "<?php echo $_GET['gameid']; ?>";
 	</script>
+		<?php if($devenvironment == true){ ?>
+		<style>
+			.writeButton{ display:block !important; }
+			.nonDevWarning{display:none;}
+		</style>
+		<?php }
+		else{ ?>
+			<style>
+				.writeButton{ display:none !important; }
+				.nonDevWarning{display:block;}
+			</style>
+		<?php } ?>
+		<style>
+		</style>
+
 </head>
 
 <body>
@@ -23,11 +38,9 @@
 				<div class="navButton" onclick="viewSwitcher('emu');">
 					Emulator
 				</div>
-				<?php if($devenvironment == true){ ?>
 				<div class="navButton" onclick="viewSwitcher('gamedbman');">
 					Games DB
 				</div>
-				<?php } ?>
 
 			</div>
 		</div>
@@ -139,43 +152,19 @@
 				<div id="VIEW_gamedbmanager_container">
 					<div id="gamedata_section">
 						<h3>Edit Game Data</h3>
-						<div id="gamedb_new">NEW</div>
-						<div id="gamedb_del">DEL</div>
+						<div class="writeButton" id="gamedb_new">NEW</div>
+						<div class="writeButton" id="gamedb_del">DEL</div>
+						<div class="nonDevWarning" id="nonDevWarning_gameManager">NOTE: Database updating is only available within the dev environment.</div>
 
 						<table id="completeData_1game">
-
-							<tr>
-								<td>title</td><td><input id="completeData_1game_title" type="text" value=""></td>
-							</tr>
-
-							<tr>
-								<td>authors</td><td><input id="completeData_1game_authors" type="text" value=""></td>
-							</tr>
-
-							<tr>
-								<td>gamefile</td><td><input id="completeData_1game_gamefile" type="text" value=""></td>
-							</tr>
-							<tr>
-								<td>uses_sd</td><td><input id="completeData_1game_uses_sd" type="text" value=""></td>
-							</tr>
-							<tr>
-								<td>addedby</td><td><input id="completeData_1game_addedby" type="text" value=""></td>
-							</tr>
-							<tr>
-								<td>validheader</td><td><input id="completeData_1game_validheader" type="text" value=""></td>
-							</tr>
-							<tr>
-								<td>complete</td><td><input id="completeData_1game_complete" type="text" value=""></td>
-							</tr>
-							<tr>
-								<td>id</td><td><input disabled id="completeData_1game_id" type="text" value=""></td>
-							</tr>
-							<tr>
-								<td>gamedir</td><td><input disabled id="completeData_1game_gamedir" type="text" value=""></td>
-							</tr>
-							<tr>
-								<td>lastupload</td><td><input disabled id="completeData_1game_lastupload" type="text" value=""></td>
-							</tr>
+							<tr><td>title</td>      <td><input id="completeData_1game_title" type="text" value=""></td></tr>
+							<tr><td>authors</td>    <td><input id="completeData_1game_authors" type="text" value=""></td></tr>
+							<tr><td>gamefile</td>   <td><input id="completeData_1game_gamefile" type="text" value=""></td></tr>
+							<tr><td>added_by</td>   <td><input id="completeData_1game_added_by" type="text" value=""></td></tr>
+							<tr><td>status</td>     <td><input id="completeData_1game_status" type="text" value=""></td></tr>
+							<tr><td>id</td>         <td><input disabled id="completeData_1game_id" type="text" value=""></td></tr>
+							<tr><td>gamedir</td>    <td><input disabled id="completeData_1game_gamedir" type="text" value=""></td></tr>
+							<tr><td>when_added</td> <td><input disabled id="completeData_1game_when_added" type="text" value=""></td></tr>
 						</table>
 
 						<div id="completeData_1game_description_container">
@@ -183,10 +172,10 @@
 							<textarea id="completeData_1game_description_textarea"></textarea>
 						</div>
 
-						<div id="completeData_1game_buttons">
+						<div id="completeData_1game_buttons" class="writeButton">
 							<br>
 							<input type="button" id="completeData_1game_buttons_cancel" value="Cancel (clear form)">
-							<input type="button" id="completeData_1game_buttons_update"value="UPDATE">
+							<input type="button" id="completeData_1game_buttons_update" value="UPDATE">
 						</div>
 					</div>
 					<div id="filemanager_section">
@@ -200,7 +189,7 @@
 						</tr>
 						</table>
 
-						<div>
+						<div class="writeButton">
 							<h3>Add new files to this Game's Directory?</h3>
 							<input type="file"   id="newFileUpload_browse" name="newFileUpload_browse" class="" multiple>
 							<input type="button" id="newFileUpload_save"   name="newFileUpload_save"   class="" value="Upload File">

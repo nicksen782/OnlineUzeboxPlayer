@@ -587,3 +587,20 @@ input#FilesFromUser_viewableBtn {
 	width: 120px;
 }
 #top_panel_right_user table td:nth-child(2){}
+
+
+#nonDevWarning_gameManager {
+	position: absolute;
+	/* width: 570px; */
+	width: 100%;
+	height: 30px;
+	background-color: red;
+	right: 0px;
+	top: 0px;
+	border-top-left-radius: 10px;
+	border-top-right-radius: 10px;
+	font-size: 16px;
+	font-weight: bold;
+	line-height: 30px;
+	text-align: center;
+}

@@ -1,4 +1,4 @@
-<?php $properAccess=true; require_once("globals_p.php"); tattle5("TEST", "TEST"); ?>
+<?php $properAccess=true; require_once("globals_p.php"); ?>
 <!doctype html>
 <html lang="en-us">
 
@@ -9,7 +9,10 @@
 	<link rel="stylesheet" type="text/css" href="css/index.css">
 	<script src="js/index.js"></script>
 	<script src="js/polyfills.js"></script>
-
+	<script>
+		// Get the game id from the querystring if one was passed.
+		var gameid_GET = '<?php echo $_GET['gameid']; ?>';
+	</script>
 </head>
 
 <body>
@@ -30,13 +33,6 @@
 		</div>
 
 		<div id="top_panel_right" class="panels">
-			<!--<select id="gameMenu_select">-->
-			<!--	<option value=""> - Choose a game - </option>-->
-			<!--</select>-->
-			<!--<input id="stopEmulator_button" type="button" value="Stop">-->
-			<!--<input id="restartEmulator_button" type="button" value="Restart">-->
-			<!--<br>-->
-			<!--<div id="progressBar"></div>-->
 		</div>
 
 		<div id="top_panel_right_user" class="panels">
@@ -94,29 +90,26 @@
 					<hr>
 					<div class="emulatorControls_section">
 						<div class="emulatorControls_section_title">Emulator Controls:</div>
+						<div class="emulatorControls_buttons" id="stopEmulator_button">Stop Emulator</div>
+						<div class="emulatorControls_buttons" id="emulatorControls_resize">Resize Emulator</div>
 						<div class="emulatorControls_buttons" id="emulatorControls_F2">F2: Quality</div>
 						<div class="emulatorControls_buttons" id="emulatorControls_F3">F3: Debug</div>
 						<div class="emulatorControls_buttons" id="emulatorControls_F7">F7: Flicker</div>
 						<div class="emulatorControls_buttons" id="emulatorControls_F8">F8: Controls</div>
-						<div class="emulatorControls_buttons" id="emulatorControls_resize">Resize Emulator</div>
-						<div class="emulatorControls_buttons" id="stopEmulator_button">Stop Emulator</div>
 					</div>
 					<hr>
 				</div>
 
 				<div class="gameframe_">
 				<div class="gameframe_border_top gameframe_borders"></div>
-				<!--<div style="clear:both;"></div>-->
 
 				<div id="middle_cont1">
 					<div class="gameframe_border_left gameframe_borders"></div>
 					<div id="emscripten_iframe_container"> <iframe id="emscripten_iframe" frameBorder="0" src="loading.html"></iframe> </div>
 					<div class="gameframe_border_right gameframe_borders"></div>
 				</div>
-				<!--<div style="clear:both;"></div>-->
 
 				<div class="gameframe_border_bottom gameframe_borders"></div>
-				<!--<div style="clear:both;"></div>-->
 				</div>
 			</div>
 
@@ -198,7 +191,6 @@
 					</div>
 					<div id="filemanager_section">
 						<h3>Files Found in This Game's Directory</h3>
-						<!--<p>-->
 						<table id="filesInDirectory_table">
 						<tr>
 							<th>File Name</th>
@@ -213,7 +205,6 @@
 							<input type="file"   id="newFileUpload_browse" name="newFileUpload_browse" class="" multiple>
 							<input type="button" id="newFileUpload_save"   name="newFileUpload_save"   class="" value="Upload File">
 						</div>
-						<!--</p>-->
 
 					</div>
 				</div>
@@ -225,8 +216,6 @@
 				<?php } ?>
 
 			</div>
-
-
 
 		</div>
 

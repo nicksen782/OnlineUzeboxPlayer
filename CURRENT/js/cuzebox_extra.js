@@ -1,4 +1,3 @@
-
 // ********************************
 // Configure Module
 var Module = {
@@ -37,10 +36,12 @@ document.body.appendChild(script);
 // ********************************
 
 function extras_preInit(filelist, uzerom){
+	if     ( filelistType == 1 ){ filelist=filelist; }					// Keep the filelist the same.
+	else if( filelistType == 2 ){ filelist=parent.window.thefiles; }	// Get the filelist from the parent window.
+	else if( filelistType == 3 ){ filelist=window.opener.thefiles; }	// Get the filelist from the window opener.
+
 	// Depending
-	console.log("gameOnServer is this:::::", gameOnServer);
-	if     ( gameOnServer){ filelist=filelist; }
-	else if(!gameOnServer){ filelist=parent.window.thefiles; }
+	console.log("filelistType is this:::::", filelistType);
 	loadFileSystem(filelist, uzerom);
 		// Need to read the filelist from the parent window.
 		// console.log(parent.window.document.querySelector('#FilesFromUser').files);
@@ -52,8 +53,6 @@ function extras_preInit(filelist, uzerom){
 
 function extras_postRun(currentgame, uzerom){
 	setTimeout(function(){
-		if     ( gameOnServer){ filelist=filelist; }
-		else if(!gameOnServer){ filelist=parent.window.thefiles }
 		parent.iframeIsReadyNow(currentgame, uzerom, filelist) ;
 		// mem stuff
 		// window.onload=function(){ fsReady() };
@@ -64,17 +63,15 @@ function extras_postRun(currentgame, uzerom){
 function loadFileSystem(filelist, uzerom) {
 	console.log("The filelist:", filelist, filelist.length);
 	for(var i=0; i<filelist.length; i++){
-		if     ( gameOnServer){ addToFS(filelist[i].filename, filelist[i].completefilepath, uzerom); }
-		else if(!gameOnServer){ addToFS2(filelist[i].filename, filelist[i].completefilepath, uzerom); }
+		// There are 2 methods of loading files. Direct arrayBuffer and download.
+		if     ( filelistType == 1 ){ addToFS (filelist[i].filename, filelist[i].completefilepath, uzerom); }
+		else if( filelistType == 2 ){ addToFS2(filelist[i].filename, filelist[i].completefilepath, uzerom); }
+		else if( filelistType == 3 ){ addToFS2(filelist[i].filename, filelist[i].completefilepath, uzerom); }
 	}
 }
 
 // NOT USED.
 function addToFS2(filename, byteArray, uzerom) {
-	// console.info("Adding file:", filename, ", Path:", completefilepath);
-	// FS.createPreloadedFile('/', filename  , completefilepath      , true, true);
-	// FS.createPreloadedFile(parent, name, url, canRead, canWrite, onload, onerror, dontCreateFile, canOwn, preFinish);
-
 	// Only check the headers on .uze files. Don't check on .hex files.
 	if( filename==uzerom && filename.substr(-4, 4) == ".uze" ){
 		// Read the first six bytes of the byteArray. Does it spell UZEBOX?
@@ -101,9 +98,6 @@ function addToFS2(filename, byteArray, uzerom) {
 	// FS.createDataFile('/', filename, byteArray, true, true, true);
 	FS.createPreloadedFile('/', filename  , byteArray      , true, true);
 	// FS.writeFile(filename+"blah"+filename, 'test');
-
-
-
 }
 
 function addToFS(filename, completefilepath, uzerom) {
@@ -140,10 +134,6 @@ function addToFS(filename, completefilepath, uzerom) {
 	}), null);
 }
 
-
-
-
-
 // ********************************
 
 
@@ -165,3 +155,7 @@ function addToFS(filename, completefilepath, uzerom) {
 	// 	})();
 
 	// };
+
+
+
+// ********************************

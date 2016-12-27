@@ -81,7 +81,7 @@ function loadGame(){
 
 	// Fetch the records.
 	$result = $dbhandle->statement->fetchAll(PDO::FETCH_ASSOC) ;
-
+	if(!sizeof($result)){ exit(); }
   // Now get a list of the files that are within the game's directory.
   $directory = $result[0]['gamedir'];
   $scanned_directory = array_values(array_diff(scandir($directory), array('..', '.', '.git')));
@@ -105,7 +105,8 @@ function loadGame(){
 	];
 
 	// Get the HTML that will be put into the iframe.
-	$iframehtml = liveEditEmu($dataFilesObj, true);
+	$filelistType = 1;
+	$iframehtml = liveEditEmu($dataFilesObj, $filelistType);
 
 	// Output the data.
 	echo json_encode(
@@ -123,7 +124,8 @@ function loadUserGameIntoEmu(){
 	// $_POST['gamefile'];
 
 	// Get the HTML that will be put into the iframe.
-	$iframehtml = liveEditEmu(null, $gameOnServer);
+	$filelistType = 2;
+	$iframehtml = liveEditEmu(null, $filelistType);
 
 	// Output the data.
 	echo json_encode(
@@ -135,39 +137,30 @@ function loadUserGameIntoEmu(){
 	);
 }
 
+function loadaAutoFilelistIntoEmu(){
+	// Get the HTML that will be put into the iframe.
+	$filelistType = 3;
+	$iframehtml = liveEditEmu(null, $filelistType);
+
+	// Output the data.
+	echo json_encode(
+		array(
+			"iframehtml"  	=> $iframehtml,
+			"count"   	  	=> sizeof($result),
+			"dataFilesObj"  => $dataFilesObj
+		)
+	);
+}
+
+
 // DONE!
 // Used by 'loadGame()'
-function liveEditEmu($dataFilesObj, $gameOnServer){
+function liveEditEmu($dataFilesObj, $filelistType){
   // Load, edit, send the cuzebox.html file.
   $cuzeboxhtml = file_get_contents("cuzebox_minimal.html");
 
 // Original script text
-{
-//   $script0_tofind=
-//   "<script type=\"text/javascript\">
-
-//       var Module = {
-//         canvas: (function() {
-//           return document.getElementById('canvas');
-//         })(),
-//       };
-
-//       (function() {
-//         var memoryInitializer = 'cuzebox.html.mem';
-//         var xhr = Module['memoryInitializerRequest'] = new XMLHttpRequest();
-//         xhr.open('GET', memoryInitializer, true);
-//         xhr.responseType = 'arraybuffer';
-//         xhr.send(null);
-//       })();
-
-//       var script = document.createElement('script');
-//       script.src = \"cuzebox.js\";
-//       document.body.appendChild(script);
-
-//     </script>";
-}
-
-$script0_tofind=base64_decode("PHNjcmlwdCB0eXBlPSJ0ZXh0L2phdmFzY3JpcHQiPgoKICAgICAgdmFyIE1vZHVsZSA9IHsKICAgICAgICBjYW52YXM6IChmdW5jdGlvbigpIHsKICAgICAgICAgIHJldHVybiBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnY2FudmFzJyk7CiAgICAgICAgfSkoKSwKICAgICAgfTsKCiAgICAgIChmdW5jdGlvbigpIHsKICAgICAgICB2YXIgbWVtb3J5SW5pdGlhbGl6ZXIgPSAnY3V6ZWJveC5odG1sLm1lbSc7CiAgICAgICAgdmFyIHhociA9IE1vZHVsZVsnbWVtb3J5SW5pdGlhbGl6ZXJSZXF1ZXN0J10gPSBuZXcgWE1MSHR0cFJlcXVlc3QoKTsKICAgICAgICB4aHIub3BlbignR0VUJywgbWVtb3J5SW5pdGlhbGl6ZXIsIHRydWUpOwogICAgICAgIHhoci5yZXNwb25zZVR5cGUgPSAnYXJyYXlidWZmZXInOwogICAgICAgIHhoci5zZW5kKG51bGwpOwogICAgICB9KSgpOwoKICAgICAgdmFyIHNjcmlwdCA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoJ3NjcmlwdCcpOwogICAgICBzY3JpcHQuc3JjID0gImN1emVib3guanMiOwogICAgICBkb2N1bWVudC5ib2R5LmFwcGVuZENoaWxkKHNjcmlwdCk7CgogICAgPC9zY3JpcHQ+");
+$script0_tofind = "<script type='text/javascript' >var REPLACEME;</script>";
 
   $script0_toreplace=
   "
@@ -181,25 +174,37 @@ $script0_tofind=base64_decode("PHNjcmlwdCB0eXBlPSJ0ZXh0L2phdmFzY3JpcHQiPgoKICAgI
   <script>
 ";
 
-if($gameOnServer){
- $script0_toreplace.= "
-	// SERVER SUPPLILED GAME, CHOSEN BY USER.
-	var filelist    = ".json_encode(($dataFilesObj['datafiles']), JSON_PRETTY_PRINT).";
-	var currentgame = '".$dataFilesObj['title']."';
-	var uzerom      = '".$dataFilesObj['uzerom']."';
-	var arguments   = '".$dataFilesObj['uzerom']."'
-	var gameOnServer = true;
-";
-}
-else{
+if($filelistType==1){
 	$script0_toreplace.=
 	"
-	// USER SUPPLIED GAME.
-		var filelist    = {} ;
+		// SERVER SUPPLILED GAME, CHOSEN BY USER.
+		var filelist    = ".json_encode(($dataFilesObj['datafiles']), JSON_PRETTY_PRINT).";
+		var currentgame = '".$dataFilesObj['title']."';
+		var uzerom      = '".$dataFilesObj['uzerom']."';
+		var arguments   = '".$dataFilesObj['uzerom']."';
+		var filelistType= '". $filelistType ."';
+	";
+}
+else if($filelistType==2){
+	$script0_toreplace.=
+	"
+	// USER SUPPLIED FILELIST.
+		var filelist    = [] ;
 		var currentgame = '". $_POST['gamefile'] ."';
 		var uzerom      = '". $_POST['gamefile'] ."';
-		var arguments   = '". $_POST['gamefile'] ."'
-		var gameOnServer=false;
+		var arguments   = '". $_POST['gamefile'] ."';
+		var filelistType= '". $filelistType ."';
+	";
+}
+else if($filelistType==3){
+	$script0_toreplace.=
+	"
+	// AUTO FILE LIST (FROM UAM).
+		var filelist    = [] ;
+		var currentgame = '". $_POST['gamefile'] ."';
+		var uzerom      = '". $_POST['gamefile'] ."';
+		var arguments   = '". $_POST['gamefile'] ."';
+		var filelistType= '". $filelistType ."';
 	";
 }
 

@@ -2,12 +2,13 @@ html {
 	background-color: #000060;
 	/*height: 100vh;*/
 	margin: auto;
-	margin-top: 5px;
+	margin-top: 2px;
 	/* padding: 2px; */
 	/* border: 1px solid darkslategray; */
-	width:1300px;
-	width: 1330px;
+	/* width:1300px; */
+	/* width: 1080px; */
 	padding: 2px 2px 2px 2px;
+	overflow: auto;
 }
 
 body {
@@ -20,7 +21,8 @@ body {
 	overflow: hidden;
 	/* width:1300px; */
 	/* width: 1355px; */
-	width: 100%;
+	/* width: 100%; */
+	width: 1070px;
 }
 
 div#wrapAll {
@@ -36,8 +38,9 @@ div#top_panel {
 	background-color: antiquewhite;
 	/* background-color: #336699; */
 	background-color: #000060;
+	background-color: #336699;
 	height: 45px;
-	width: 1316px;
+	/* width: 1316px; */
 	padding: 5px 0px 0px 0px;
 	border-radius: 10px;
 }
@@ -58,12 +61,13 @@ div#topNavMenu {
 	border-top-left-radius: 20px;
 	border-top-right-radius: 20px;
 	position: relative;
-	border: 2px solid #000060;
+	/* border: 2px solid #000060; */
 	border-bottom: 0px solid black;
+	background-color: #daa520;
 	background-color: #336699;
 	position: relative;
 	top: 0px;
-	padding-top: 2px;
+	/* padding-top: 2px; */
 	left: 0px;
 }
 
@@ -71,18 +75,24 @@ div#topNavMenu {
 	display: inline-block;
 	/* vertical-align:top; */
 	background-color: goldenrod;
-	height: 23px;
+	background-color: darkkhaki;
+	.: 32px
+	width: 150px;
+	text-align: center;
 	border-top-left-radius: 10px;
 	border-top-right-radius: 10px;
 	border: 2px solid #000060;
+	border-bottom: 0px solid black;
 	padding: 5px;
 	font-size: 24px;
-	line-height: 23px;
+	height: 38px;
+	line-height: 38px;
 	position: relative;
 	text-decoration: underline;
 	font-weight: bold;
-	top: 3px;
-	left: 5px;
+	top: -4px;
+	left: 15px;
+	vertical-align: bottom;
 	color: #1d1e21;
 }
 
@@ -126,6 +136,7 @@ div#top_panel_right_gamemanager {
 
 #gameMenu_select {
 	/* width: 180px; */
+	width: 100%;
 	height: 32px;
 	font-weight: bold;
 	vertical-align: top;
@@ -154,7 +165,7 @@ input#restartEmulator_button {
 	/* width: 60px; */
 	/* height: 50%; */
 	width: 100%;
-	/* margin-top: 1px; */
+	margin-top: 5px;
 	font-weight: bold;
 	vertical-align: top;
 	font-size: 12px;
@@ -180,28 +191,31 @@ input#restartEmulator_button {
 }
 
 .navButton:hover {
-	transform: scale(1.05);
+	transform: scale(0.95, 1);
 	background-color: gold;
 	/* background-color: darkgoldenrod; */
+	background-color: khaki;
 }
 
 .navButton:active {
 	transform: scale(0.95);
 	/* background-color: gold; */
 	background-color: goldenrod;
+	background-color: darkgray;
 }
 
 #content{
 	border: 2px solid #000060;
 	/* min-height: 650px; */
-	background-color: #336699;
+	/* background-color: #336699; */
+	background-color: darkkhaki;
 	margin: 0px 1px 0px 1px;
 	padding-bottom: 15px;
-	border-radius: 0px 0px 10px 10px;
+	border-radius: 5px 5px 10px 10px;
 }
 
 
-#middle {text-align: center;padding-top: 15px;}
+#middle {/* text-align: center; */padding-top: 15px;padding-left: 15px;}
 #VIEW_gamedbmanager{
 	/*background-color: darkgray;*/
 	/*margin: auto;*/
@@ -233,15 +247,18 @@ input#restartEmulator_button {
 }
 #emscripten_iframe_container iframe {height: 100%;width: 100%;padding: 0px;margin: auto;}
 .gameframe_{
-	width: 900px;
+	width: 800px;
 	/* height: 655px; */
-	margin: 0 auto;
+	/* margin: 0 auto; */
+	display: inline-block;
+	vertical-align: top;
 	padding: 0px;
 	/* box-shadow: 5px 5px 5px 5px rgba(0, 0, 0, 0.5); */
-	box-shadow: 0px 0px 5px 10px rgba(0, 0, 0, 0.5);
+	box-shadow: 0px 0px 5px 5px rgba(0, 0, 0, 0.5);
 	background-color: #ab8118;
 	overflow: hidden;
 	position: relative;
+	left: 20px;
 	border-radius: 20px;
 	border: 5px solid #000060;
 	border: 3px solid rgb(57, 60, 169);
@@ -454,18 +471,21 @@ input#newFileUpload_browse {
 }
 
 #emulatorControls{
-	position:absolute;
+	position: relative;
+	display: inline-block;
+	vertical-align: top;
 	/* top: 5px; */
-	left: 5px;
+	/* left: 5px; */
 	width: 185px;
 	/*height:200px;*/
 	padding: 0px 0px 0px 0px;
 	background-color:goldenrod;
+	background-color: #008bc0;
 	border-radius: 5px;
 	border: 2px solid #000060;
 	border: 3px solid rgb(57, 60, 169);
 	box-shadow: 0px 0px 5px 2px;
-	box-shadow: 0px 0px 5px 10px rgba(0, 0, 0, 0.5);
+	box-shadow: 0px 0px 5px 5px rgba(0, 0, 0, 0.5);
 }
 .emulatorControls_buttons{
 	width: 145px;
@@ -493,7 +513,7 @@ input#newFileUpload_browse {
 	/*display: inline-block;*/
 	vertical-align: top;
 	text-align: center;
-	padding: 3px;
+	padding: 0px 5px 6px 5px;
 	background-color: darkgoldenrod;
 	border-radius: 5px;
 	border: 2px solid #000060;

@@ -1,0 +1,12 @@
+[27-Dec-2016 09:34:50 America/Detroit] PHP Warning:  scandir(): Directory name cannot be empty in /home/ubuntu/workspace/web/ACTIVE/Emscripten_Uzebox_Gamechanger/CURRENT/_p/gamedbmanager_p.php on line 87
+[27-Dec-2016 09:34:50 America/Detroit] PHP Warning:  array_diff(): Argument #1 is not an array in /home/ubuntu/workspace/web/ACTIVE/Emscripten_Uzebox_Gamechanger/CURRENT/_p/gamedbmanager_p.php on line 87
+[27-Dec-2016 09:34:50 America/Detroit] PHP Warning:  array_values() expects parameter 1 to be array, null given in /home/ubuntu/workspace/web/ACTIVE/Emscripten_Uzebox_Gamechanger/CURRENT/_p/gamedbmanager_p.php on line 87
+[27-Dec-2016 09:34:56 America/Detroit] PHP Warning:  scandir(): Directory name cannot be empty in /home/ubuntu/workspace/web/ACTIVE/Emscripten_Uzebox_Gamechanger/CURRENT/_p/gamedbmanager_p.php on line 87
+[27-Dec-2016 09:34:56 America/Detroit] PHP Warning:  array_diff(): Argument #1 is not an array in /home/ubuntu/workspace/web/ACTIVE/Emscripten_Uzebox_Gamechanger/CURRENT/_p/gamedbmanager_p.php on line 87
+[27-Dec-2016 09:34:56 America/Detroit] PHP Warning:  array_values() expects parameter 1 to be array, null given in /home/ubuntu/workspace/web/ACTIVE/Emscripten_Uzebox_Gamechanger/CURRENT/_p/gamedbmanager_p.php on line 87
+[27-Dec-2016 09:34:58 America/Detroit] PHP Warning:  scandir(): Directory name cannot be empty in /home/ubuntu/workspace/web/ACTIVE/Emscripten_Uzebox_Gamechanger/CURRENT/_p/gamedbmanager_p.php on line 87
+[27-Dec-2016 09:34:58 America/Detroit] PHP Warning:  array_diff(): Argument #1 is not an array in /home/ubuntu/workspace/web/ACTIVE/Emscripten_Uzebox_Gamechanger/CURRENT/_p/gamedbmanager_p.php on line 87
+[27-Dec-2016 09:34:58 America/Detroit] PHP Warning:  array_values() expects parameter 1 to be array, null given in /home/ubuntu/workspace/web/ACTIVE/Emscripten_Uzebox_Gamechanger/CURRENT/_p/gamedbmanager_p.php on line 87
+[27-Dec-2016 09:37:30 America/Detroit] PHP Warning:  scandir(): Directory name cannot be empty in /home/ubuntu/workspace/web/ACTIVE/Emscripten_Uzebox_Gamechanger/CURRENT/_p/gamedbmanager_p.php on line 87
+[27-Dec-2016 09:37:30 America/Detroit] PHP Warning:  array_diff(): Argument #1 is not an array in /home/ubuntu/workspace/web/ACTIVE/Emscripten_Uzebox_Gamechanger/CURRENT/_p/gamedbmanager_p.php on line 87
+[27-Dec-2016 09:37:30 America/Detroit] PHP Warning:  array_values() expects parameter 1 to be array, null given in /home/ubuntu/workspace/web/ACTIVE/Emscripten_Uzebox_Gamechanger/CURRENT/_p/gamedbmanager_p.php on line 87

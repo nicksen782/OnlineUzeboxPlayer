@@ -404,6 +404,7 @@ input#newFileUpload_browse {
 	font-weight: bold;
 	font-size: 16px;
 	line-height: 25px;
+	text-align:center;
 }
 #gamedb_new:hover{ transform: scale(1.05); }
 #gamedb_new:active{ transform: scale(0.95); }
@@ -418,6 +419,7 @@ input#newFileUpload_browse {
 	font-weight: bold;
 	font-size: 16px;
 	line-height: 25px;
+	text-align:center;
 }
 #gamedb_del:hover{ transform: scale(1.05); }
 #gamedb_del:active{ transform: scale(0.95); }
@@ -604,3 +606,5 @@ input#FilesFromUser_viewableBtn {
 	line-height: 30px;
 	text-align: center;
 }
+
+#completeData_1game_status{width: 100%;}

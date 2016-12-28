@@ -153,7 +153,7 @@
 					<div id="gamedata_section">
 						<h3>Edit Game Data</h3>
 						<div class="writeButton" id="gamedb_new">NEW</div>
-						<div class="writeButton" id="gamedb_del">DEL</div>
+						<!--<div class="writeButton" id="gamedb_del">DEL</div>-->
 						<div class="nonDevWarning" id="nonDevWarning_gameManager">NOTE: Database updating is only available within the dev environment.</div>
 
 						<table id="completeData_1game">
@@ -161,7 +161,18 @@
 							<tr><td>authors</td>    <td><input id="completeData_1game_authors" type="text" value=""></td></tr>
 							<tr><td>gamefile</td>   <td><input id="completeData_1game_gamefile" type="text" value=""></td></tr>
 							<tr><td>added_by</td>   <td><input id="completeData_1game_added_by" type="text" value=""></td></tr>
-							<tr><td>status</td>     <td><input id="completeData_1game_status" type="text" value=""></td></tr>
+							<tr><td>status</td>     <td>
+								<!--<input id="completeData_1game_status" type="text" value=""></td>-->
+								<select id="completeData_1game_status">
+									<option value=""></option>
+									<option value="0">(0) - Not Defined Yet</option>
+									<option value="1">(1) - Demo</option>
+									<option value="2">(2) - W.I.P.</option>
+									<option value="3">(3) - Complete</option>
+									<option value="4">(4) - RESERVED</option>
+									<option value="5">(5) - RESERVED</option>
+								</select>
+							</tr>
 							<tr><td>id</td>         <td><input disabled id="completeData_1game_id" type="text" value=""></td></tr>
 							<tr><td>gamedir</td>    <td><input disabled id="completeData_1game_gamedir" type="text" value=""></td></tr>
 							<tr><td>when_added</td> <td><input disabled id="completeData_1game_when_added" type="text" value=""></td></tr>

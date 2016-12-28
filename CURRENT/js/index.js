@@ -241,6 +241,7 @@ function loadGameIntoEmu(game){
 		};
 
 		var game = document.getElementById('gameMenu_select2').value;
+		document.getElementById('gameMenu_select').value = game;
 
 		var thedata = {
 			o: "loadGame_intoManager",
@@ -370,7 +371,6 @@ window.onload = function() {
 
 	resizeEmulatorView();
 
-
 	document.getElementById('FilesFromUser').addEventListener('change', newFilesFromuser);
 	// Emulator
 	document.getElementById('emscripten_iframe_container').addEventListener('mouseenter', mouseEnterEmuIframe);
@@ -431,7 +431,7 @@ function reloadGameFileList(gamedata, filelist){
 		removeBtn.setAttribute('onclick', removeGameFile_onclick_text);
 		removeBtn.setAttribute('type', 'button');
 		removeBtn.setAttribute('title', "removeGameFile"+filelist[f]+" ");
-		removeBtn.setAttribute('value', "11REMOVE");
+		removeBtn.setAttribute('value', "REMOVE");
 		// removeBtn.classList.add('writeButton');
 		cell1.appendChild(removeBtn);
 
@@ -441,7 +441,7 @@ function reloadGameFileList(gamedata, filelist){
 		gamefileBtn.setAttribute('onclick', gamefileBtn_onclick_text);
 		gamefileBtn.setAttribute('type', 'button');
 		gamefileBtn.setAttribute('title', "setGameFile('"+filelist[f]+"'); ");
-		gamefileBtn.setAttribute('value', "22Set as gamefile (Auto-save)");
+		gamefileBtn.setAttribute('value', "Set as gamefile (Auto-save)");
 		// gamefileBtn.classList.add('writeButton');
 		cell3.appendChild(gamefileBtn);
 
@@ -501,106 +501,9 @@ function iframeIsReadyNow(currentgame, uzerom, filelist) {
 	setTimeout(function(){ resizeEmulatorView(); }, 500);
 
 }
-function getGameList(autostartGame, gameDbValue) {
-	var callback = function(resp) {
-		// Parse the array right away.
-		resp = JSON.parse(resp);
-		resp = resp.result;
-
-		// Stop the emulator.
-		document.getElementById('stopEmulator_button').click();
-
-		// Prepare variables, get handle on the select menu.
-		var menus = [];
-		menus.push(document.getElementById('gameMenu_select'));
-		menus.push(document.getElementById('gameMenu_select2'));
-		var option;
-		var i;
-		var optgroup;
-		// Needs to be a for loop... I guess.
-		for (var m = 0; m < menus.length; m++) {
-			// Clear menu options and optgroups.
-			menus[m].length = 1;
-			[].map.call(menus[m].querySelectorAll('optgroup'), function(elem, index, elems) {
-				elem.remove();
-			});
-
-			// Create/Add option group.
-			optgroup = document.createElement('optgroup');
-			optgroup.setAttribute('label', "Correct .uze headers");
-			menus[m].appendChild(optgroup);
-
-			// Add games with valid headers to the list.
-			for (i = 0; i < resp.length; i++) {
-				if (resp[i].validheader == 1) {
-					option = document.createElement('option');
-					option.setAttribute('value', resp[i].id);
-					option.innerHTML = resp[i].title;
-					menus[m].appendChild(option);
-				}
-			}
-
-			// Create/Add option group.
-			optgroup = document.createElement('optgroup');
-			optgroup.setAttribute('label', "");
-			menus[m].appendChild(optgroup);
-
-			// Create/Add option group.
-			optgroup = document.createElement('optgroup');
-			optgroup.setAttribute('label', "Incorrect .uze headers");
-			menus[m].appendChild(optgroup);
-
-			// Add games with invalid headers to the list.
-			for (i = 0; i < resp.length; i++) {
-				if (resp[i].validheader == 0) {
-					option = document.createElement('option');
-					option.setAttribute('value', resp[i].id);
-					option.innerHTML = " " + resp[i].title;
-					menus[m].appendChild(option);
-				}
-			}
-
-			// Create/Add option group.
-			optgroup = document.createElement('optgroup');
-			optgroup.setAttribute('label', "");
-			menus[m].appendChild(optgroup);
-
-			// Create/Add option group.
-			optgroup = document.createElement('optgroup');
-			optgroup.setAttribute('label', "Incomplete");
-			menus[m].appendChild(optgroup);
-
-			// Add games to the list that are not ready yet.
-			for (i = 0; i < resp.length; i++) {
-				if (resp[i].complete != 1) {
-					option = document.createElement('option');
-					option.setAttribute('value', resp[i].id);
-					option.innerHTML = " " + resp[i].title;
-					menus[m].appendChild(option);
-				}
-			}
-
-			menus[m].selectedIndex = "";
-		}
-
-		if(autostartGame){
-			document.getElementById('gameMenu_select').value = autostartGame;
-			var game = document.getElementById('gameMenu_select').value;
-			loadGameIntoEmu(game);
-		}
-		if(gameDbValue){
-			console.info("POPULATED! gameDbValue", gameDbValue);
-			document.getElementById('gameMenu_select2').value = gameDbValue;
-		}
-
-	};
-
-	var thedata = {
-		o: "getGameList"
-	};
-	this.serverPOSTrequest(thedata, callback, "gateway_p.php");
-}
 function updateGameInfo(infoObj) {
+	if(!infoObj.id){ alert("Game data is not loaded. You will need to choose a game from the list."); return; }
+
 	var callback = function(resp) {
 		resp = JSON.parse(resp);
 
@@ -776,3 +679,80 @@ function newGameRecord(){
 
 }
 
+function getGameList(autostartGame, gameDbValue) {
+	var callback = function(resp) {
+		// Parse the array right away.
+		resp = JSON.parse(resp);
+		resp = resp.result;
+
+		// Stop the emulator.
+		document.getElementById('stopEmulator_button').click();
+
+		// Prepare variables, get handle on the select menu.
+		var menus = [ document.getElementById('gameMenu_select'), document.getElementById('gameMenu_select2') ];
+		var option;
+		var i;
+		var optgroup;
+
+		// Break down the response into array groups by status.
+		function addToGamelistMenu(obj1, searchKey, searchValue, spacerLabel, titleLabel){
+			var separatedArray = [];
+			// Go through each index of the recordset.
+			for (var i = 0; i < obj1.length; i++) {
+				// Now look through a specific key of the current record.
+				if(obj1[i][searchKey] == searchValue){ separatedArray.push(obj1[i]); }
+			}
+
+			// We have the matching status in a new array. Go through it and add to the games list menu.
+
+			// If there are no status matches then just end this function.
+			if(!separatedArray.length){ return; }
+
+			// Create/Add option group - title
+			optgroup = document.createElement('optgroup');
+			optgroup.setAttribute('label', titleLabel+" ("+separatedArray.length+")");
+			menus[m].appendChild(optgroup);
+
+			// Add the new options under the title.
+			for (i = 0; i < separatedArray.length; i++) {
+				option = document.createElement('option');
+				option.setAttribute('value', separatedArray[i].id);
+				option.innerHTML = separatedArray[i].title;
+				menus[m].appendChild(option);
+			}
+
+			// Create/Add option group - spacer
+			optgroup = document.createElement('optgroup');
+			optgroup.setAttribute('label', spacerLabel);
+			menus[m].appendChild(optgroup);
+
+			// return separatedArray;
+		}
+		for (var m = 0; m < menus.length; m++) {
+			menus[m].length = 1;
+			[].map.call(menus[m].querySelectorAll('optgroup'), function(elem, index, elems) { elem.remove(); });
+			addToGamelistMenu(resp, 'status', '3', '', 'Complete');
+			addToGamelistMenu(resp, 'status', '2', '', 'W.I.P.');
+			addToGamelistMenu(resp, 'status', '1', '', 'Demo');
+			addToGamelistMenu(resp, 'status', '0', '', 'Not Defined Yet');
+			addToGamelistMenu(resp, 'status', '4', '', 'RESERVED');
+			addToGamelistMenu(resp, 'status', '5', '', 'RESERVED');
+		}
+
+		if(autostartGame){
+			document.getElementById('gameMenu_select').value = autostartGame;
+			var game = document.getElementById('gameMenu_select').value;
+			loadGameIntoEmu(game);
+		}
+		if(gameDbValue){
+			console.info("POPULATED! gameDbValue", gameDbValue);
+			document.getElementById('gameMenu_select2').value = gameDbValue;
+		}
+
+	};
+
+	var thedata = {
+		o: "getGameList"
+	};
+	this.serverPOSTrequest(thedata, callback, "gateway_p.php");
+}

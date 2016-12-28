@@ -302,7 +302,6 @@ function updateGameInfo(){
 	// Fetch the records.
 // 	$result = $dbhandle->statement->fetchAll(PDO::FETCH_ASSOC) ;
 
-	tattle5("i want data!", $retval_execute1);
 	// Output the data.
 	echo json_encode(
 		array(

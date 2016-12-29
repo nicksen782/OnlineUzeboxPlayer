@@ -38,7 +38,7 @@ div#top_panel {
 	background-color: antiquewhite;
 	/* background-color: #336699; */
 	background-color: #000060;
-	background-color: #336699;
+	background-color: #393ca9;
 	height: 45px;
 	/* width: 1316px; */
 	padding: 5px 0px 0px 0px;
@@ -64,7 +64,7 @@ div#topNavMenu {
 	/* border: 2px solid #000060; */
 	border-bottom: 0px solid black;
 	background-color: #daa520;
-	background-color: #336699;
+	background-color: #393ca9;
 	position: relative;
 	top: 0px;
 	/* padding-top: 2px; */
@@ -473,16 +473,18 @@ input#newFileUpload_browse {
 }
 
 #emulatorControls{
-	position: relative;
+	/* position: relative; */
+	/* padding-top: 47px; */
 	display: inline-block;
 	vertical-align: top;
 	/* top: 5px; */
 	/* left: 5px; */
 	width: 185px;
 	/*height:200px;*/
-	padding: 0px 0px 0px 0px;
+	padding: 3px 3px 3px 3px;
 	background-color:goldenrod;
 	background-color: #008bc0;
+	background-color: #336699;
 	border-radius: 5px;
 	border: 2px solid #000060;
 	border: 3px solid rgb(57, 60, 169);
@@ -490,17 +492,23 @@ input#newFileUpload_browse {
 	box-shadow: 0px 0px 5px 5px rgba(0, 0, 0, 0.5);
 }
 .emulatorControls_buttons{
-	width: 145px;
-	height: 18px;
+	/* width: 145px; */
+	height: 20px;
+	line-height: 20px;
 	/* line-height: 50px; */
 	font-weight: bold;
 	font-size: 16px;
 	background-color:darkgoldenrod;
-	margin: 5px;
-	padding: 5px;
+	margin: 3px;
+	padding: 2px;
 	text-align: left;
+	/* text-align: center; */
+	/* overflow: hidden; */
+	z-index: 9;
+	position: relative;
+	border: 1px solid darkgoldenrod;
 }
-.emulatorControls_buttons:hover{ background-color:gold;transform: scale(1.05); }
+.emulatorControls_buttons:hover{background-color:gold;/* transform: scale(1.05); */border: 1px solid black;border-radius: 5px;/* margin: 1px; *//* padding: 2px; *//* overflow: hidden; */z-index: 10;}
 .emulatorControls_buttons:active{ transform: scale(0.95); }
 
 
@@ -523,19 +531,20 @@ input#newFileUpload_browse {
 }
 
 .emulatorControls_section{
-	width: 165px;
+	/* width: 165px; */
 	/* height: 70px; */
 	/*line-height: 50px;*/
 	font-weight: bold;
 	font-size: 16px;
 	background-color:darkgoldenrod;
-	margin: 5px;
+	/* margin: 5px; */
 	padding: 5px;
 	word-wrap: break-word;
 	text-align: left;
 	border-radius: 10px;
 	border: 1px solid black;
 }
+
 .emulatorControls_section_title{
 	font-weight:bold;
 	background-color: orange;
@@ -562,20 +571,44 @@ input#newFileUpload_browse {
 }
 
 .userGameFileLink{
-	text-decoration:underline;
-	color:blue;
+	/*text-decoration:underline;*/
+	/*color:blue;*/
 	font-weight:bold;
 	margin-left:5px;
 }
 .userGameFileLink:hover{
-	text-color:blue;
-	color:yellow;
+	/*text-color:blue;*/
+	/*color:blue;*/
+}
+
+.userDataFileLink{
+	/*text-decoration:underline;*/
+	/*color:blue;*/
+	font-weight:bold;
+	margin-left:5px;
+}
+.userDataFileLink:hover{
+	/*text-color:blue;*/
+	/*color:yellow;*/
+}
+#userGameFiles .title1{ text-align:center; }
+#userGameFiles .title2{ text-align:center; }
+
+#userGameFiles .gamefiles button{
+	height: 18px;
+	font-size: 12px;
+	margin-left:5px;
+}
+
+#userGameFiles .hide{
+	display:none;
 }
 
 input#FilesFromUser_viewableBtn {
 	width: 100%;
 	font-weight: bold;
 	margin-top: 5px;
+	margin-bottom: 5px;
 }
 
 #top_panel_right_user table{
@@ -608,3 +641,43 @@ input#FilesFromUser_viewableBtn {
 }
 
 #completeData_1game_status{width: 100%;}
+
+#gameChooser{
+	/*background-color:purple;*/
+	/* padding: 0px; */
+	/* margin: 0px; */
+	/* margin: 4px; */
+	border-radius: 10px 10px 10px 10px;
+	/* overflow: hidden; */
+}
+#gameSourceNav{/* width:100%; *//* background-color: #008bc0; *//* overflow:hidden; */text-align: center;/* margin: 0px 2px 0px 2px; *//* border: 1px solid black; *//* border-top: 0px; *//* padding: 2px; */border-bottom: 0px;/* position: relative; *//* top: 0px; */}
+#gameSourceNav_SERVER{ }
+#gameSourceNav_LOCAL { }
+#gameSourceNav_URL   { }
+.gameSourceNav_tab{background-color: #6d4804;width: 30%;display:inline-block;margin: 0px;padding: 0px;text-align: center;border: 1px solid black;border-bottom: 0px;border-radius: 5px 5px 0px 0px;position: relative;top: 1px;height: 24px;line-height: 24px;}
+.gameSourceNav_tab:hover{background-color: goldenrod;text-decoration:underline;font-weight:bold;}
+.gameSourceNav_tab:active{}
+.gameSourceNav_tab.active{background-color: darkgoldenrod;}
+
+.emulatorControls_section.miniview{
+	display:none;
+	/*background-color:green;*/
+	/* padding: 2px; */
+	margin: 0px 0px 0px 0px;
+	/* width: 100%; */
+	border-top-left-radius: 0px;
+	border-top-right-radius: 0px;
+	border-top: 0px;
+	border: 1px solid black;
+}
+.emulatorControls_section.miniview.active{
+	display:block;
+}
+
+#userGameFiles{font-size: 12px;font-weight: normal;border: 1px solid black;background-color: #f3cf78;}
+
+#userGameFiles_fromURL{display:none;margin: 5px 0px 5px 0px;padding: 5px 5px 5px 5px;text-align: center;font-size: 12px;font-weight: normal;border: 1px solid black;background-color: #f3cf78;}
+#userGameFiles_fromURL.show{display:block;}
+#userGameFiles_fromURL div:nth-child(1){ text-decoration:underline; font-weight:bold; }
+#userGameFiles_fromURL div:nth-child(2){}
+#userGameFiles_fromURL input{ width:100%;}

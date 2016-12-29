@@ -120,6 +120,25 @@ function loadUserGameIntoEmu(){
 	);
 }
 
+// DONE!
+function loadUserGameIntoEmu2(){
+	// $_POST['gamefile'];
+
+	// Get the HTML that will be put into the iframe.
+	$filelistType = 4;
+	$iframehtml = liveEditEmu(null, $filelistType);
+
+	// Output the data.
+	echo json_encode(
+		array(
+			"iframehtml"  	=> $iframehtml,
+			"count"   	  	=> sizeof($result),
+			"dataFilesObj"  => $dataFilesObj
+		)
+	);
+}
+
+
 function loadaAutoFilelistIntoEmu(){
 	// Get the HTML that will be put into the iframe.
 	$filelistType = 3;
@@ -188,6 +207,19 @@ else if($filelistType==3){
 		var filelistType= \"". $filelistType ."\";
 	";
 }
+
+else if($filelistType==4){
+	$script0_toreplace.=
+	"
+	// REMOTE FILELIST.
+		var filelist    = [] ;
+		var currentgame = \"". $_POST['gamefile'] ."\";
+		var uzerom      = \"". $_POST['gamefile'] ."\";
+		var arguments   = \"". $_POST['gamefile'] ."\";
+		var filelistType= \"". $filelistType ."\";
+	";
+}
+
 
 $script0_toreplace.=
 	"
@@ -467,7 +499,7 @@ function newGameRecord(){
 
 	// Make the new game dir.
 	$gamedir2=getcwd()."/".$gamedir;
-	@mkdir($gamedir2, 0700);
+	@mkdir($gamedir2, 0755);
 
 	// Get the data from loadGame_intoManager, parse it, and return it as well.
 	$_POST['game'] = $lastInsertId;

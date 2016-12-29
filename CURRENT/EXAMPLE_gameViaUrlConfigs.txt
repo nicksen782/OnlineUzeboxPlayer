@@ -1,0 +1,29 @@
+******
+Example .json file contents:
+
+{
+ "files": [
+  {"filename":"gamefile.uze", "completefilepath":"gamefile.uze", "ext":"uze"},
+  {"filename":"gamedata.bin", "completefilepath":"gamedata.bin", "ext":"bin"}
+ ],
+ "title": "Title for your game",
+ "gamefile": "gamefile.uze"
+}
+
+NOTE: completefilepath gets appended to the base directory name that the .json file was downloaded from. It will become a complete file path.
+
+******
+
+******
+
+Example Apache .htaccess file contents:
+
+Header always set Access-Control-Allow-Origin "http://www.nicksen782.net"
+Header always set Access-Control-Allow-Credentials "true"
+Header always set Access-Control-Allow-Methods "POST, GET, OPTIONS"
+Header always set Access-Control-Allow-Headers "x-requested-with, Content-Type, origin, authorization, accept, client-security-token"
+Header always set Access-Control-Max-Age: 60
+
+This .htaccess file should be in the download directory ONLY.
+
+******

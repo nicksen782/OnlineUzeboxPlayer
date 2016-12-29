@@ -1,4 +1,5 @@
 var thefiles = [];
+var thefiles2 = [];
 var sometest="";
 // function supertest(arg1){
 // 	console.info("arg1:", arg1);
@@ -31,6 +32,35 @@ function loadUserGameIntoEmu(gamefile){
 	};
 	serverPOSTrequest(thedata, callback, "gateway_p.php");
 }
+
+function loadUserGameIntoEmu2(gamefile){
+
+	var callback = function(resp) {
+		resp = JSON.parse(resp);
+
+		// Remove previous iframe. Create another one.
+		document.getElementById('emscripten_iframe').remove();
+
+		var iframe = document.createElement('iframe');
+		iframe.setAttribute("frameBorder", "0");
+		iframe.id = "emscripten_iframe";
+
+		document.getElementById('emscripten_iframe_container').appendChild(iframe);
+
+		iframe.contentWindow.document.open();
+		iframe.contentWindow.document.write(resp.iframehtml);
+		iframe.contentWindow.document.close();
+	};
+
+	document.getElementById('gameMenu_select').value = "";
+
+	var thedata = {
+		o: "loadUserGameIntoEmu2",
+		gamefile: gamefile
+	};
+	serverPOSTrequest(thedata, callback, "gateway_p.php");
+}
+
 
 function sendKeyToIframe(keyCode){
 	var evt = new Event('keydown');
@@ -146,13 +176,33 @@ function loadGameIntoEmu(game){
 }
 
 	function newFilesFromuser() {
-		console.log("files:", this.files);
+		// console.log("files:", this.files);
+
 		var _this = this;
 
-		// Clear the rows of the table.
-		// Get a handle on the table and then clear the table.
 		var userGameFiles = document.querySelector("#userGameFiles");
-		userGameFiles.innerHTML = "";
+
+		var title1       = userGameFiles.querySelector('.title1');
+		var title2       = userGameFiles.querySelector('.title2');
+		var filelistdata = userGameFiles.querySelector('.filelistdata');
+		var gamefiles    = userGameFiles.querySelector('.gamefiles');
+		var datafiles    = userGameFiles.querySelector('.datafiles');
+		var shortenedName = "";
+
+		// Hide or show the sections depending on if there are any files ready.
+		if(_this.files.length){
+			title1.classList.add('hide');
+			title2.classList.remove('hide');
+			filelistdata.classList.remove('hide');
+		}
+		else{
+			title1.classList.remove('hide');
+			title2.classList.add('hide');
+			filelistdata.classList.add('hide');
+		}
+
+		gamefiles.innerHTML = "";
+		datafiles.innerHTML = "";
 
 		// NOTHING SHOULD ACTUALLY UPLOAD TO THE SERVER!
 
@@ -161,7 +211,7 @@ function loadGameIntoEmu(game){
 
 		// Use the filereader api to convert data to blob/arraybuffer.
 		for (var i = 0; i < _this.files.length; i++) {
-			if(i==0){ userGameFiles.innerHTML += "Click gamefile to start:<br>"; }
+			// if(i==0){ userGameFiles.innerHTML += "Click gamefile to start:<br>"; }
 			var reader = new FileReader();
 			reader.onload = (function(e) {
 				var filedata = e.target.result;
@@ -169,12 +219,20 @@ function loadGameIntoEmu(game){
 				console.log("the file data:", filedata);
 				// console.log("e", e);
 				// console.info(i, this.fileobj.name, this.fileext, filedata);
+				console.info("thefiles:", thefiles);
 				thefiles.push(
 					{filename:this.fileobj.name, completefilepath:filedata2, ext:this.fileext}
 				);
 
 				// Add contents to the new row's cells.
-				userGameFiles.innerHTML += "<div class='userGameFileLink' onclick='loadUserGameIntoEmu(\""+this.fileobj.name+"\");'>" + this.fileobj.name + "</div>";
+				if(this.fileext.toLowerCase()=='hex' || this.fileext.toLowerCase()=='uze'){
+					if(this.fileobj.name.length>17){ shortenedName = this.fileobj.name.substr(0, 12) + "..." + this.fileobj.name.substr(-3, 3); }
+					else                           { shortenedName = this.fileobj.name; }
+					gamefiles.innerHTML += "<button onclick='loadUserGameIntoEmu(\""+this.fileobj.name+"\");'>PLAY</button><span class='userGameFileLink'>" + shortenedName + "</span><br>";
+				}
+				else {
+					datafiles.innerHTML += "<div class='userDataFileLink'>" + this.fileobj.name + "</div>";
+				}
 			});
 			// Get the file extension.
 			reader.fileobj = _this.files[i];
@@ -356,6 +414,85 @@ function loadGameIntoEmu(game){
 		updateGameInfo(infoObj);
 		// document.getElementById('completeData_1game_buttons_cancel').click(); //dispatchEvent(new Event('click'));
 	}
+	function nav_miniviewChange(){
+		console.log("nav_miniviewChange:", this, window.event);
+
+		// Remove the active class from the nav tabs.
+		[].map.call(document.querySelectorAll('#gameSourceNav .gameSourceNav_tab'), function(elem, index, elems) {
+			// elem.addEventListener('click', nav_miniviewChange);
+			elem.classList.remove('active');
+		});
+
+		// Remove the active class from the miniviews.
+		[].map.call(document.querySelectorAll('.emulatorControls_section.miniview'), function(elem, index, elems) {
+			elem.classList.remove('active');
+		});
+
+		// Add the active class to the nav tab that was clicked.
+		this.classList.add('active');
+
+		// Based on the nav button id, add the active class to the correct miniview.
+		switch(this.id){
+			case "gameSourceNav_SERVER" : {
+				document.querySelector('#emulatorControls_section_gamefromserver').classList.add('active');
+				break;
+			}
+			case "gameSourceNav_LOCAL" : {
+				document.querySelector('#emulatorControls_section_gamefromlocal').classList.add('active');
+				break;
+			}
+			case "gameSourceNav_URL" : {
+				document.querySelector('#emulatorControls_section_gamefromurl').classList.add('active');
+				break;
+			}
+		}
+	}
+
+	function getGameFilesFromJSON(){
+		var urlText = document.querySelector('#emulatorControls_section_gamefromurl_url').value;
+		if(!urlText.length){ alert("The URL is empty. You must enter a valid URL."); return; }
+
+		console.log("getGameFilesFromJSON", this, urlText);
+		var onload_callback = function(data){
+			console.log("data!", data);
+			// urlText.split('/').reverse()[0];
+			var basedir = urlText.replace(/\\/g, '/').replace(/\/[^\/]*\/?$/, '');
+			console.log("basedir:", basedir);
+
+			thefiles2 = data;
+
+			// Add the basedir to each file in the array.
+			for(var i=0; i<thefiles2.files.length; i++){
+				thefiles2.files[i].completefilepath = basedir + "/" + thefiles2.files[i].completefilepath ;
+
+				// This does actually download the file... and it gets cached. When requested by the emulator iframe the file comes from cache!
+				ajaxGETfile(thefiles2.files[i].completefilepath, "arraybuffer", null, null);
+			}
+
+			console.info(thefiles2.files);
+
+			var resultsDiv = document.getElementById('userGameFiles_fromURL');
+			resultsDiv.classList.add('show');
+			// resultsDiv.querySelector('div:nth-child(1)').innerHTML = data.title ;
+			var shortendName = "";
+
+			if(data.title.length>20){ shortendName = data.title.substr(0, 17) + "..." + data.title.substr(-3, 3); }
+			else                           { shortendName = data.title ; }
+			resultsDiv.querySelector('div:nth-child(2)').innerHTML = shortendName ;
+			var playOnclick = "loadUserGameIntoEmu2('"+data.gamefile+"')";
+
+			document.querySelector('#emulatorControls_section_gamefromurl_play').setAttribute("onclick", playOnclick);
+		};
+		var onerror_callback = function(){ console.log('getGameFilesFromJSON: ERROR!'); };
+		ajaxGETfile(urlText, "json", onload_callback, onerror_callback);
+	}
+
+	// DONE!
+	function clearJSONURL(){
+		console.log("clearJSONURL", this);
+		document.querySelector('#emulatorControls_section_gamefromurl_url').value = "";
+	}
+
 
 window.onload = function() {
 	if (window.opener && window.opener !== window) {
@@ -371,6 +508,7 @@ window.onload = function() {
 
 	resizeEmulatorView();
 
+
 	document.getElementById('FilesFromUser').addEventListener('change', newFilesFromuser);
 	// Emulator
 	document.getElementById('emscripten_iframe_container').addEventListener('mouseenter', mouseEnterEmuIframe);
@@ -381,6 +519,18 @@ window.onload = function() {
 	document.getElementById('emulatorControls_F3').addEventListener('click', emulatorControls_F3);
 	document.getElementById('emulatorControls_F7').addEventListener('click', emulatorControls_F7);
 	document.getElementById('emulatorControls_F8').addEventListener('click', emulatorControls_F8 );
+
+	document.getElementById('emulatorControls_section_gamefromurl_get').addEventListener('click', getGameFilesFromJSON );
+	document.getElementById('emulatorControls_section_gamefromurl_clear').addEventListener('click', clearJSONURL );
+
+	[].map.call(document.querySelectorAll('#gameSourceNav .gameSourceNav_tab'), function(elem, index, elems) {
+		elem.addEventListener('click', nav_miniviewChange);
+	});
+
+	if(localStorage.getItem('url')){
+		document.querySelector('#emulatorControls_section_gamefromurl_url').value = localStorage.getItem('url') ;
+		document.querySelector('#gameSourceNav_URL').click();
+	}
 
 	// Emulator - Top-right panel
 	document.getElementById('stopEmulator_button').addEventListener('click', stopEmulator );
@@ -756,3 +906,17 @@ function getGameList(autostartGame, gameDbValue) {
 	};
 	this.serverPOSTrequest(thedata, callback, "gateway_p.php");
 }
+
+
+function ajaxGETfile(url, responseType, onload_callback, onerror_callback) {
+	var xhr = new XMLHttpRequest;
+	xhr.open("GET", url, true);
+	xhr.responseType = responseType ; // "arraybuffer";
+	xhr.withCredentials = "true";
+	xhr.onload = function xhr_onload() {
+		if (xhr.status == 200 || xhr.status == 0 && xhr.response) { onload_callback(xhr.response) }
+		else { onerror_callback() }
+	};
+	xhr.onerror = onerror_callback;
+	xhr.send(null)
+};

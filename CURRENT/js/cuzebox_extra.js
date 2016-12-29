@@ -39,6 +39,7 @@ function extras_preInit(filelist, uzerom){
 	if     ( filelistType == 1 ){ filelist=filelist; }					// Keep the filelist the same.
 	else if( filelistType == 2 ){ filelist=parent.window.thefiles; }	// Get the filelist from the parent window.
 	else if( filelistType == 3 ){ filelist=window.opener.thefiles; }	// Get the filelist from the window opener.
+	else if( filelistType == 4 ){ filelist=parent.window.thefiles2.files; }	// Get the filelist from the parent window.
 
 	// Depending
 	console.log("filelistType is this:::::", filelistType);
@@ -67,6 +68,7 @@ function loadFileSystem(filelist, uzerom) {
 		if     ( filelistType == 1 ){ addToFS (filelist[i].filename, filelist[i].completefilepath, uzerom); }
 		else if( filelistType == 2 ){ addToFS2(filelist[i].filename, filelist[i].completefilepath, uzerom); }
 		else if( filelistType == 3 ){ addToFS2(filelist[i].filename, filelist[i].completefilepath, uzerom); }
+		else if( filelistType == 4 ){ addToFS(filelist[i].filename, filelist[i].completefilepath, uzerom); }
 	}
 }
 

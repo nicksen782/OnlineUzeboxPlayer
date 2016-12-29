@@ -72,7 +72,7 @@
 			<div id="progressBar2"></div>
 		</div>
 
-		<div id="top_panel_settings_gear"></div>
+		<div onclick="document.querySelector('#gameSourceNav_URL').click();" id="top_panel_settings_gear"></div>
 
 	</div>
 
@@ -83,26 +83,93 @@
 
 				<div id="emulatorControls">
 
-					<hr>
-					<div class="emulatorControls_section">
-						<div class="emulatorControls_section_title">(server) Game:</div>
-						<select id="gameMenu_select">
-							<option value=""> - Choose a game - </option>
-						</select>
-						<input id="restartEmulator_button" type="button" value="Restart this game">
-						<br>
-						<div id="progressBar"></div>
+						<div class="emulatorControls_section_title">Choose a Game</div>
+					<div id="gameChooser">
+
+						<div id="gameSourceNav">
+							<div class="gameSourceNav_tab active" id="gameSourceNav_SERVER">Server</div>
+							<div class="gameSourceNav_tab" id="gameSourceNav_LOCAL">Local</div>
+							<div <?php if($devenvironment !== true){ echo "style='/*visibility: hidden;*/'"; } ?>class="gameSourceNav_tab" id="gameSourceNav_URL">URL</div>
+						</div>
+
+						<div id="emulatorControls_section_gamefromserver" class="emulatorControls_section miniview active">
+							<div class="emulatorControls_section_title">Game from Database:</div>
+
+							<select id="gameMenu_select">
+								<option value=""> - Choose a game - </option>
+							</select>
+							<input id="restartEmulator_button" type="button" value="Restart this game">
+							<br>
+							<div id="progressBar"></div>
+							<br>
+							<div style="font-size:18px;font-weight:bold;text-decoration:underline;text-align:center;">Information:</div>
+							<div style="font-size:14px;font-weight:normal;text-decoration:none;text-align:left;">
+								Games are made available by database entry and are downloaded from the server.
+							</div>
+							<br>
+
+						</div>
+
+
+						<div id="emulatorControls_section_gamefromlocal" class="emulatorControls_section miniview">
+							<div class="emulatorControls_section_title">User Supplied Game:</div>
+
+							<div id="userGameFiles">
+								<div class="title1">Import a file to begin!</div>
+								<div class="title2 hide">Click gamefile to start!</div>
+
+								<div class="filelistdata hide">
+									<br>
+									Game files:
+									<div class="gamefiles"></div>
+
+									<br>
+									Data files:
+									<div class="datafiles"></div>
+									<br>
+								</div>
+								<input style="display:none;" id="FilesFromUser" type="file" value="CHOOSE" multiple>
+								<input type="button" id="FilesFromUser_viewableBtn" value="Import File(s)" onclick="document.querySelector('#FilesFromUser').click();">
+							</div>
+
+
+							<br>
+							<div style="font-size:18px;font-weight:bold;text-decoration:underline;text-align:center;">Information:</div>
+							<div style="font-size:14px;font-weight:normal;text-decoration:none;text-align:left;">
+								This mode is used for loading files that are not in the Game Manager Database. Additionally, a game with a large datafile can be loaded here instead of downloaded repeatedly from the server.
+							</div>
+							<br>
+
+						</div>
+
+						<div id="emulatorControls_section_gamefromurl" class="emulatorControls_section miniview">
+							<div class="emulatorControls_section_title">Game via URL</div>
+
+							<input id="emulatorControls_section_gamefromurl_url" placeholder="Enter URL" type="text" value="">
+							<input id="emulatorControls_section_gamefromurl_get" type="button" value="Retrieve!">
+							<input id="emulatorControls_section_gamefromurl_clear" type="button" value="Clear URL!">
+
+							<div id="userGameFiles_fromURL">
+								<div>GAME LOADED:</div>
+								<div>The Quest of a Dragon</div>
+								<input id="emulatorControls_section_gamefromurl_play" type="button" value="PLAY:">
+							</div>
+
+							<div style="font-size:18px;font-weight:bold;text-decoration:underline;text-align:center;">Information:</div>
+							<div style="font-size:14px;font-weight:normal;text-decoration:none;text-align:left;">
+								Downloads a .json file with game file settings.<br>
+								<br>** On remote servers you MUST configure Access Control headers or this will not work!<br>
+								<br>** Example configs: <a href="EXAMPLE_gameViaUrlConfigs.txt" target="_blank">View</a><br>
+							</div>
+
+						</div>
+
 					</div>
+
 					<hr>
-					<div class="emulatorControls_section">
-						<div class="emulatorControls_section_title">(user) Files:</div>
-						<div id="userGameFiles"></div>
-						<input style="display:none;" id="FilesFromUser" type="file" value="CHOOSE" multiple>
-						<input type="button" id="FilesFromUser_viewableBtn" value="Import File(s)" onclick="document.querySelector('#FilesFromUser').click();">
-					</div>
-					<hr>
-					<div class="emulatorControls_section">
+
 						<div class="emulatorControls_section_title">Emulator Controls:</div>
+					<div class="emulatorControls_section active">
 						<div class="emulatorControls_buttons" id="stopEmulator_button">Stop Emulator</div>
 						<div class="emulatorControls_buttons" id="emulatorControls_resize">Resize Emulator</div>
 						<div class="emulatorControls_buttons" id="emulatorControls_F2">F2: Quality</div>
@@ -110,19 +177,20 @@
 						<div class="emulatorControls_buttons" id="emulatorControls_F7">F7: Flicker</div>
 						<div class="emulatorControls_buttons" id="emulatorControls_F8">F8: Controls</div>
 					</div>
-					<hr>
+
+
 				</div>
 
 				<div class="gameframe_">
-				<div class="gameframe_border_top gameframe_borders"></div>
+					<div class="gameframe_border_top gameframe_borders"></div>
 
-				<div id="middle_cont1">
-					<div class="gameframe_border_left gameframe_borders"></div>
-					<div id="emscripten_iframe_container"> <iframe id="emscripten_iframe" frameBorder="0" src="loading.html"></iframe> </div>
-					<div class="gameframe_border_right gameframe_borders"></div>
-				</div>
+					<div id="middle_cont1">
+						<div class="gameframe_border_left gameframe_borders"></div>
+						<div id="emscripten_iframe_container"> <iframe id="emscripten_iframe" frameBorder="0" src="loading.html"></iframe> </div>
+						<div class="gameframe_border_right gameframe_borders"></div>
+					</div>
 
-				<div class="gameframe_border_bottom gameframe_borders"></div>
+					<div class="gameframe_border_bottom gameframe_borders"></div>
 				</div>
 			</div>
 

@@ -1,33 +1,19 @@
 html {
 	background-color: #000060;
-	/*height: 100vh;*/
 	margin: auto;
 	margin-top: 2px;
-	/* padding: 2px; */
-	/* border: 1px solid darkslategray; */
-	/* width:1300px; */
-	/* width: 1080px; */
 	padding: 2px 2px 2px 2px;
 	overflow: auto;
 }
 
 body {
-	/* background-color:green; */
-	/* background-color: #000060; */
-	/*background-color: #336699;*/
-	/*height: 100vh;*/
 	margin: auto;
-	/* padding: 3px; */
 	overflow: hidden;
-	/* width:1300px; */
-	/* width: 1355px; */
-	/* width: 100%; */
 	width: 1070px;
 }
 
 div#wrapAll {
 	padding: 5px;
-	background-color: #000060;
 	background-color: rgb(57, 60, 169);
 	border-radius: 10px;
 }
@@ -35,12 +21,8 @@ div#wrapAll {
 div#top_panel {
 	position: relative;
 	left: 1px;
-	background-color: antiquewhite;
-	/* background-color: #336699; */
-	background-color: #000060;
 	background-color: #393ca9;
 	height: 45px;
-	/* width: 1316px; */
 	padding: 5px 0px 0px 0px;
 	border-radius: 10px;
 }
@@ -49,8 +31,7 @@ div#top_panel_left {
 	position: relative;
 	top: 1px;
 	left: 0px;
-	/*background-color: #336699;*/
-	width: 370px;
+	width: 525px;
 	height: 100%;
 	display: inline-block;
 	vertical-align: top;
@@ -60,23 +41,18 @@ div#topNavMenu {
 	height: 42px;
 	border-top-left-radius: 20px;
 	border-top-right-radius: 20px;
-	position: relative;
-	/* border: 2px solid #000060; */
 	border-bottom: 0px solid black;
-	background-color: #daa520;
 	background-color: #393ca9;
 	position: relative;
 	top: 0px;
-	/* padding-top: 2px; */
 	left: 0px;
+	width: inherit;
 }
 
 .navButton {
 	display: inline-block;
-	/* vertical-align:top; */
 	background-color: goldenrod;
 	background-color: darkkhaki;
-	.: 32px
 	width: 150px;
 	text-align: center;
 	border-top-left-radius: 10px;
@@ -94,16 +70,15 @@ div#topNavMenu {
 	left: 15px;
 	vertical-align: bottom;
 	color: #1d1e21;
+	min-width: 125px;
 }
 
 div#top_panel_right {
 	position: absolute;
 	top: 6px;
 	right: 55px;
-	/* background-color: #336699; */
 	width: 320px;
 	height: 32px;
-	/*display: inline-block;*/
 	display: none;
 	vertical-align: top;
 	text-align: center;
@@ -114,18 +89,12 @@ div#top_panel_right {
 	box-shadow: 0px 0px 5px 5px rgba(0, 0, 0, 0.5);
 }
 
-
-
-
-
 div#top_panel_right_gamemanager {
 	position: absolute;
 	top: 6px;
 	right: 55px;
-	/* background-color: #336699; */
 	width: 320px;
 	height: 32px;
-	/*display: inline-block;*/
 	vertical-align: top;
 	text-align: center;
 	padding: 3px;
@@ -135,7 +104,6 @@ div#top_panel_right_gamemanager {
 }
 
 #gameMenu_select {
-	/* width: 180px; */
 	width: 100%;
 	height: 32px;
 	font-weight: bold;
@@ -151,19 +119,9 @@ div#top_panel_right_gamemanager {
 	font-size: 12px;
 }
 
-input#stopEmulator_button {
-	/*width: 60px;*/
-	/* height: 50%; */
-	/*width: 48%;*/
-	/* margin-top: 1px; */
-	/*font-weight: bold;*/
-	/*vertical-align: top;*/
-	/*font-size: 12px;*/
-}
+input#stopEmulator_button {}
 
 input#restartEmulator_button {
-	/* width: 60px; */
-	/* height: 50%; */
 	width: 100%;
 	margin-top: 5px;
 	font-weight: bold;
@@ -178,12 +136,8 @@ input#restartEmulator_button {
 	background-image: url(../img/settingsGear.png);
 	background-repeat: no-repeat;
 	background-size: 100% 100%;
-	/*position: absolute;*/
 	width: 42px;
 	height: 38px;
-	/* height: 92%; */
-	/*top: 1px;*/
-	/*right: 5px;*/
 	background-color: darkgoldenrod;
 	border-radius: 5px;
 	border: 2px solid #000060;
@@ -193,67 +147,64 @@ input#restartEmulator_button {
 .navButton:hover {
 	transform: scale(0.95, 1);
 	background-color: gold;
-	/* background-color: darkgoldenrod; */
 	background-color: khaki;
 }
 
 .navButton:active {
 	transform: scale(0.95);
-	/* background-color: gold; */
 	background-color: goldenrod;
 	background-color: darkgray;
 }
 
-#content{
+#content {
 	border: 2px solid #000060;
-	/* min-height: 650px; */
-	/* background-color: #336699; */
+	min-height: 550px;
 	background-color: darkkhaki;
 	margin: 0px 1px 0px 1px;
 	padding-bottom: 15px;
 	border-radius: 5px 5px 10px 10px;
 }
 
+#middle {
+	padding-top: 15px;
+	padding-left: 15px;
+}
 
-#middle {/* text-align: center; */padding-top: 15px;padding-left: 15px;}
-#VIEW_gamedbmanager{
-	/*background-color: darkgray;*/
-	/*margin: auto;*/
-	/*margin-bottom: 15px;*/
-	/*width: 600px;*/
-	/* height: 80vh; */
-	/* height: inherit; */
-	/* padding: 5px; */
-	/*padding-bottom: 10px;*/
-	/*overflow: auto;*/
-	/*border-radius: 15px;*/
+#VIEW_gamedbmanager {
 	position: relative;
 }
-#VIEW_gamedbmanager_container{
+
+#VIEW_gamedbmanager_container {
 	background-color: darkgray;
 	margin: auto;
 	margin-bottom: 15px;
 	width: 600px;
-	/* height: 80vh; */
-	/* height: inherit; */
-	/* padding: 5px; */
 	padding-bottom: 10px;
 	overflow: auto;
 	border-radius: 15px;
 	position: relative;
 }
-#VIEW_emulator{
-	position:relative;
+
+#VIEW_emulator {
+	position: relative;
 }
-#emscripten_iframe_container iframe {height: 100%;width: 100%;padding: 0px;margin: auto;}
-.gameframe_{
+
+#VIEW_misc {
+	position: relative;
+}
+
+#emscripten_iframe_container iframe {
+	height: 100%;
+	width: 100%;
+	padding: 0px;
+	margin: auto;
+}
+
+.gameframe_ {
 	width: 800px;
-	/* height: 655px; */
-	/* margin: 0 auto; */
 	display: inline-block;
 	vertical-align: top;
 	padding: 0px;
-	/* box-shadow: 5px 5px 5px 5px rgba(0, 0, 0, 0.5); */
 	box-shadow: 0px 0px 5px 5px rgba(0, 0, 0, 0.5);
 	background-color: #ab8118;
 	overflow: hidden;
@@ -263,14 +214,42 @@ input#restartEmulator_button {
 	border: 5px solid #000060;
 	border: 3px solid rgb(57, 60, 169);
 }
-.gameframe_borders{background-color: darkgoldenrod;}
-#emscripten_iframe 		 	 {z-index:5;}
-.gameframe_border_top    	 {margin: 0 auto;padding: 0px;background-size: 36px;background-image: url('../img/uzebox-logo-best_reasonably_small.png');vertical-align:top;width:100%;height: 35px;/* background-color:blue; *//* background-color: black; */position: relative;/* top: 0px; */}
-.gameframe_border_left   	 {position: absolute;width: 110px;height: 100%;/* background-color: black; *//* background-color: blue; *//* background-color: yellow; */vertical-align: top;left: 0px;top: 0px;background-size: 115px;background-size: 100% 100%;background-image: url(../img/uzebox-logo-best_reasonably_small.png);/* background-image: url(../img/lborder1-min.png); */background-repeat: no-repeat;}
+
+.gameframe_borders {
+	background-color: darkgoldenrod;
+}
+
+#emscripten_iframe {
+	z-index: 5;
+}
+
+.gameframe_border_top {
+	margin: 0 auto;
+	padding: 0px;
+	background-size: 36px;
+	background-image: url('../img/uzebox-logo-best_reasonably_small.png');
+	vertical-align: top;
+	width: 100%;
+	height: 35px;
+	position: relative;
+}
+
+.gameframe_border_left {
+	position: absolute;
+	width: 110px;
+	height: 100%;
+	vertical-align: top;
+	left: 0px;
+	top: 0px;
+	background-size: 115px;
+	background-size: 100% 100%;
+	background-image: url(../img/uzebox-logo-best_reasonably_small.png);
+	background-repeat: no-repeat;
+}
+
 #emscripten_iframe_container {
 	position: relative;
 	left: 0px;
-	/*height: 440px;*/
 	height: 465px;
 	width: 630px;
 	margin: auto;
@@ -279,12 +258,11 @@ input#restartEmulator_button {
 	border: 0px solid black;
 	z-index: 500;
 }
-.gameframe_border_right  	 {
+
+.gameframe_border_right {
 	position: absolute;
 	width: 110px;
 	height: 100%;
-	/*background-color: black;*/
-	/* background-color: blue; */
 	vertical-align: top;
 	right: 0px;
 	top: 0px;
@@ -293,20 +271,19 @@ input#restartEmulator_button {
 	background-image: url(../img/uzebox-logo-best_reasonably_small.png);
 	background-image: url(../img/lborder1.png);
 }
-.gameframe_border_bottom    	 {margin: 0 auto;padding: 0px;background-size: 36px;background-image: url('../img/uzebox-logo-best_reasonably_small.png');vertical-align:top;width:100%;height: 35px;/* background-color:red; *//* background-color: black; *//* background-color: blue; */position: relative;/* bottom: -15px; *//* top: 15px; */}
-/*.gameframe_border{*/
-/*	background-image: url('../img/uzebox-logo-best_reasonably_small.png');*/
-/*	background-repeat-y: left top;*/
-/*	display:inline-block;*/
-/*	padding: 0px 100px 0px 100px;*/
-/*	background-size: 32px 32px;*/
-/*	box-shadow: 2px 2px 10px 5px rgba(138,43,226,0.5);*/
-/*	box-shadow: 5px 5px 5px 5px rgba(0, 0, 0, 0.5);*/
-/*	z-index:5;*/
-	/* position: relative; */
-/*}*/
 
-#progressBar{
+.gameframe_border_bottom {
+	margin: 0 auto;
+	padding: 0px;
+	background-size: 36px;
+	background-image: url('../img/uzebox-logo-best_reasonably_small.png');
+	vertical-align: top;
+	width: 100%;
+	height: 35px;
+	position: relative;
+}
+
+#progressBar {
 	background-image: url('../img/ProgressBar.gif');
 	width: 100%;
 	height: 40%;
@@ -317,7 +294,8 @@ input#restartEmulator_button {
 	margin: auto;
 	display: none;
 }
-#progressBar2{
+
+#progressBar2 {
 	background-image: url('../img/ProgressBar.gif');
 	width: 100%;
 	height: 40%;
@@ -328,34 +306,71 @@ input#restartEmulator_button {
 	margin: auto;
 	display: none;
 }
-#progressBar.show, #progressBar2.show{ display: block;}
 
-.views{display:none;}
-.views.show{display:block;}
+#progressBar.show,
+#progressBar2.show {
+	display: block;
+}
 
-.panels{display:none;}
-.panels.show{display:block;}
+.views {
+	display: none;
+}
 
-#completeData_1game{display:inline-block;width:50%;vertical-align:top;}
-#completeData_1game td input[type='text']{width:100%;}
-#completeData_1game td:nth-child(1){text-align:left;}
-#completeData_1game td textarea{width:100%;}
+.views.show {
+	display: block;
+}
 
-#completeData_1game_description_container{display:inline-block; width:45%;vertical-align:top;}
-#completeData_1game_description_textarea{
+.panels {
+	display: none;
+}
+
+.panels.show {
+	display: block;
+}
+
+#completeData_1game {
+	display: inline-block;
+	width: 50%;
+	vertical-align: top;
+}
+
+#completeData_1game td input[type='text'] {
+	width: 100%;
+}
+
+#completeData_1game td:nth-child(1) {
+	text-align: left;
+}
+
+#completeData_1game td textarea {
+	width: 100%;
+}
+
+#completeData_1game_description_container {
+	display: inline-block;
+	width: 45%;
+	vertical-align: top;
+}
+
+#completeData_1game_description_textarea {
 	margin: 0px;
 	height: 160px;
 	width: 245px;
 }
 
-#completeData_1game_buttons{ text-align:center; }
-#completeData_1game_buttons input[type='button']{ width:45%; }
-/*#gamefilelist{min-height:2em;}*/
+#completeData_1game_buttons {
+	text-align: center;
+}
 
-#middle_cont1{position: relative;/* height: 570px; */}
+#completeData_1game_buttons input[type='button'] {
+	width: 45%;
+}
 
+#middle_cont1 {
+	position: relative;
+}
 
-#filemanager_section{
+#filemanager_section {
 	text-align: left;
 	width: 550px;
 	margin: auto;
@@ -364,14 +379,14 @@ input#restartEmulator_button {
 	padding: 10px;
 	background-color: lightgray;
 	border-radius: 10px;
-	/* position: relative; */
 }
-#filemanager_section h3{
+
+#filemanager_section h3 {
 	text-align: center;
 }
 
-#filesInDirectory_table{
-	margin:auto;
+#filesInDirectory_table {
+	margin: auto;
 	width: 100%;
 }
 
@@ -383,67 +398,83 @@ input#newFileUpload_browse {
 	width: 69%;
 }
 
-#gamedata_section{
-	border:1px solid black;
+#gamedata_section {
+	border: 1px solid black;
 	margin: auto;
 	margin-top: 10px;
 	padding: 10px;
 	width: 550px;
 	background-color: lightgray;
 	border-radius: 10px;
-	position:relative;
+	position: relative;
 }
-#gamedb_new{
-	width:50px;
+
+#gamedb_new {
+	width: 50px;
 	height: 25px;
-	background-color:yellow;
-	position:absolute;
+	background-color: yellow;
+	position: absolute;
 	right: 10px;
 	top: 2px;
 	border: 2px solid #000060;
 	font-weight: bold;
 	font-size: 16px;
 	line-height: 25px;
-	text-align:center;
+	text-align: center;
 }
-#gamedb_new:hover{ transform: scale(1.05); }
-#gamedb_new:active{ transform: scale(0.95); }
-#gamedb_del{
-	width:50px;
+
+#gamedb_new:hover {
+	transform: scale(1.05);
+}
+
+#gamedb_new:active {
+	transform: scale(0.95);
+}
+
+#gamedb_del {
+	width: 50px;
 	height: 25px;
-	background-color:red;
-	position:absolute;
+	background-color: red;
+	position: absolute;
 	right: 65px;
 	top: 2px;
 	border: 2px solid #000060;
 	font-weight: bold;
 	font-size: 16px;
 	line-height: 25px;
-	text-align:center;
+	text-align: center;
 }
-#gamedb_del:hover{ transform: scale(1.05); }
-#gamedb_del:active{ transform: scale(0.95); }
 
-#darkener_modal_1{
-    position:fixed;
-    top:0px;
-    left:0px;
-    width:100%;
-    height:100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display:none;
-    z-index: 100;
+#gamedb_del:hover {
+	transform: scale(1.05);
 }
-#darkener_modal_1.show{
-	display:block;
+
+#gamedb_del:active {
+	transform: scale(0.95);
 }
-#modal_1{
+
+#darkener_modal_1 {
+	position: fixed;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.5);
+	display: none;
+	z-index: 100;
+}
+
+#darkener_modal_1.show {
+	display: block;
+}
+
+#modal_1 {
 	background-color: rgba(89, 160, 230, 1);
 	color: black;
 	border: 5px solid #000060;
 	border-radius: 10px;
 	z-index: 101;
-	display:none;
+	display: none;
 	position: fixed;
 	top: 0;
 	bottom: 0;
@@ -454,35 +485,26 @@ input#newFileUpload_browse {
 	padding-top: 0px;
 	height: 300px;
 	margin: auto;
-	/* margin-top: 50px; */
 	text-align: left;
 	box-shadow: 0px 0px 5px 10px rgba(0, 0, 0, 0.70);
 }
-#modal_1.show{
-	display:block;
+
+#modal_1.show {
+	display: block;
 }
 
-#userFileControls{
-	/* position:absolute; */
+#userFileControls {
 	top: 5px;
 	right: 5px;
-	/* width: 170px; */
-	/* height: 300px; */
 	padding: 0px 0px 0px 0px;
-	/* background-color:goldenrod; */
 }
 
-#emulatorControls{
-	/* position: relative; */
-	/* padding-top: 47px; */
+#emulatorControls {
 	display: inline-block;
 	vertical-align: top;
-	/* top: 5px; */
-	/* left: 5px; */
 	width: 185px;
-	/*height:200px;*/
 	padding: 3px 3px 3px 3px;
-	background-color:goldenrod;
+	background-color: goldenrod;
 	background-color: #008bc0;
 	background-color: #336699;
 	border-radius: 5px;
@@ -491,36 +513,38 @@ input#newFileUpload_browse {
 	box-shadow: 0px 0px 5px 2px;
 	box-shadow: 0px 0px 5px 5px rgba(0, 0, 0, 0.5);
 }
-.emulatorControls_buttons{
-	/* width: 145px; */
+
+.emulatorControls_buttons {
 	height: 20px;
 	line-height: 20px;
-	/* line-height: 50px; */
 	font-weight: bold;
 	font-size: 16px;
-	background-color:darkgoldenrod;
+	background-color: darkgoldenrod;
 	margin: 3px;
 	padding: 2px;
 	text-align: left;
-	/* text-align: center; */
-	/* overflow: hidden; */
 	z-index: 9;
 	position: relative;
 	border: 1px solid darkgoldenrod;
 }
-.emulatorControls_buttons:hover{background-color:gold;/* transform: scale(1.05); */border: 1px solid black;border-radius: 5px;/* margin: 1px; *//* padding: 2px; *//* overflow: hidden; */z-index: 10;}
-.emulatorControls_buttons:active{ transform: scale(0.95); }
 
+.emulatorControls_buttons:hover {
+	background-color: gold;
+	border: 1px solid black;
+	border-radius: 5px;
+	z-index: 10;
+}
 
+.emulatorControls_buttons:active {
+	transform: scale(0.95);
+}
 
-#top_panel_right_user{
+#top_panel_right_user {
 	position: absolute;
 	top: 6px;
 	right: 60px;
-	/* background-color: #336699; */
 	width: 350px;
 	height: 32px;
-	/*display: inline-block;*/
 	vertical-align: top;
 	text-align: center;
 	padding: 0px 5px 6px 5px;
@@ -530,14 +554,10 @@ input#newFileUpload_browse {
 	box-shadow: 0px 0px 5px 5px rgba(0, 0, 0, 0.5);
 }
 
-.emulatorControls_section{
-	/* width: 165px; */
-	/* height: 70px; */
-	/*line-height: 50px;*/
+.emulatorControls_section {
 	font-weight: bold;
 	font-size: 16px;
-	background-color:darkgoldenrod;
-	/* margin: 5px; */
+	background-color: darkgoldenrod;
 	padding: 5px;
 	word-wrap: break-word;
 	text-align: left;
@@ -545,8 +565,8 @@ input#newFileUpload_browse {
 	border: 1px solid black;
 }
 
-.emulatorControls_section_title{
-	font-weight:bold;
+.emulatorControls_section_title {
+	font-weight: bold;
 	background-color: orange;
 	text-align: center;
 	margin-bottom: 5px;
@@ -556,52 +576,45 @@ input#newFileUpload_browse {
 	border: 1px solid black;
 }
 
-.emulatorControls_info{
-	/*width: 165px;*/
-	/*height: 50%;*/
-	/* line-height: 32px; */
+.emulatorControls_info {
 	font-weight: bold;
 	font-size: 16px;
-	/* background-color:darkgoldenrod; */
 	margin: 0px;
 	padding: 0px;
 	word-wrap: break-word;
 	text-align: left;
-	/* margin-right: 10px; */
 }
 
-.userGameFileLink{
-	/*text-decoration:underline;*/
-	/*color:blue;*/
-	font-weight:bold;
-	margin-left:5px;
-}
-.userGameFileLink:hover{
-	/*text-color:blue;*/
-	/*color:blue;*/
+.userGameFileLink {
+	font-weight: bold;
+	margin-left: 5px;
 }
 
-.userDataFileLink{
-	/*text-decoration:underline;*/
-	/*color:blue;*/
-	font-weight:bold;
-	margin-left:5px;
-}
-.userDataFileLink:hover{
-	/*text-color:blue;*/
-	/*color:yellow;*/
-}
-#userGameFiles .title1{ text-align:center; }
-#userGameFiles .title2{ text-align:center; }
+.userGameFileLink:hover {}
 
-#userGameFiles .gamefiles button{
+.userDataFileLink {
+	font-weight: bold;
+	margin-left: 5px;
+}
+
+.userDataFileLink:hover {}
+
+#userGameFiles .title1 {
+	text-align: center;
+}
+
+#userGameFiles .title2 {
+	text-align: center;
+}
+
+#userGameFiles .gamefiles button {
 	height: 18px;
 	font-size: 12px;
-	margin-left:5px;
+	margin-left: 5px;
 }
 
-#userGameFiles .hide{
-	display:none;
+#userGameFiles .hide {
+	display: none;
 }
 
 input#FilesFromUser_viewableBtn {
@@ -611,22 +624,22 @@ input#FilesFromUser_viewableBtn {
 	margin-bottom: 5px;
 }
 
-#top_panel_right_user table{
-	height:inherit;
+#top_panel_right_user table {
+	height: inherit;
 	margin: 0px !important;
 	padding: 0px !important;
-	overflow:scroll;
+	overflow: scroll;
 	border-collapse: collapse;
 }
-#top_panel_right_user table td:nth-child(1){
+
+#top_panel_right_user table td:nth-child(1) {
 	width: 120px;
 }
-#top_panel_right_user table td:nth-child(2){}
 
+#top_panel_right_user table td:nth-child(2) {}
 
 #nonDevWarning_gameManager {
 	position: absolute;
-	/* width: 570px; */
 	width: 100%;
 	height: 30px;
 	background-color: red;
@@ -640,44 +653,103 @@ input#FilesFromUser_viewableBtn {
 	text-align: center;
 }
 
-#completeData_1game_status{width: 100%;}
-
-#gameChooser{
-	/*background-color:purple;*/
-	/* padding: 0px; */
-	/* margin: 0px; */
-	/* margin: 4px; */
-	border-radius: 10px 10px 10px 10px;
-	/* overflow: hidden; */
+#completeData_1game_status {
+	width: 100%;
 }
-#gameSourceNav{/* width:100%; *//* background-color: #008bc0; *//* overflow:hidden; */text-align: center;/* margin: 0px 2px 0px 2px; *//* border: 1px solid black; *//* border-top: 0px; *//* padding: 2px; */border-bottom: 0px;/* position: relative; *//* top: 0px; */}
-#gameSourceNav_SERVER{ }
-#gameSourceNav_LOCAL { }
-#gameSourceNav_URL   { }
-.gameSourceNav_tab{background-color: #6d4804;width: 30%;display:inline-block;margin: 0px;padding: 0px;text-align: center;border: 1px solid black;border-bottom: 0px;border-radius: 5px 5px 0px 0px;position: relative;top: 1px;height: 24px;line-height: 24px;}
-.gameSourceNav_tab:hover{background-color: goldenrod;text-decoration:underline;font-weight:bold;}
-.gameSourceNav_tab:active{}
-.gameSourceNav_tab.active{background-color: darkgoldenrod;}
 
-.emulatorControls_section.miniview{
-	display:none;
-	/*background-color:green;*/
-	/* padding: 2px; */
+#gameChooser {
+	border-radius: 10px 10px 10px 10px;
+}
+
+#gameSourceNav {
+	text-align: center;
+	border-bottom: 0px;
+}
+
+#gameSourceNav_SERVER {}
+
+#gameSourceNav_LOCAL {}
+
+#gameSourceNav_URL {}
+
+.gameSourceNav_tab {
+	background-color: #6d4804;
+	width: 30%;
+	display: inline-block;
+	margin: 0px;
+	padding: 0px;
+	text-align: center;
+	border: 1px solid black;
+	border-bottom: 0px;
+	border-radius: 5px 5px 0px 0px;
+	position: relative;
+	top: 1px;
+	height: 24px;
+	line-height: 24px;
+}
+
+.gameSourceNav_tab:hover {
+	background-color: goldenrod;
+	text-decoration: underline;
+	font-weight: bold;
+}
+
+.gameSourceNav_tab:active {}
+
+.gameSourceNav_tab.active {
+	background-color: darkgoldenrod;
+}
+
+.emulatorControls_section.miniview {
+	display: none;
 	margin: 0px 0px 0px 0px;
-	/* width: 100%; */
 	border-top-left-radius: 0px;
 	border-top-right-radius: 0px;
 	border-top: 0px;
 	border: 1px solid black;
 }
-.emulatorControls_section.miniview.active{
-	display:block;
+
+.emulatorControls_section.miniview.active {
+	display: block;
 }
 
-#userGameFiles{font-size: 12px;font-weight: normal;border: 1px solid black;background-color: #f3cf78;}
+#userGameFiles {
+	font-size: 12px;
+	font-weight: normal;
+	border: 1px solid black;
+	background-color: #f3cf78;
+}
 
-#userGameFiles_fromURL{display:none;margin: 5px 0px 5px 0px;padding: 5px 5px 5px 5px;text-align: center;font-size: 12px;font-weight: normal;border: 1px solid black;background-color: #f3cf78;}
-#userGameFiles_fromURL.show{display:block;}
-#userGameFiles_fromURL div:nth-child(1){ text-decoration:underline; font-weight:bold; }
-#userGameFiles_fromURL div:nth-child(2){}
-#userGameFiles_fromURL input{ width:100%;}
+#userGameFiles_fromURL {
+	display: none;
+	margin: 5px 0px 5px 0px;
+	padding: 5px 5px 5px 5px;
+	text-align: center;
+	font-size: 12px;
+	font-weight: normal;
+	border: 1px solid black;
+	background-color: #f3cf78;
+}
+
+#userGameFiles_fromURL.show {
+	display: block;
+}
+
+#userGameFiles_fromURL div:nth-child(1) {
+	text-decoration: underline;
+	font-weight: bold;
+}
+
+#userGameFiles_fromURL div:nth-child(2) {}
+
+#userGameFiles_fromURL input {
+	width: 100%;
+}
+
+.navButton {
+	background-color: #797447;
+}
+
+.navButton.active {
+	background-color: darkkhaki;
+}

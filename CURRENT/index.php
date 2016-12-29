@@ -35,11 +35,14 @@
 	<div id="top_panel">
 		<div id="top_panel_left">
 			<div id="topNavMenu">
-				<div class="navButton" onclick="viewSwitcher('emu');">
+				<div class="navButton" id="navButton_emu" onclick="viewSwitcher('emu');">
 					Emulator
 				</div>
-				<div class="navButton" onclick="viewSwitcher('gamedbman');">
+				<div class="navButton" id="navButton_gamedbman" onclick="viewSwitcher('gamedbman');">
 					Games DB
+				</div>
+				<div class="navButton" id="navButton_misc" onclick="viewSwitcher('misc');">
+					Misc
 				</div>
 
 			</div>
@@ -228,7 +231,6 @@
 							<tr><td>title</td>      <td><input id="completeData_1game_title" type="text" value=""></td></tr>
 							<tr><td>authors</td>    <td><input id="completeData_1game_authors" type="text" value=""></td></tr>
 							<tr><td>gamefile</td>   <td><input id="completeData_1game_gamefile" type="text" value=""></td></tr>
-							<tr><td>added_by</td>   <td><input id="completeData_1game_added_by" type="text" value=""></td></tr>
 							<tr><td>status</td>     <td>
 								<!--<input id="completeData_1game_status" type="text" value=""></td>-->
 								<select id="completeData_1game_status">
@@ -241,6 +243,7 @@
 									<option value="5">(5) - RESERVED</option>
 								</select>
 							</tr>
+							<tr><td>added_by</td>   <td><input disabled id="completeData_1game_added_by" type="text" value=""></td></tr>
 							<tr><td>id</td>         <td><input disabled id="completeData_1game_id" type="text" value=""></td></tr>
 							<tr><td>gamedir</td>    <td><input disabled id="completeData_1game_gamedir" type="text" value=""></td></tr>
 							<tr><td>when_added</td> <td><input disabled id="completeData_1game_when_added" type="text" value=""></td></tr>
@@ -285,6 +288,20 @@
 
 			</div>
 
+			<div id="VIEW_misc" class="views">
+			<h1>LINKS:</h1>
+			<a href="http://uzebox.org/forums" target="_blank">Uzebox Forums</a><br>
+			&nbsp;&nbsp;<a href="http://uzebox.org/forums/viewtopic.php?f=9&t=2413" target="_blank">All Uzebox Games Online! (Cuzebox and Emscripten)</a><br>
+			&nbsp;&nbsp;<a href="http://uzebox.org/forums/viewtopic.php?f=9&t=2386&start=60" target="_blank">CUzeBox - a new Uzebox emulator in progress</a><br>
+			<br>
+			<a href="https://github.com/" target="_blank">Github</a><br>
+			&nbsp;&nbsp;<a href="https://github.com/nicksen782/OnlineUzeboxPlayer" target="_blank">nicksen782/OnlineUzeboxPlayer</a><br>
+			&nbsp;&nbsp;<a href="https://github.com/Jubatian/cuzebox" target="_blank">Jubatian/cuzebox</a><br>
+			<br>
+			<a href="http://uzebox.org/wiki" target="_blank">Uzebox Wiki</a><br>
+			&nbsp;&nbsp;<a href="http://uzebox.org/wiki/index.php?title=Games_and_Demos" target="_blank">Games and Demos</a><br>
+			<br>
+			</div>
 		</div>
 
 	</div>

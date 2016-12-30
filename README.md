@@ -19,8 +19,7 @@ You will need PHP, Linux (Ubuntu/CentOS has worked), and Sqlite drivers. You can
 Uzebox Forums:
   * Online Uzebox Player  : http://uzebox.org/forums/viewtopic.php?f=9&t=2413  
   * CUzeBox forum post    : http://uzebox.org/forums/viewtopic.php?f=9&t=2386&start=60
-
-* Uzebox Webpage         : http://www.belogic.com/uzebox/
+  * Uzebox Webpage         : http://www.belogic.com/uzebox/
 
 Github: 
   * nicksen782/OnlineUzeboxPlayer   : https://github.com/nicksen782/OnlineUzeboxPlayer

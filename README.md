@@ -5,7 +5,7 @@ Live Online Version  : http://www.nicksen782.net/a_demos/Emscripten_Uzebox_Gamec
 
 Game Changer and Emscripten Filesystem Configuration: (this program)
  Nickolas Andersen (nicksen782)
- 
+
 You will need PHP, Linux (Ubuntu/CentOS has worked), and Sqlite drivers. You can install the Sqlite drivers with this command:
 
 `sudo apt-get install php5-sqlite`
@@ -17,16 +17,16 @@ You will need PHP, Linux (Ubuntu/CentOS has worked), and Sqlite drivers. You can
 ## LINKS: ##
 
 Uzebox Forums:
-  * Online Uzebox Player  : http://uzebox.org/forums/viewtopic.php?f=9&t=2413  
+  * Online Uzebox Player  : http://uzebox.org/forums/viewtopic.php?f=9&t=2413
   * CUzeBox forum post    : http://uzebox.org/forums/viewtopic.php?f=9&t=2386&start=60
   * Uzebox Webpage         : http://www.belogic.com/uzebox/
 
-Github: 
+Github:
   * nicksen782/OnlineUzeboxPlayer   : https://github.com/nicksen782/OnlineUzeboxPlayer
   * Jubatian/cuzebox                : https://github.com/Jubatian/cuzebox
 
 Uzebox Wiki:
-  * Games and Demos       :  http://uzebox.org/wiki/index.php?title=Games_and_Demos 
+  * Games and Demos       :  http://uzebox.org/wiki/index.php?title=Games_and_Demos
 
 Online Live Version
   * Online Uzebox Player  : http://www.nicksen782.net/a_demos/Emscripten_Uzebox_Gamechanger/

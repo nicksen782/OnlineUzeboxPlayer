@@ -49,7 +49,6 @@ function processClientRequest_O(){
 	$o_values["loadGame"]					= [ "func"=>"loadGame",					"args"=>[],		"perms"=>(($canRead) ? 1 : 0) ] ;
 	$o_values["loadUserGameIntoEmu"]		= [ "func"=>"loadUserGameIntoEmu",		"args"=>[null],	"perms"=>(($canRead) ? 1 : 0) ] ;
 	$o_values["loadUserGameIntoEmu2"]		= [ "func"=>"loadUserGameIntoEmu2",		"args"=>[null],	"perms"=>(($canRead) ? 1 : 0) ] ;
-	$o_values["loadaAutoFilelistIntoEmu"]	= [ "func"=>"loadaAutoFilelistIntoEmu",	"args"=>[null],	"perms"=>(($canRead) ? 1 : 0) ] ;
 
 	// GAME DATABASE MANAGER (_p/gamedbmanager_p.php)
 	$o_values["loadGame_intoManager"]	= [ "func"=>"loadGame_intoManager",			"args"=>[],		"perms"=>(($canRead) ? 1 : 0) ] ;

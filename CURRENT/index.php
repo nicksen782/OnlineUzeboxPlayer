@@ -75,7 +75,7 @@
 			<div id="progressBar2"></div>
 		</div>
 
-		<div onclick="document.querySelector('#gameSourceNav_URL').click();" id="top_panel_settings_gear"></div>
+		<div id="top_panel_settings_gear"></div>
 
 	</div>
 
@@ -83,10 +83,32 @@
 
 		<div id="middle">
 			<div id="VIEW_emulator" class="views">
+				<div id="darkener_modal_2"></div>
+				<div id="modal_2">
+
+					<div>
+				        <h3>CUzeBox Emulator Controls:</h3>
+					<div id="CUzeBox_controls"></div>
+				        <ul>
+				          <li>Arrow keys: SNES controller DPAD</li>
+				          <li>Q: SNES controller 'Y'</li>
+				          <li>W: SNES controller 'X'</li>
+				          <li>A: SNES controller 'B'</li>
+				          <li>S: SNES controller 'A'</li>
+				          <li>Enter: SNES controller 'Start'</li>
+				          <li>Space: SNES controller 'Select'</li>
+				          <li>Right shift: SNES controller Right shoulder</li>
+				          <li>Left shift: SNES controller Left shoulder</li>
+				          <li>F2: Toggle low quality (helps if emulator runs too slow)</li>
+				          <li>F3: Toggle emulator debug information (slower with them on)</li>
+				          <li>F8: Toggle UZEM style keymapping (A, S, Y, X instead of Q, W, A, S)</li>
+				        </ul>
+				      </div>
+				</div>
+
 
 				<div id="emulatorControls">
-
-						<div class="emulatorControls_section_title">Choose a Game</div>
+					<div class="emulatorControls_section_title">Choose a Game</div>
 					<div id="gameChooser">
 
 						<div id="gameSourceNav">
@@ -171,8 +193,9 @@
 
 					<hr>
 
-						<div class="emulatorControls_section_title">Emulator Controls:</div>
+						<div class="emulatorControls_section_title">Emulator Controls: </div>
 					<div class="emulatorControls_section active">
+						<div class="emulatorControls_buttons" id="showEmuControls">Display Controls</div>
 						<div class="emulatorControls_buttons" id="stopEmulator_button">Stop Emulator</div>
 						<div class="emulatorControls_buttons" id="emulatorControls_resize">Resize Emulator</div>
 						<div class="emulatorControls_buttons" id="emulatorControls_F2">F2: Quality</div>
@@ -300,6 +323,8 @@
 			<br>
 			<a href="http://uzebox.org/wiki" target="_blank">Uzebox Wiki</a><br>
 			&nbsp;&nbsp;<a href="http://uzebox.org/wiki/index.php?title=Games_and_Demos" target="_blank">Games and Demos</a><br>
+			<br>
+			<a href="http://www.nicksen782.net/a_demos/Emscripten_Uzebox_Gamechanger/" target="_blank">Non-development Version of this Application.</a><br>
 			<br>
 			</div>
 		</div>

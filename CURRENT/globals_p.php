@@ -5,6 +5,8 @@
 	// Have we already went through all this??
 	if( ! $globalsSet ){
 		$globalsSet = true;
+		$dt5_app = "Online Uzebox Player";
+
 		// Configure error reporting
 		error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT);
 		ini_set('error_log', getcwd() . '/EUD_php-error.txt');
@@ -24,6 +26,8 @@
 
 			// Load my debugger.
 			require_once("/home/ubuntu/workspace/web/ACTIVE/dt5/index_p.php");
+			// if( file_exists( "dt5/index_p.php" )){ include_once("dt5/index_p.php"); }
+			// else                                 { function tattle5(){ return "This is a placeholder for tattle5."; } }
 		}
 		else{
 			// This is NOT the dev environment.

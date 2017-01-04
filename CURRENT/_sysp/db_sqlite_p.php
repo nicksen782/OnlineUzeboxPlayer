@@ -58,7 +58,7 @@ class sqlite3_DB_PDO{
 		catch(PDOException $e){
 			// BUG: We should indicate the error somehow though...
 			// trigger_error("\n ******prepare". json_encode(debug_backtrace(), JSON_PRETTY_PRINT), E_USER_ERROR);
-			tattle5("error in prepare", $e);
+			// tattle5("error in prepare", $e);
 			trigger_error("\n ******prepare". json_encode($e, JSON_PRETTY_PRINT), E_USER_ERROR);
 			// tattle4('Error during prepare.', json_encode(array("<br><hr><br>",'e:'=>$e_values, "<br><hr><br>", 'pdo_debug_StrParams:'=>$pdo_debug_StrParams, "<br><hr><br>",)), false);
 			// tattle4('Error during prepare.', json_encode(array("<br><hr><br>",'e:'=>$e_values, "<br><hr><br>", 'pdo_debug_StrParams:'=>$pdo_debug_StrParams, "<br><hr><br>",)), true);
@@ -92,7 +92,7 @@ class sqlite3_DB_PDO{
 		}
 		catch(PDOException $e){
 			// BUG: We should indicate the error somehow though...
-			tattle5("uh oh", $e);
+			// tattle5("uh oh", $e);
 			echo "crap!!!";
 			exit();
 			// $pdo_debug_StrParams = $this->pdo_debugStrParams();

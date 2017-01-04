@@ -1,7 +1,8 @@
 <?php
-
+// tattle5("i got here1", null);
 // DONE!
 function getGameList(){
+// tattle5("i got here2", null);
 	// List all files in the game database. Provide separate responses for SD and non-SD games.
 	// Prepares this query.
 	$eud_db = $GLOBALS['eud_db'];
@@ -125,22 +126,6 @@ function loadUserGameIntoEmu2(){
 	// $_POST['gamefile'];
 
 	// Get the HTML that will be put into the iframe.
-	$filelistType = 4;
-	$iframehtml = liveEditEmu(null, $filelistType);
-
-	// Output the data.
-	echo json_encode(
-		array(
-			"iframehtml"  	=> $iframehtml,
-			"count"   	  	=> sizeof($result),
-			"dataFilesObj"  => $dataFilesObj
-		)
-	);
-}
-
-
-function loadaAutoFilelistIntoEmu(){
-	// Get the HTML that will be put into the iframe.
 	$filelistType = 3;
 	$iframehtml = liveEditEmu(null, $filelistType);
 
@@ -153,6 +138,7 @@ function loadaAutoFilelistIntoEmu(){
 		)
 	);
 }
+
 
 // DONE!
 function liveEditEmu($dataFilesObj, $filelistType){
@@ -196,19 +182,8 @@ else if($filelistType==2){
 		var filelistType= \"". $filelistType ."\";
 	";
 }
-else if($filelistType==3){
-	$script0_toreplace.=
-	"
-	// AUTO FILE LIST (FROM UAM).
-		var filelist    = [] ;
-		var currentgame = \"". $_POST['gamefile'] ."\";
-		var uzerom      = \"". $_POST['gamefile'] ."\";
-		var arguments   = \"". $_POST['gamefile'] ."\";
-		var filelistType= \"". $filelistType ."\";
-	";
-}
 
-else if($filelistType==4){
+else if($filelistType==3){
 	$script0_toreplace.=
 	"
 	// REMOTE FILELIST.

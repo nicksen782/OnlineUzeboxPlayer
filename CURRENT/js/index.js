@@ -49,6 +49,11 @@ function loadUserGameIntoEmu2(gamefile){
 		iframe.contentWindow.document.open();
 		iframe.contentWindow.document.write(resp.iframehtml);
 		iframe.contentWindow.document.close();
+
+		setTimeout(function(){
+			emulatorControls_F2();
+			emulatorControls_F3();
+		}, 1500);
 	};
 
 	document.getElementById('gameMenu_select').value = "";
@@ -227,7 +232,7 @@ function restartEmulator(){
 	document.getElementById('gameMenu_select').dispatchEvent(new Event('change'));
 }
 function nav_miniviewChange(){
-	console.log("nav_miniviewChange:", this, window.event);
+	// console.log("nav_miniviewChange:", this, window.event);
 
 	// Remove the active class from the nav tabs.
 	[].map.call(document.querySelectorAll('#gameSourceNav .gameSourceNav_tab'), function(elem, index, elems) {
@@ -281,24 +286,35 @@ function getGameFilesFromJSON(){
 	var urlText = document.querySelector('#emulatorControls_section_gamefromurl_url').value;
 	if(!urlText.length){ alert("The URL is empty. You must enter a valid URL."); return; }
 
-	console.log("getGameFilesFromJSON", this, urlText);
+	// console.log("getGameFilesFromJSON", this, urlText);
 	var onload_callback = function(data){
-		console.log("data!", data);
+		// console.log("json datafile from server!", data);
 		// urlText.split('/').reverse()[0];
 		var basedir = urlText.replace(/\\/g, '/').replace(/\/[^\/]*\/?$/, '');
-		console.log("basedir:", basedir);
+		// console.log("basedir:", basedir);
 
 		thefiles2 = data;
 
+		var succ
 		// Add the basedir to each file in the array.
 		for(var i=0; i<thefiles2.files.length; i++){
-			thefiles2.files[i].completefilepath = basedir + "/" + thefiles2.files[i].completefilepath ;
+			(function (i) {
+				thefiles2.files[i].completefilepath = basedir + "/" + thefiles2.files[i].completefilepath;//+"?r=" + Math.random() ;
 
-			// This does actually download the file... and it gets cached. When requested by the emulator iframe the file comes from cache!
-			ajaxGETfile(thefiles2.files[i].completefilepath, "arraybuffer", function(){}, function(){});
+				// This does actually download the file... and it gets cached. When requested by the emulator iframe the file comes from cache!
+				ajaxGETfile(thefiles2.files[i].completefilepath, "arraybuffer",
+				// success
+				function(d){
+					thefiles2.files[i].completefilepath = new Int8Array(d);
+					console.log("Successfully downloaded file number "+i+", NAME:", thefiles2.files[i].filename);
+				},
+				// fail
+				function(d){ console.log("fail!",d, i, thefiles2.files.length ); });
+
+			})(i);
 		}
 
-		console.info(thefiles2.files);
+		// console.info(thefiles2.files);
 
 		var resultsDiv = document.getElementById('userGameFiles_fromURL');
 		resultsDiv.classList.add('show');
@@ -688,6 +704,27 @@ function modal_1(display){
 	}
 
 }
+
+function show_modal2(){ modal_2(true); }
+function hide_modal2(){ modal_2(false); }
+function modal_2(display){
+	var darkener = document.querySelector("#darkener_modal_2");
+	var modal = document.querySelector("#modal_2");
+
+	if(display==true){
+		// Show the modal darkener and the modal.
+		darkener.classList.add('show');
+		modal.classList.add('show');
+	}
+	else{
+		// Hide the modal darkener and the modal.
+		darkener.classList.remove('show');
+		modal.classList.remove('show');
+	}
+
+}
+
+
 function gameDbForm_cancel(){
 	// Clear the form.
 	[].map.call(document.querySelectorAll('#VIEW_gamedbmanager input[type="text"], #VIEW_gamedbmanager textarea, #VIEW_gamedbmanager select'),
@@ -878,10 +915,10 @@ function newGameRecord(){
 
 // Initial Setup:
 window.onload = function() {
-	if (window.opener && window.opener !== window) {
+	// if (window.opener && window.opener !== window) {
 		// We have been opened by some other window. If compatible it will have a variable that we can read.
-		console.log("**** Seems we have been opened up by Javascript! ****", window.opener.pageTitle);
-	}
+		// console.log("**** Seems we have been opened up by Javascript! ****", window.opener.pageTitle);
+	// }
 
 	// getGameList(false);	// Call but do not specify a game id.
 	getGameList(gameid_GET, null);	// Call but do not specify a game id.
@@ -910,8 +947,10 @@ window.onload = function() {
 		elem.addEventListener('click', nav_miniviewChange);
 	});
 
-	if(localStorage.getItem('url')){
-		document.querySelector('#emulatorControls_section_gamefromurl_url').value = localStorage.getItem('url') ;
+	var urlParams = new URLSearchParams(window.location.search);
+	var url = (urlParams.get('url'));
+	if(url){
+		document.querySelector('#emulatorControls_section_gamefromurl_url').value = url ;
 		document.querySelector('#gameSourceNav_URL').click();
 	}
 
@@ -920,13 +959,53 @@ window.onload = function() {
 	document.getElementById('restartEmulator_button').addEventListener('click', restartEmulator );
 	document.getElementById('gameMenu_select').addEventListener('change', serverGameMenu_select );
 
+	document.getElementById('top_panel_settings_gear').addEventListener('click', function(){
+		if(window.opener){
+			window.opener.document.querySelector('.sideTab_darkenerdiv').click();
+			window.opener.document.querySelector('#UzeboxBridge_compile').click();
+
+			setTimeout(function(){
+			var html = window.opener.document.querySelector('#UzeboxBridge_window3_results').innerHTML;
+			document.getElementById('emscripten_iframe').remove();
+
+			var iframe = document.createElement('iframe');
+			iframe.setAttribute("frameBorder", "0");
+			iframe.id = "emscripten_iframe";
+
+			document.getElementById('emscripten_iframe_container').appendChild(iframe);
+
+			iframe.contentWindow.document.open();
+			iframe.contentWindow.document.write(html);
+			// var cWindow = document.querySelector('#emscripten_iframe').contentDocument;
+			// var cBody = cWindow.querySelector('body');
+			// cBody.scrollTo(0, cBody.scrollHeight);
+			document.querySelector('#emscripten_iframe').contentWindow.scrollTo(0,document.body.scrollHeight);
+			iframe.contentWindow.document.close();
+
+
+			}, 2000);
+
+		}
+		else{ return; }
+		document.querySelector('#stopEmulator_button').click();
+		document.querySelector('#gameSourceNav_URL').click();
+		document.querySelector('#userGameFiles_fromURL').classList.remove('show');
+
+		setTimeout(function(){
+			document.querySelector('#emulatorControls_section_gamefromurl_get').click();
+		// 	window.opener.document.querySelector('.sideTab_darkenerdiv').click();
+		}, 3000);
+	});
+
 	// Games DB
 	document.getElementById('gameMenu_select2').addEventListener('change', serverGameDbMenu);
 	document.getElementById('newFileUpload_save').addEventListener('click', gameDbFileUpdate);
 	document.getElementById('gamedb_new').addEventListener('click', show_modal1 );
+	document.getElementById('showEmuControls').addEventListener('click', show_modal2 );
 	document.getElementById('modal_1_CANCEL').addEventListener('click', hide_modal1 );
 	document.getElementById('modal_1_SAVE').addEventListener('click', newGameRecord	);
 	document.getElementById('darkener_modal_1').addEventListener('click', hide_modal1 );
+	document.getElementById('darkener_modal_2').addEventListener('click', hide_modal2 );
 	document.getElementById('completeData_1game_buttons_cancel').addEventListener('click', gameDbForm_cancel );
 	document.getElementById('completeData_1game_buttons_update').addEventListener('click', gameDbForm_update );
 };

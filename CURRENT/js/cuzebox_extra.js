@@ -36,12 +36,12 @@ document.body.appendChild(script);
 // ********************************
 
 function extras_preInit(filelist, uzerom){
-	if     ( filelistType == 1 ){ console.info("filelistType=1, Download each file in list.");          filelist=filelist; }						// Keep the filelist the same.
-	else if( filelistType == 2 ){ console.info("filelistType=2, Each file is already an arrayBuffer."); filelist=parent.window.thefiles; }			// Get the filelist from the parent window.
-	else if( filelistType == 3 ){ console.info("filelistType=3, Each file is already an arrayBuffer."); filelist=parent.window.thefiles2.files; }	// Get the filelist from the parent window.
+	if     ( filelistType == 1 ){ console.info("filelistType=1, Server file : Download each file in list.");  filelist=filelist; }						// Keep the filelist the same.
+	else if( filelistType == 2 ){ console.info("filelistType=2, User file   : Each file is an arrayBuffer."); filelist=parent.window.thefiles; }			// Get the filelist from the parent window.
+	else if( filelistType == 3 ){ console.info("filelistType=3, Remote file : Each file is an arrayBuffer."); filelist=parent.window.thefiles2.files; }	// Get the filelist from the parent window.
 
 	// Depending
-	console.log("filelistType is this:::::", filelistType);
+	// console.log("filelistType is this:::::", filelistType);
 	loadFileSystem(filelist, uzerom);
 		// Need to read the filelist from the parent window.
 		// console.log(parent.window.document.querySelector('#FilesFromUser').files);
@@ -61,7 +61,7 @@ function extras_postRun(currentgame, uzerom){
 
 // *******
 function loadFileSystem(filelist, uzerom) {
-	console.log("The filelist:", filelist, filelist.length);
+	// console.log("The filelist:", filelist, filelist.length);
 	for(var i=0; i<filelist.length; i++){
 		// There are 2 methods of loading files. Direct arrayBuffer and download.
 		if     ( filelistType == 1 ){ addToFS (filelist[i].filename, filelist[i].completefilepath, uzerom); }
@@ -76,7 +76,7 @@ function addToFS2(filename, byteArray, uzerom) {
 	if( filename==uzerom && filename.substr(-4, 4) == ".uze" ){
 		// Read the first six bytes of the byteArray. Does it spell UZEBOX?
 		var header = byteArray.slice(0,6).toString();
-		console.log("Checked uzerom header... GAMEFILE:", filename, "Values:", header);
+		// console.log("Checked uzerom header... GAMEFILE:", filename, "Values:", header);
 
 		// Look for UZEBOX (as an ascii string here.)
 		if(header !== "85,90,69,66,79,88"){
@@ -90,7 +90,7 @@ function addToFS2(filename, byteArray, uzerom) {
 			console.log("GAMEFILE:", filename, " -- The header has been corrected.");
 		}
 		else {
-			console.log("The header is correct.");
+			// console.log("The header is correct.");
 		}
 	}
 

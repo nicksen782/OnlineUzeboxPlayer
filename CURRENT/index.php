@@ -83,6 +83,9 @@
 
 		<div id="middle">
 			<div id="VIEW_emulator" class="views">
+				<div id="darkener_modal_3" onclick="modal_3(false);"></div>
+				<div id="modal_3">HI</div>
+
 				<div id="darkener_modal_2"></div>
 				<div id="modal_2">
 
@@ -131,6 +134,11 @@
 							<div style="font-size:14px;font-weight:normal;text-decoration:none;text-align:left;">
 								Games are made available by database entry and are downloaded from the server.
 							</div>
+
+							<br>
+							<div style="font-size:18px;font-weight:bold;text-decoration:underline;text-align:center;">Direct Links:</div>
+							<div class="directGameLinks" id="serverGame_directurl">    N/A</div>
+							<div class="directGameLinks" id="serverGame_directurl_min">N/A</div>
 							<br>
 
 						</div>
@@ -180,8 +188,8 @@
 								<input id="emulatorControls_section_gamefromurl_play" type="button" value="PLAY:">
 							</div>
 
-							<div style="font-size:18px;font-weight:bold;text-decoration:underline;text-align:center;">Information:</div>
-							<div style="font-size:14px;font-weight:normal;text-decoration:none;text-align:left;">
+							<div id="userGameFiles_fromURL_infotitle">Information:</div>
+							<div id="userGameFiles_fromURL_infoinfo">
 								Downloads a .json file with game file settings.<br>
 								<br>** On remote servers you MUST configure Access Control headers or this will not work!<br>
 								<br>** Example configs: <a href="EXAMPLE_gameViaUrlConfigs.txt" target="_blank">View</a><br>
@@ -202,9 +210,9 @@
 						<div class="emulatorControls_buttons" id="emulatorControls_F3">F3: Debug</div>
 						<div class="emulatorControls_buttons" id="emulatorControls_F7">F7: Flicker</div>
 						<div class="emulatorControls_buttons" id="emulatorControls_F8">F8: Controls</div>
+						<div class="emulatorControls_buttons" id="emulatorControls_F9">F9: Pause</div>
+						<div class="emulatorControls_buttons" id="emulatorControls_F10">F10: Frame-step</div>
 					</div>
-
-
 				</div>
 
 				<div class="gameframe_">
@@ -326,6 +334,19 @@
 			<br>
 			<a href="http://www.nicksen782.net/a_demos/Emscripten_Uzebox_Gamechanger/" target="_blank">Non-development Version of this Application.</a><br>
 			<br>
+			<a target="_blank" href="http://vanilla-js.com/"> <img src="vanillajs_button.png"> </a>
+
+			<?php if($devenvironment == true){ ?>
+				<h1>Developer Links</h1>
+				<a href="https://dev-nicksen782.c9.io/web/ACTIVE/Emscripten_Uzebox_Gamechanger/CURRENT/?url=//dev-nicksen782.c9.io/non-web/Uzebox/UAM3_Tester/GAME/output/uzebox/remoteload.json" target="_blank">DEV Uze Zelda!</a> - <span style="font-size:70%;">https://dev-nicksen782.c9.io/web/ACTIVE/Emscripten_Uzebox_Gamechanger/CURRENT/?url=//dev-nicksen782.c9.io/non-web/Uzebox/UAM3_Tester/GAME/output/uzebox/remoteload.json</span>
+				<br>
+				<a href="http://www.nicksen782.net/a_demos/Emscripten_Uzebox_Gamechanger/CURRENT/?url=//www.nicksen782.net/UzeBridge/remoteload.json" target="_blank">Live Uze Zelda!</a> - <span style="font-size:70%;">http://www.nicksen782.net/a_demos/Emscripten_Uzebox_Gamechanger/CURRENT/?url=//www.nicksen782.net/UzeBridge/remoteload.json</span>
+				<br>
+				<a href="http://uzebox.org/wiki/index.php?title=Legend_of_Zelda_I" target="_blank">Uze Zelda! On Uzebox Wiki</a> - <span style="font-size:70%;">http://uzebox.org/wiki/index.php?title=Legend_of_Zelda_I</span>
+				<br>
+			<?php } ?>
+
+
 			</div>
 		</div>
 

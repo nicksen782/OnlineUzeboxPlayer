@@ -535,6 +535,55 @@ input#newFileUpload_browse {
 	display: block;
 }
 
+
+
+
+#darkener_modal_3 {
+	position: fixed;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.5);
+	display: none;
+	z-index: 600;
+}
+
+#darkener_modal_3.show {
+	display: block;
+}
+
+#modal_3 {
+	background-color: rgba(89, 160, 230, 1);
+	overflow-y: scroll;
+	/* overflow-x: scroll; */
+	/* overflow: hidden; */
+	font-family: "Liberation Mono", Courier, monospace;
+	font-weight: bold;
+	color: black;
+	border: 5px solid #000060;
+	border-radius: 10px;
+	z-index: 601;
+	display: none;
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	width: 950px;
+	/* padding: 10px; */
+	padding-top: 0px;
+	height: 500px;
+	margin: auto;
+	text-align: left;
+	box-shadow: 0px 0px 5px 10px rgba(0, 0, 0, 0.70);
+}
+
+#modal_3.show {
+	display: block;
+}
+
+
 #userFileControls {
 	top: 5px;
 	right: 5px;
@@ -829,3 +878,13 @@ input#FilesFromUser_viewableBtn {
 #CUzeBox_controls{background-image: url('../img/CUzeBox_controls.png');width: 400px;height: 200px;background-size: 100% 100%;background-repeat: no-repeat;margin: auto;}
 
 div#CUzeBox_controls {}
+
+
+#userGameFiles_fromURL_infotitle{font-size:18px;font-weight:bold;text-decoration:underline;text-align:center;}
+#userGameFiles_fromURL_infoinfo{font-size:14px;font-weight:normal;text-decoration:none;text-align:left;}
+
+
+.directGameLinks{
+	font-size: 16px;
+	font-weight: normal;
+}

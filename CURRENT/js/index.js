@@ -2,7 +2,7 @@
 var thefiles = [];
 var thefiles2 = [];
 var sometest="";
-
+var ExternalClickPlay=false;
 
 // Emulator Functions:
 function loadUserGameIntoEmu(gamefile){
@@ -30,6 +30,7 @@ function loadUserGameIntoEmu(gamefile){
 		o: "loadUserGameIntoEmu",
 		gamefile: gamefile
 	};
+
 	serverPOSTrequest(thedata, callback, "gateway_p.php");
 }
 function loadUserGameIntoEmu2(gamefile){
@@ -51,9 +52,9 @@ function loadUserGameIntoEmu2(gamefile){
 		iframe.contentWindow.document.close();
 
 		setTimeout(function(){
-			emulatorControls_F2();
+			// emulatorControls_F2();
 			emulatorControls_F3();
-		}, 1500);
+		}, 2000);
 	};
 
 	document.getElementById('gameMenu_select').value = "";
@@ -223,6 +224,12 @@ function emulatorControls_F7(){
 function emulatorControls_F8(){
 	sendKeyToIframe(119); // F8
 }
+function emulatorControls_F9(){
+	sendKeyToIframe(120); // F8
+}
+function emulatorControls_F10(){
+	sendKeyToIframe(121); // F8
+}
 function stopEmulator(){
 	document.getElementById('emscripten_iframe_container').querySelector('iframe').src = "loading.html";
 	document.querySelector('#emulatorControls_title').innerHTML    ="";
@@ -270,7 +277,7 @@ function iframeIsReadyNow(currentgame, uzerom, filelist) {
 		"The emulator is ready!",
 		"\n Game Title: ", currentgame,
 		"\n Game File:  ", uzerom,
-		"\n Filelist:   ", filelist,
+		// "\n Filelist:   ", filelist,
 		"\n\n"
 	);
 
@@ -286,7 +293,6 @@ function getGameFilesFromJSON(){
 	var urlText = document.querySelector('#emulatorControls_section_gamefromurl_url').value;
 	if(!urlText.length){ alert("The URL is empty. You must enter a valid URL."); return; }
 
-	// console.log("getGameFilesFromJSON", this, urlText);
 	var onload_callback = function(data){
 		// console.log("json datafile from server!", data);
 		// urlText.split('/').reverse()[0];
@@ -295,7 +301,7 @@ function getGameFilesFromJSON(){
 
 		thefiles2 = data;
 
-		var succ
+		// var succ
 		// Add the basedir to each file in the array.
 		for(var i=0; i<thefiles2.files.length; i++){
 			(function (i) {
@@ -327,11 +333,53 @@ function getGameFilesFromJSON(){
 		var playOnclick = "loadUserGameIntoEmu2('"+data.gamefile+"')";
 
 		document.querySelector('#emulatorControls_section_gamefromurl_play').setAttribute("onclick", playOnclick);
+
+		// Check for a global variable set! It would have been set by UAM3 via querystring!
+		if(ExternalClickPlay){
+			console.log("TRUE: ExternalClickPlay:", ExternalClickPlay);
+			document.querySelector('#emulatorControls_section_gamefromurl_play').click();
+		}
 	};
 	var onerror_callback = function(){ console.log('getGameFilesFromJSON: ERROR!'); };
 	ajaxGETfile(urlText, "json", onload_callback, onerror_callback);
 }
+function show_modal2(){ modal_2(true); }
+function hide_modal2(){ modal_2(false); }
+function modal_2(display){
+	var darkener = document.querySelector("#darkener_modal_2");
+	var modal = document.querySelector("#modal_2");
 
+	if(display==true){
+		// Show the modal darkener and the modal.
+		darkener.classList.add('show');
+		modal.classList.add('show');
+	}
+	else{
+		// Hide the modal darkener and the modal.
+		darkener.classList.remove('show');
+		modal.classList.remove('show');
+	}
+
+}
+
+// function show_modal3(){ modal_3(true); }
+// function hide_modal3(){ modal_3(false); }
+function modal_3(display){
+	var darkener = document.querySelector("#darkener_modal_3");
+	var modal = document.querySelector("#modal_3");
+
+	if(display==true){
+		// Show the modal darkener and the modal.
+		darkener.classList.add('show');
+		modal.classList.add('show');
+	}
+	else{
+		// Hide the modal darkener and the modal.
+		darkener.classList.remove('show');
+		modal.classList.remove('show');
+	}
+
+}
 
 // Shared Functions:
 function viewSwitcher(view) {
@@ -495,7 +543,8 @@ function getGameList(autostartGame, gameDbValue) {
 		if(autostartGame){
 			document.getElementById('gameMenu_select').value = autostartGame;
 			var game = document.getElementById('gameMenu_select').value;
-			loadGameIntoEmu(game);
+			serverGameMenu_select();
+			// loadGameIntoEmu(game);
 		}
 		if(gameDbValue){
 			console.info("POPULATED! gameDbValue", gameDbValue);
@@ -585,14 +634,23 @@ function clearJSONURL(){
 	document.querySelector('#emulatorControls_section_gamefromurl_url').value = "";
 }
 
-
 // Game Manager Functions:
 function serverGameMenu_select(){
-	var game = document.getElementById('gameMenu_select').value;
-	loadGameIntoEmu(game);
-	document.getElementById('gameMenu_select2').value = game;
+	var gameid = document.getElementById('gameMenu_select').value;
+	var gamename = document.querySelector('#gameMenu_select option:checked').innerHTML;
+	var directLink1=window.location.href+"?gameid="+gameid;
+	var directLink2=window.location.href+"?gameid="+gameid+"&externalcontrol=true" ;
+
+	console.log("Direct play URL (normal UI):", window.location.href+"?gameid="+gameid );
+	console.log("Direct play URL (reduced UI):", window.location.href+"?gameid="+gameid );
+	document.querySelector("#serverGame_directurl").innerHTML          = "<a title='"+gamename+"' target='_blank' href='"+directLink1+"'> Normal  UI (id "+gameid+")</a>";
+	document.querySelector("#serverGame_directurl_min").innerHTML      = "<a title='"+gamename+"' target='_blank' href='"+directLink2+"'> Reduced UI (id "+gameid+")</a>";
+
+	loadGameIntoEmu(gameid);
+	document.getElementById('gameMenu_select2').value = gameid;
 	document.getElementById('gameMenu_select2').dispatchEvent(new Event('change'));
 }
+
 function serverGameDbMenu(){
 	var callback = function(resp) {
 		resp = JSON.parse(resp);
@@ -704,27 +762,6 @@ function modal_1(display){
 	}
 
 }
-
-function show_modal2(){ modal_2(true); }
-function hide_modal2(){ modal_2(false); }
-function modal_2(display){
-	var darkener = document.querySelector("#darkener_modal_2");
-	var modal = document.querySelector("#modal_2");
-
-	if(display==true){
-		// Show the modal darkener and the modal.
-		darkener.classList.add('show');
-		modal.classList.add('show');
-	}
-	else{
-		// Hide the modal darkener and the modal.
-		darkener.classList.remove('show');
-		modal.classList.remove('show');
-	}
-
-}
-
-
 function gameDbForm_cancel(){
 	// Clear the form.
 	[].map.call(document.querySelectorAll('#VIEW_gamedbmanager input[type="text"], #VIEW_gamedbmanager textarea, #VIEW_gamedbmanager select'),
@@ -912,7 +949,6 @@ function newGameRecord(){
 
 }
 
-
 // Initial Setup:
 window.onload = function() {
 	// if (window.opener && window.opener !== window) {
@@ -921,7 +957,9 @@ window.onload = function() {
 	// }
 
 	// getGameList(false);	// Call but do not specify a game id.
+	// The value for 'gameid_GET' is from PHP in index.php.
 	getGameList(gameid_GET, null);	// Call but do not specify a game id.
+	if(gameid_GET) { serverGameMenu_select(); }
 
 	viewSwitcher("emu");
 	// viewSwitcher("gamedbman");
@@ -939,6 +977,8 @@ window.onload = function() {
 	document.getElementById('emulatorControls_F3').addEventListener('click', emulatorControls_F3);
 	document.getElementById('emulatorControls_F7').addEventListener('click', emulatorControls_F7);
 	document.getElementById('emulatorControls_F8').addEventListener('click', emulatorControls_F8 );
+	document.getElementById('emulatorControls_F9').addEventListener('click', emulatorControls_F9 );
+	document.getElementById('emulatorControls_F10').addEventListener('click', emulatorControls_F10 );
 
 	document.getElementById('emulatorControls_section_gamefromurl_get').addEventListener('click', getGameFilesFromJSON );
 	document.getElementById('emulatorControls_section_gamefromurl_clear').addEventListener('click', clearJSONURL );
@@ -953,6 +993,48 @@ window.onload = function() {
 		document.querySelector('#emulatorControls_section_gamefromurl_url').value = url ;
 		document.querySelector('#gameSourceNav_URL').click();
 	}
+	if( urlParams.get('externalcontrol')=="true"){
+		// Hide most of the UI to make the web page shorter and more narrow.
+
+		// document.querySelector("html").style.display="none";
+
+		document.querySelector("#top_panel").style.display="none";
+		document.querySelector(".gameframe_border_top").style.display="none";
+		document.querySelector(".gameframe_border_right").style.display="none";
+		document.querySelector(".gameframe_border_left").style.display="none";
+		document.querySelector(".gameframe_border_bottom").style.display="none";
+		document.querySelector("#gameSourceNav").style.display="none";
+		document.querySelector(".gameframe_").style.left="0px";
+		document.querySelector(".gameframe_").style.width="632px";
+		document.querySelector(".gameframe_").style['border-radius']="0px";
+		// document.querySelector("#showEmuControls").style.display="none";
+		// document.querySelector("#emulatorControls_resize").style.display="none";
+		document.querySelector("#userGameFiles_fromURL_infotitle").style.display="none";
+		document.querySelector("#userGameFiles_fromURL_infoinfo").style.display="none";
+		document.querySelector("html").style.margin="0px";
+		document.querySelector("html").style['margin-top']="0px";
+		document.querySelector("html").style['padding']="0px";
+		document.querySelector("html").style['height']="570px";
+		document.querySelector("body").style['width']="850px";
+		document.querySelector("body").style['margin']="auto";
+		document.querySelector("body").style['text-align']="center";
+		document.querySelector("#wrapAll").style['padding']="0px";
+		document.querySelector("#content").style['padding-bottom']="0px";
+		document.querySelector("#content").style['margin']="0px";
+		document.querySelector("#content").style['border']="0px solid black;";
+		document.querySelector("#middle").style['padding']="0px";
+
+		document.querySelector("#middle_cont1").style['height']="515px";
+		document.querySelector("#emscripten_iframe_container").style['height']="515px";
+		document.querySelector("#emscripten_iframe").style['height']="515px";
+
+		if( document.querySelector("#emulatorControls_section_gamefromurl_url").value ) {
+			document.querySelector("#emulatorControls_section_gamefromurl_get").click();
+		}
+
+		// document.querySelector("html").style.display="block";
+	}
+	if( urlParams.get('ExternalClickPlay')=="true"){ console.info("Setting auto play to true!");ExternalClickPlay=true; }
 
 	// Emulator - Top-right panel
 	document.getElementById('stopEmulator_button').addEventListener('click', stopEmulator );
@@ -976,11 +1058,13 @@ window.onload = function() {
 
 			iframe.contentWindow.document.open();
 			iframe.contentWindow.document.write(html);
-			// var cWindow = document.querySelector('#emscripten_iframe').contentDocument;
+			var cWindow = document.querySelector('#emscripten_iframe').contentDocument;
 			// var cBody = cWindow.querySelector('body');
 			// cBody.scrollTo(0, cBody.scrollHeight);
-			document.querySelector('#emscripten_iframe').contentWindow.scrollTo(0,document.body.scrollHeight);
 			iframe.contentWindow.document.close();
+			document.querySelector('#emscripten_iframe').contentWindow.scrollTo(0,cWindow.body.scrollHeight);
+			document.getElementById('modal_3').innerHTML = html;
+			modal_3(true);
 
 
 			}, 2000);
@@ -993,8 +1077,8 @@ window.onload = function() {
 
 		setTimeout(function(){
 			document.querySelector('#emulatorControls_section_gamefromurl_get').click();
-		// 	window.opener.document.querySelector('.sideTab_darkenerdiv').click();
-		}, 3000);
+			window.opener.document.querySelector('.sideTab_darkenerdiv').click();
+		}, 2500);
 	});
 
 	// Games DB

@@ -1,7 +1,6 @@
 <?php
 date_default_timezone_set('America/Detroit');
-if( $_SERVER['HTTP_HOST'] == "dev-nicksen782.c9.io" || $_SERVER['SERVER_NAME'] == "dev-nicksen782.c9.io" ){ $devenvironment=true;} else{$devenvironment=false;}
-
+if( $_SERVER['HTTP_HOST'] == "dev2-nicksen782.c9users.io" || $_SERVER['SERVER_NAME'] == "dev2-nicksen782.c9users.io" ){ $devenvironment=true;} else{$devenvironment=false;}
 
 // Get file listing minus the '.' and '..'.
 $directory = ".";
@@ -29,6 +28,30 @@ for($i=0; $i<sizeof($dirlist); $i++){
 ?>
 
 
+<div id="iedetected"
+	style="
+	background-color: red;
+	text-align: center;
+	/* line-height: 1em; */
+	font-size: 2em;
+	border: 5px solid black;
+	padding: 5px;
+	width: 85%;
+	margin: auto;
+	">
+	Internet Explorer users:<br>
+	NOTE: The application does NOT work (very well) with Internet Explorer at this time.<br>
+	(Have tried using IE 11, and Edge (IE v12). Once I got it to run, the performance was very bad.<br>
+	Use a different browser.
+</div>
+
+<script>
+	var isIE = !!navigator.userAgent.match(/Trident/g) || !!navigator.userAgent.match(/MSIE/g);
+	if(isIE){ document.querySelector("#iedetected").style.display="block"; }
+	else    { document.querySelector("#iedetected").style.display="none"; }
+</script>
+
+
 <h1><?php echo basename(getcwd()); ?><h1>
 <h3>
 Youtube Video Demo:
@@ -52,6 +75,7 @@ Youtube Video Demo:
 
 <h3>Page will automatically redirect to == <?php echo 'CURRENT' ;?> == in 15 seconds.</h3>
 <h4>... or you could just click <a href='<?php echo 'CURRENT' ;?>/'>HERE (<?php echo 'CURRENT' ;?>)</a> to see the latest version</h4>
+
 <?php
 clearstatcache();
 

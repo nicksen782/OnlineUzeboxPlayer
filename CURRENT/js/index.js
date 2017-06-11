@@ -66,7 +66,9 @@ function loadUserGameIntoEmu2(gamefile){
 	serverPOSTrequest(thedata, callback, "gateway_p.php");
 }
 function sendKeyToIframe(keyCode){
-	var evt = new Event('keydown');
+	// var evt = new Event('keydown');
+	var evt = new CustomEvent('keydown');
+
 	evt.keyCode = keyCode;
 	document.querySelector('#emscripten_iframe').contentDocument.dispatchEvent(evt);
 }
@@ -115,6 +117,7 @@ function resizeEmulatorView(){
 }
 function loadGameIntoEmu(game){
 	var callback = function(resp) {
+		// console.log(resp);
 		resp = JSON.parse(resp);
 		// console.log("loadGame callback called. Number found:", resp.count, "(should be 1.)");
 
@@ -181,7 +184,7 @@ function newFilesFromuser() {
 		reader.onload = (function(e) {
 			var filedata = e.target.result;
 			var filedata2 = new Int8Array(filedata);
-			console.log("the file data:", filedata);
+			// console.log("the file data:", filedata);
 			// console.log("e", e);
 			// console.info(i, this.fileobj.name, this.fileext, filedata);
 			console.info("thefiles:", thefiles);
@@ -230,6 +233,40 @@ function emulatorControls_F9(){
 function emulatorControls_F10(){
 	sendKeyToIframe(121); // F8
 }
+function emulatorControls_gamepad(button){
+	// button=button.getAttribute('name');
+	// console.log(button, button.type, button.target.id); return;
+	// console.log(window.event);
+	button=button.target.id;
+	// console.log(button);
+	var evt = new CustomEvent('keypress');
+	// var evt = new Event('keydown');
+
+	// Directional pad.
+	if(button=="dirUP"){ console.log("PRESSED dirUP"); sendKeyToIframe(38); evt.keyCode=38; } // dirUP (ArrowUp)
+	if(button=="dirDN"){ console.log("PRESSED dirDN"); evt.keyCode=40; } // dirDN (ArrowDown)
+	if(button=="dirLT"){ console.log("PRESSED dirLT"); evt.keyCode=37; } // dirLT (ArrowLeft)
+	if(button=="dirRT"){ console.log("PRESSED dirRT"); evt.keyCode=39; } // dirRT (ArrowRight)
+
+	// Start/Select.
+	if(button=="select"){ evt.keyCode=32; } // select (Space)
+	if(button=="start") { evt.keyCode=13; } // start (Enter)
+
+	// Left/Right Shoulder buttons.
+	if(button=="sL"){ evt.keyCode=16; evt.shiftKey=true; evt.which=16; evt.key="Shift"; evt.code = "ShiftLeft";  evt.location=1; } // sL (ShiftLeft)
+	if(button=="sR"){ evt.keyCode=16; evt.shiftKey=true; evt.which=16; evt.key="Shift"; evt.code = "ShiftRight"; evt.location=2; } // sR (ShiftRight)
+
+	// Y/B/X/A buttons.
+	if(button=="btnY"){ evt.keyCode=81; evt.keyCode=32; evt.code = "KeyQ"; } // btnY (KeyQ)
+	if(button=="btnB"){ evt.keyCode=65; evt.keyCode=32; evt.code = "KeyA"; } // btnB (KeyA)
+	if(button=="btnX"){ evt.keyCode=87; evt.keyCode=32; evt.code = "KeyW"; } // btnX (KeyW)
+	if(button=="btnA"){ evt.keyCode=83; evt.keyCode=32; evt.code = "KeyS"; } // btnA (KeyS)
+
+evt.isTrusted=true;
+	// console.log(button, evt);
+	document.querySelector('#emscripten_iframe').contentDocument.dispatchEvent(evt);
+}
+
 function stopEmulator(){
 	document.getElementById('emscripten_iframe_container').querySelector('iframe').src = "loading.html";
 	document.querySelector('#emulatorControls_title').innerHTML    ="";
@@ -299,45 +336,62 @@ function getGameFilesFromJSON(){
 		var basedir = urlText.replace(/\\/g, '/').replace(/\/[^\/]*\/?$/, '');
 		// console.log("basedir:", basedir);
 
-		thefiles2 = data;
+		// Required for IE.
+		if(typeof data == "string"){ data=JSON.parse(data); }
 
+		thefiles2 = data;
 		// var succ
 		// Add the basedir to each file in the array.
+
+
+		var shortendName = "";
+		var resultsDiv = document.getElementById('userGameFiles_fromURL');
+		resultsDiv.classList.add('show');
+		// console.log("****** data: ", data);
+		// console.log("****** data.title: ", data['title']);
+		// console.log("****** data.title.length: ", data.title.length);
+		if(data.title.length>20){ shortendName = data.title.substr(0, 17) + "..." + data.title.substr(-3, 3); }
+		else                           { shortendName = data.title ; }
+		resultsDiv.querySelector('div:nth-child(2)').innerHTML = shortendName + ":)<br>" ;
+
 		for(var i=0; i<thefiles2.files.length; i++){
 			(function (i) {
 				thefiles2.files[i].completefilepath = basedir + "/" + thefiles2.files[i].completefilepath;//+"?r=" + Math.random() ;
+				resultsDiv.querySelector('div:nth-child(2)').innerHTML += "<a target='_blank' href='"+thefiles2.files[i].completefilepath+"'>file"+i+"</a>, ";
 
 				// This does actually download the file... and it gets cached. When requested by the emulator iframe the file comes from cache!
 				ajaxGETfile(thefiles2.files[i].completefilepath, "arraybuffer",
-				// success
-				function(d){
-					thefiles2.files[i].completefilepath = new Int8Array(d);
-					console.log("Successfully downloaded file number "+i+", NAME:", thefiles2.files[i].filename);
-				},
-				// fail
-				function(d){ console.log("fail!",d, i, thefiles2.files.length ); });
+					// success
+					function(d){
+						// console.log("****", thefiles2.files[i].completefilepath, "**********************thefiles2", thefiles2, data, basedir);
+						thefiles2.files[i].completefilepath = new Int8Array(d);
+						console.log("Successfully downloaded file number "+i+", NAME:", thefiles2.files[i].filename);
+
+					},
+					// fail
+					function(d){ console.log("fail!",d, i, thefiles2.files.length ); }
+				);
 
 			})(i);
 		}
 
 		// console.info(thefiles2.files);
 
-		var resultsDiv = document.getElementById('userGameFiles_fromURL');
-		resultsDiv.classList.add('show');
-		// resultsDiv.querySelector('div:nth-child(1)').innerHTML = data.title ;
-		var shortendName = "";
 
-		if(data.title.length>20){ shortendName = data.title.substr(0, 17) + "..." + data.title.substr(-3, 3); }
-		else                           { shortendName = data.title ; }
-		resultsDiv.querySelector('div:nth-child(2)').innerHTML = shortendName ;
+		// resultsDiv.querySelector('div:nth-child(1)').innerHTML = data.title ;
+
 		var playOnclick = "loadUserGameIntoEmu2('"+data.gamefile+"')";
 
 		document.querySelector('#emulatorControls_section_gamefromurl_play').setAttribute("onclick", playOnclick);
 
 		// Check for a global variable set! It would have been set by UAM3 via querystring!
+
+		// console.log("!!!@!@!@!@", ExternalClickPlay);
 		if(ExternalClickPlay){
-			console.log("TRUE: ExternalClickPlay:", ExternalClickPlay);
-			document.querySelector('#emulatorControls_section_gamefromurl_play').click();
+			setTimeout(function(){
+				// console.log("!!!!!!!!!!!!!***************TRUE: ExternalClickPlay:", ExternalClickPlay);
+				document.querySelector('#emulatorControls_section_gamefromurl_play').click();
+			}, 450);
 		}
 	};
 	var onerror_callback = function(){ console.log('getGameFilesFromJSON: ERROR!'); };
@@ -630,7 +684,7 @@ function ajaxGETfile(url, responseType, onload_callback, onerror_callback) {
 	xhr.send(null)
 };
 function clearJSONURL(){
-	console.log("clearJSONURL", this);
+	// console.log("clearJSONURL", this);
 	document.querySelector('#emulatorControls_section_gamefromurl_url').value = "";
 }
 
@@ -729,11 +783,11 @@ xhr.onload = function() {
 		// Reset the filelist.
 		document.querySelector('#newFileUpload_browse').value = "";
 		var resp = JSON.parse(this.response);
-		console.log('Server got:', resp);
+		// console.log('Server got:', resp);
 
 		if(resp.unauthorized){ alert("You have no business using this feature. It has been disabled for a reason."); window.location.reload(); return; }
 		else{
-			console.log('Server got:', resp);
+			// console.log('Server got:', resp);
 			// Reload the game list.
 			reloadGameFileList(resp.gamedata, resp.filelist);
 		}
@@ -804,7 +858,7 @@ function updateGameInfo(infoObj) {
 
 		if(resp.unauthorized){ alert("You have no business using this feature. It has been disabled for a reason."); window.location.reload(); return; }
 		else{
-			console.log('Server got:', resp);
+			// console.log('Server got:', resp);
 			// Reload the game list.
 			getGameList(null, infoObj.id);
 			// reloadGameFileList(resp.gamedata, resp.filelist);
@@ -820,7 +874,7 @@ function updateGameInfo(infoObj) {
 function removeGameFile(filename, gameid){
 
 	var conf1 = confirm("Are you sure that you want to delete the file:\n\n"+filename+"?");
-	console.log( "removeGameFile", filename, gameid, conf1 );
+	// console.log( "removeGameFile", filename, gameid, conf1 );
 
 	if(!conf1){ alert("File deletion has been canceled."); return; }
 	else{
@@ -857,7 +911,7 @@ function removeGameFile(filename, gameid){
 			var resp = JSON.parse(this.response);
 			if(resp.unauthorized){ alert("You have no business using this feature. It has been disabled for a reason."); window.location.reload(); return; }
 			else{
-				console.log('Server got:', resp);
+				// console.log('Server got:', resp);
 				reloadGameFileList(resp.gamedata, resp.filelist);
 			}
 		}
@@ -906,7 +960,7 @@ function newGameRecord(){
 			else{
 				var callback = function(resp) {
 					resp = JSON.parse(resp);
-						console.log('Server got:', resp);
+						// console.log('Server got:', resp);
 
 						var gamedata = resp.result;
 						var filelist = resp.filelist;
@@ -925,7 +979,7 @@ function newGameRecord(){
 						document.getElementById('completeData_1game_when_added').value = gamedata.when_added;
 						document.getElementById('completeData_1game_description_textarea').value = gamedata['description'];
 
-						console.log(null, gamedata.id);
+						// console.log(null, gamedata.id);
 						getGameList(null, gamedata.id);
 
 						// Make visible the save and cancel buttons.
@@ -983,17 +1037,66 @@ window.onload = function() {
 	document.getElementById('emulatorControls_section_gamefromurl_get').addEventListener('click', getGameFilesFromJSON );
 	document.getElementById('emulatorControls_section_gamefromurl_clear').addEventListener('click', clearJSONURL );
 
+	// Emulator overlay controls:
+	document.getElementById('dirUP').addEventListener ('mousedown', emulatorControls_gamepad);
+	document.getElementById('dirUP').addEventListener ('mouseup', emulatorControls_gamepad);
+
+	document.getElementById('dirDN').addEventListener ('mousedown', emulatorControls_gamepad);
+	document.getElementById('dirDN').addEventListener ('mouseup', emulatorControls_gamepad);
+
+	document.getElementById('dirLT').addEventListener ('mousedown', emulatorControls_gamepad);
+	document.getElementById('dirLT').addEventListener ('mouseup', emulatorControls_gamepad);
+
+	document.getElementById('dirRT').addEventListener ('mousedown', emulatorControls_gamepad);
+	document.getElementById('dirRT').addEventListener ('mouseup', emulatorControls_gamepad);
+
+	document.getElementById('select').addEventListener('mousedown', emulatorControls_gamepad);
+	document.getElementById('select').addEventListener('mouseup', emulatorControls_gamepad);
+
+	document.getElementById('start').addEventListener ('mousedown', emulatorControls_gamepad);
+	document.getElementById('start').addEventListener ('mouseup', emulatorControls_gamepad);
+
+	document.getElementById('sL').addEventListener    ('mousedown', emulatorControls_gamepad);
+	document.getElementById('sL').addEventListener    ('mouseup', emulatorControls_gamepad);
+
+	document.getElementById('sR').addEventListener    ('mousedown', emulatorControls_gamepad);
+	document.getElementById('sR').addEventListener    ('mouseup', emulatorControls_gamepad);
+
+	document.getElementById('btnY').addEventListener  ('mousedown', emulatorControls_gamepad);
+	document.getElementById('btnY').addEventListener  ('mouseup', emulatorControls_gamepad);
+
+	document.getElementById('btnB').addEventListener  ('mousedown', emulatorControls_gamepad);
+	document.getElementById('btnB').addEventListener  ('mouseup', emulatorControls_gamepad);
+
+	document.getElementById('btnX').addEventListener  ('mousedown', emulatorControls_gamepad);
+	document.getElementById('btnX').addEventListener  ('mouseup', emulatorControls_gamepad);
+
+	document.getElementById('btnA').addEventListener  ('mousedown', emulatorControls_gamepad);
+	document.getElementById('btnA').addEventListener  ('mouseup', emulatorControls_gamepad);
+
+
 	[].map.call(document.querySelectorAll('#gameSourceNav .gameSourceNav_tab'), function(elem, index, elems) {
 		elem.addEventListener('click', nav_miniviewChange);
 	});
 
-	var urlParams = new URLSearchParams(window.location.search);
-	var url = (urlParams.get('url'));
+	var url = getUrlParameter("url");
+	var externalcontrol = getUrlParameter("externalcontrol");
+	ExternalClickPlay = getUrlParameter("ExternalClickPlay");
+
+	console.log(
+		"\n***************************",
+		"\nurl:", url,
+		"\nexternalcontrol:", externalcontrol,
+		"\nExternalClickPlay:", ExternalClickPlay
+	);
+
+	// var urlParams = new URLSearchParams(window.location.search);
+	// var url = (urlParams.get('url'));
 	if(url){
 		document.querySelector('#emulatorControls_section_gamefromurl_url').value = url ;
 		document.querySelector('#gameSourceNav_URL').click();
 	}
-	if( urlParams.get('externalcontrol')=="true"){
+	if( externalcontrol =="true"){
 		// Hide most of the UI to make the web page shorter and more narrow.
 
 		// document.querySelector("html").style.display="none";
@@ -1003,7 +1106,7 @@ window.onload = function() {
 		document.querySelector(".gameframe_border_right").style.display="none";
 		document.querySelector(".gameframe_border_left").style.display="none";
 		document.querySelector(".gameframe_border_bottom").style.display="none";
-		document.querySelector("#gameSourceNav").style.display="none";
+		  //document.querySelector("#gameSourceNav").style.display="none";
 		document.querySelector(".gameframe_").style.left="0px";
 		document.querySelector(".gameframe_").style.width="632px";
 		document.querySelector(".gameframe_").style['border-radius']="0px";
@@ -1034,7 +1137,7 @@ window.onload = function() {
 
 		// document.querySelector("html").style.display="block";
 	}
-	if( urlParams.get('ExternalClickPlay')=="true"){ console.info("Setting auto play to true!");ExternalClickPlay=true; }
+	if( ExternalClickPlay =="true"){ ExternalClickPlay=true; console.info("Setting auto play to true!"); }
 
 	// Emulator - Top-right panel
 	document.getElementById('stopEmulator_button').addEventListener('click', stopEmulator );

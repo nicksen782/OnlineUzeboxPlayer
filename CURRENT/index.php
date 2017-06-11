@@ -3,12 +3,13 @@
 <html lang="en-us">
 
 <head>
+	<meta http-equiv="X-UA-Compatible" content="IE=11" />
 	<meta charset="utf-8">
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<title>Uzebox Game Changer</title>
 	<link rel="stylesheet" type="text/css" href="css/index.css">
-	<script src="js/index.js"></script>
 	<script src="js/polyfills.js"></script>
+	<script src="js/index.js"></script>
 	<script>
 		// Get the game id from the querystring if one was passed.
 		var gameid_GET = "<?php echo $_GET['gameid']; ?>";
@@ -225,6 +226,58 @@
 					</div>
 
 					<div class="gameframe_border_bottom gameframe_borders"></div>
+
+					<style>
+.hover_group:hover {
+    opacity:1;
+    background-color:yellow;
+}
+#projectsvg {
+	position: relative;
+	width: 338px;
+	height: 158px;
+	z-index: 550;
+	overflow: hidden;
+	margin:auto;
+	display:none;
+}
+#projectsvg svg {
+	width: 338px;
+	height: 158px;
+	background-color:blue;
+	padding:0px;
+	margin:0px;
+	display:none;
+}
+
+</style>
+					<figure id="projectsvg">
+						<svg width="338" height="158" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 338 158" preserveAspectRatio="xMinYMin meet" >
+						    //set your background image
+						<image width="320" height="240" xlink:href="img/CUzeBox_controls.png">
+						<image width="338" height="158" xlink:href="img/CUzeBox_controls.png">
+						<image xlink:href="img/CUzeBox_controls.png">
+						</image>
+						<g class="hover_group" opacity="0"><rect id="dirUP"  name="dirUP"  x="68" y="40" width="16" height="24" opacity="0.5" fill="#FFFFFF"></rect></g>
+						<g class="hover_group" opacity="0"><rect id="dirDN"  name="dirDN"  x="68" y="96" width="16" height="24" opacity="0.5" fill="#FFFFFF"></rect></g>
+						<g class="hover_group" opacity="0"><rect id="dirLT"  name="dirLT"  x="32" y="72" width="32" height="16" opacity="0.5" fill="#FFFFFF"></rect></g>
+						<g class="hover_group" opacity="0"><rect id="dirRT"  name="dirRT"  x="88" y="72" width="32" height="16" opacity="0.5" fill="#FFFFFF"></rect></g>
+						<g class="hover_group" opacity="0"><rect id="select" name="select" x="128" y="80" width="24" height="24" opacity="0.5" fill="#FFFFFF"></rect></g>
+						<g class="hover_group" opacity="0"><rect id="start"  name="start"  x="168" y="80" width="24" height="24" opacity="0.5" fill="#FFFFFF"></rect></g>
+						<g class="hover_group" opacity="0"><rect id="sL"     name="sL"     x="32" y="0" width="80" height="24" opacity="0.5" fill="#FFFFFF"></rect></g>
+						<g class="hover_group" opacity="0"><rect id="sR"     name="sR"     x="226" y="0" width="80" height="24" opacity="0.5" fill="#FFFFFF"></rect></g>
+						<g class="hover_group" opacity="0"><rect id="btnY"   name="btnY"   x="216" y="72" width="24" height="24" opacity="0.5" fill="#FFFFFF"></rect></g>
+						<g class="hover_group" opacity="0"><rect id="btnB"   name="btnB"   x="252" y="96" width="24" height="24" opacity="0.5" fill="#FFFFFF"></rect></g>
+						<g class="hover_group" opacity="0"><rect id="btnX"   name="btnX"   x="252" y="46" width="24" height="24" opacity="0.5" fill="#FFFFFF"></rect></g>
+						<g class="hover_group" opacity="0"><rect id="btnA"   name="btnA"   x="282" y="72" width="24" height="24" opacity="0.5" fill="#FFFFFF"></rect></g>
+						</svg>
+					</figure>
+
+
+
+
+
+
 				</div>
 			</div>
 
@@ -338,11 +391,14 @@
 
 			<?php if($devenvironment == true){ ?>
 				<h1>Developer Links</h1>
-				<a href="https://dev-nicksen782.c9.io/web/ACTIVE/Emscripten_Uzebox_Gamechanger/CURRENT/?url=//dev-nicksen782.c9.io/non-web/Uzebox/UAM3_Tester/GAME/output/uzebox/remoteload.json" target="_blank">DEV Uze Zelda!</a> - <span style="font-size:70%;">https://dev-nicksen782.c9.io/web/ACTIVE/Emscripten_Uzebox_Gamechanger/CURRENT/?url=//dev-nicksen782.c9.io/non-web/Uzebox/UAM3_Tester/GAME/output/uzebox/remoteload.json</span>
+				http://www.nicksen782.net/r_uzezelda.php<br>
+				<a href="https://dev2-nicksen782.c9users.io/web/ACTIVE/Emscripten_Uzebox_Gamechanger/CURRENT/?url=//dev2-nicksen782.c9users.io/non-web/Uzebox/UAM3_Tester/GAME/output/uzebox/remoteload.json" target="_blank">DEV Uze Zelda!</a> - <span style="font-size:45%;">https://dev2-nicksen782.c9users.io/web/ACTIVE/Emscripten_Uzebox_Gamechanger/CURRENT/?url=//dev2-nicksen782.c9users.io/non-web/Uzebox/UAM3_Tester/GAME/output/uzebox/remoteload.json</span>
 				<br>
-				<a href="http://www.nicksen782.net/a_demos/Emscripten_Uzebox_Gamechanger/CURRENT/?url=//www.nicksen782.net/UzeBridge/remoteload.json" target="_blank">Live Uze Zelda!</a> - <span style="font-size:70%;">http://www.nicksen782.net/a_demos/Emscripten_Uzebox_Gamechanger/CURRENT/?url=//www.nicksen782.net/UzeBridge/remoteload.json</span>
+				<a href="http://www.nicksen782.net/a_demos/Emscripten_Uzebox_Gamechanger/CURRENT/?url=//www.nicksen782.net/UzeBridge/remoteload.json" target="_blank">Live Uze Zelda!</a> - <span style="font-size:45%;">http://www.nicksen782.net/a_demos/Emscripten_Uzebox_Gamechanger/CURRENT/?url=//www.nicksen782.net/UzeBridge/remoteload.json</span>
 				<br>
-				<a href="http://uzebox.org/wiki/index.php?title=Legend_of_Zelda_I" target="_blank">Uze Zelda! On Uzebox Wiki</a> - <span style="font-size:70%;">http://uzebox.org/wiki/index.php?title=Legend_of_Zelda_I</span>
+				<a href="http://www.nicksen782.net/a_demos/Emscripten_Uzebox_Gamechanger/CURRENT/?ExternalClickPlay=true&externalcontrol=true&url=//dev2-nicksen782.c9users.io/non-web/Uzebox/UzeZelda2017/output_files/remoteload.json" target="_blank">Live Uze Zelda! (autostart with less GUI)</a> - <span style="font-size:45%;">http://www.nicksen782.net/a_demos/Emscripten_Uzebox_Gamechanger/CURRENT/?ExternalClickPlay=true&externalcontrol=true&url=//dev2-nicksen782.c9users.io/non-web/Uzebox/UzeZelda2017/output_files/remoteload.json</span>
+				<br>
+				<a href="http://uzebox.org/wiki/index.php?title=Legend_of_Zelda_I" target="_blank">Uze Zelda! On Uzebox Wiki</a> - <span style="font-size:45%;">http://uzebox.org/wiki/index.php?title=Legend_of_Zelda_I</span>
 				<br>
 			<?php } ?>
 

@@ -75,7 +75,9 @@ function addToFS2(filename, byteArray, uzerom) {
 	// Only check the headers on .uze files. Don't check on .hex files.
 	if( filename==uzerom && filename.substr(-4, 4) == ".uze" ){
 		// Read the first six bytes of the byteArray. Does it spell UZEBOX?
-		var header = byteArray.slice(0,6).toString();
+		var header = Array.prototype.slice.call( byteArray, 0,6 ).toString();
+		// var header = byteArray.slice(0,6).toString();
+		// var header = byteArray.substr(0, 6).toString();//slice(0,6).toString();
 		// console.log("Checked uzerom header... GAMEFILE:", filename, "Values:", header);
 
 		// Look for UZEBOX (as an ascii string here.)
@@ -90,7 +92,7 @@ function addToFS2(filename, byteArray, uzerom) {
 			console.log("GAMEFILE:", filename, " -- The header has been corrected.");
 		}
 		else {
-			// console.log("The header is correct.");
+			console.log("The header is correct.");
 		}
 	}
 
@@ -108,7 +110,10 @@ function addToFS(filename, completefilepath, uzerom) {
 		if( filename==uzerom && filename.substr(-4, 4) == ".uze" ){
 			// console.log("Checking uzerom header... GAMEFILE:", filename);
 			// Read the first six bytes of the byteArray. Does it spell UZEBOX?
-			var header = byteArray.slice(0,6).toString();
+			// var header = byteArray.substr(0, 6).toString();//slice(0,6).toString();
+
+			// var header = byteArray.slice(0,6).toString();
+			var header = Array.prototype.slice.call( byteArray, 0,6 ).toString();
 
 			// Look for UZEBOX (as an ascii string here.)
 			if(header !== "85,90,69,66,79,88"){
@@ -122,7 +127,7 @@ function addToFS(filename, completefilepath, uzerom) {
 				console.log("GAMEFILE:", filename, " -- The header has been corrected.");
 			}
 			else {
-				// console.log("The header is correct.");
+				console.log("The header is correct.");
 			}
 		}
 

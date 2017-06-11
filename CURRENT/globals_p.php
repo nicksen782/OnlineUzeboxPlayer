@@ -20,7 +20,7 @@
 		require_once("_sysp/db_sqlite_p.php");
 
 		// Detect if this is dev.
-		if( $_SERVER['SERVER_NAME'] == "dev-nicksen782.c9.io" ){
+		if( $_SERVER['SERVER_NAME'] == "dev2-nicksen782.c9users.io" ){
 			// This IS the dev environment.
 			$devenvironment=true;
 

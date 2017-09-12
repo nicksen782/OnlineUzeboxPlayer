@@ -36,19 +36,22 @@ document.body.appendChild(script);
 // ********************************
 
 function extras_preInit(filelist, uzerom){
-	if     ( filelistType == 1 ){ console.info("filelistType=1, Server file : Download each file in list.");  filelist=filelist; }						// Keep the filelist the same.
-	else if( filelistType == 2 ){ console.info("filelistType=2, User file   : Each file is an arrayBuffer."); filelist=parent.window.thefiles; }			// Get the filelist from the parent window.
-	else if( filelistType == 3 ){ console.info("filelistType=3, Remote file : Each file is an arrayBuffer."); filelist=parent.window.thefiles2.files; }	// Get the filelist from the parent window.
-
-	// Depending
-	// console.log("filelistType is this:::::", filelistType);
+	if     ( filelistType == 1 ){
+		// Keep the filelist the same.
+		// console.info("filelistType=1, Server file : Download each file in list.");
+		filelist=filelist;
+	}
+	else if( filelistType == 2 ){
+		// Get the filelist from the parent window.
+		// console.info("filelistType=2, User file   : Each file is an arrayBuffer.");
+		filelist=parent.window.thefiles;
+	}
+	else if( filelistType == 3 ){
+		// Get the filelist from the parent window.
+		// console.info("filelistType=3, Remote file : Each file is an arrayBuffer.");
+		filelist=parent.window.thefiles2.files;
+	}
 	loadFileSystem(filelist, uzerom);
-		// Need to read the filelist from the parent window.
-		// console.log(parent.window.document.querySelector('#FilesFromUser').files);
-	// if (parent.window.opener && parent.window.opener !== window) {
-	// 	console.log("**** cuzebox_extra: Seems we have been opened up by Javascript! ****");
-	// }
-
 }
 
 function extras_postRun(currentgame, uzerom){
@@ -92,7 +95,7 @@ function addToFS2(filename, byteArray, uzerom) {
 			console.log("GAMEFILE:", filename, " -- The header has been corrected.");
 		}
 		else {
-			console.log("The header is correct.");
+			// console.log("The header is correct.");
 		}
 	}
 

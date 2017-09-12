@@ -9,19 +9,22 @@ html {
 body {
 	margin: auto;
 	overflow: hidden;
-	width: 1070px;
+	width: 1100px;
+	color: black;
+	font-family: "Times New Roman";
 }
 
 div#wrapAll {
 	padding: 5px;
-	background-color: rgb(57, 60, 169);
+	/* background-color: rgb(57, 60, 169); */
+	/* background-color: #6a6cc7; */
 	border-radius: 10px;
 }
 
 div#top_panel {
 	position: relative;
 	left: 1px;
-	background-color: #393ca9;
+	/* background-color: #6b8dbd; */
 	height: 45px;
 	padding: 5px 0px 0px 0px;
 	border-radius: 10px;
@@ -42,7 +45,7 @@ div#topNavMenu {
 	border-top-left-radius: 20px;
 	border-top-right-radius: 20px;
 	border-bottom: 0px solid black;
-	background-color: #393ca9;
+	/* background-color: #393ca9; */
 	position: relative;
 	top: 0px;
 	left: 0px;
@@ -51,21 +54,22 @@ div#topNavMenu {
 
 .navButton {
 	display: inline-block;
-	background-color: goldenrod;
-	background-color: darkkhaki;
+	/* background-color: goldenrod; */
+	/* background-color: darkkhaki; */
 	width: 150px;
 	text-align: center;
-	border-top-left-radius: 10px;
-	border-top-right-radius: 10px;
+	/* border-top-left-radius: 10px; */
+	/* border-top-right-radius: 10px; */
+	border-radius: 10px 10px 0px 0px;
 	border: 2px solid #000060;
 	border-bottom: 0px solid black;
 	padding: 5px;
-	font-size: 24px;
+	font-size: 16px;
 	height: 38px;
 	line-height: 38px;
 	position: relative;
 	text-decoration: underline;
-	font-weight: bold;
+	/* font-weight: bold; */
 	top: -4px;
 	left: 15px;
 	vertical-align: bottom;
@@ -142,6 +146,7 @@ input#restartEmulator_button {
 	border-radius: 5px;
 	border: 2px solid #000060;
 	box-shadow: 0px 0px 5px 5px rgba(0, 0, 0, 0.5);
+	display: none;
 }
 
 .navButton:hover {
@@ -159,7 +164,10 @@ input#restartEmulator_button {
 #content {
 	border: 2px solid #000060;
 	min-height: 550px;
-	background-color: darkkhaki;
+	/* background-color: #6a6cc7; */
+	/* background-color: #393ca9; */
+	background-color: rgb(161, 122, 24);
+	/* background-color: #000060; */
 	margin: 0px 1px 0px 1px;
 	padding-bottom: 15px;
 	border-radius: 5px 5px 10px 10px;
@@ -191,6 +199,9 @@ input#restartEmulator_button {
 
 #VIEW_misc {
 	position: relative;
+	background-color: rgba(167, 120, 0, 0.6);
+	/* height: 100%; */
+	/* width: 100%; */
 }
 
 #emscripten_iframe_container iframe {
@@ -201,22 +212,26 @@ input#restartEmulator_button {
 }
 
 .gameframe_ {
-	width: 800px;
+	text-align: center;
+	width: 650px;
 	display: inline-block;
 	vertical-align: top;
-	padding: 0px;
+	/* padding: 5px; */
 	box-shadow: 0px 0px 5px 5px rgba(0, 0, 0, 0.5);
 	background-color: #ab8118;
+	background-color: black;
 	overflow: hidden;
 	position: relative;
-	left: 20px;
-	border-radius: 20px;
+	left: 10px;
+	border-radius: 15px;
 	border: 5px solid #000060;
-	border: 3px solid rgb(57, 60, 169);
+	border: 10px solid rgb(57, 60, 169);
+	/* padding-bottom: 10px; */
 }
 
 .gameframe_borders {
 	background-color: darkgoldenrod;
+	display: none;
 }
 
 #emscripten_iframe {
@@ -232,6 +247,7 @@ input#restartEmulator_button {
 	width: 100%;
 	height: 35px;
 	position: relative;
+	/* display: none; */
 }
 
 .gameframe_border_left {
@@ -593,12 +609,14 @@ input#newFileUpload_browse {
 #emulatorControls {
 	display: inline-block;
 	vertical-align: top;
-	width: 185px;
+	width: 350px;
 	padding: 3px 3px 3px 3px;
-	background-color: goldenrod;
-	background-color: #008bc0;
+	padding: 5px;
+	/* background-color: goldenrod; */
+	/* background-color: #008bc0; */
 	background-color: #336699;
-	border-radius: 5px;
+	background-color: #393ca9;
+	border-radius: 15px;
 	border: 2px solid #000060;
 	border: 3px solid rgb(57, 60, 169);
 	box-shadow: 0px 0px 5px 2px;
@@ -607,16 +625,21 @@ input#newFileUpload_browse {
 
 .emulatorControls_buttons {
 	height: 20px;
+	width: 150px;
 	line-height: 20px;
 	font-weight: bold;
-	font-size: 16px;
-	background-color: darkgoldenrod;
+	font-size: 14px;
+	background-color: orange;
 	margin: 3px;
 	padding: 2px;
 	text-align: left;
 	z-index: 9;
 	position: relative;
 	border: 1px solid darkgoldenrod;
+	/* font-stretch: ultra-expanded; */
+	border-radius: 10px 10px 10px 10px;
+	display: inline-block;
+	text-align: center;
 }
 
 .emulatorControls_buttons:hover {
@@ -633,13 +656,13 @@ input#newFileUpload_browse {
 #top_panel_right_user {
 	position: absolute;
 	top: 6px;
-	right: 60px;
+	right: 0px;
 	width: 350px;
 	height: 32px;
 	vertical-align: top;
 	text-align: center;
 	padding: 0px 5px 6px 5px;
-	background-color: darkgoldenrod;
+	background-color: #a17a18;
 	border-radius: 5px;
 	border: 2px solid #000060;
 	box-shadow: 0px 0px 5px 5px rgba(0, 0, 0, 0.5);
@@ -648,7 +671,7 @@ input#newFileUpload_browse {
 .emulatorControls_section {
 	font-weight: bold;
 	font-size: 16px;
-	background-color: darkgoldenrod;
+	background-color: #a17a18;
 	padding: 5px;
 	word-wrap: break-word;
 	text-align: left;
@@ -658,7 +681,7 @@ input#newFileUpload_browse {
 
 .emulatorControls_section_title {
 	font-weight: bold;
-	background-color: orange;
+	background-color: #d2a709;
 	text-align: center;
 	margin-bottom: 5px;
 	text-decoration: underline;
@@ -674,6 +697,7 @@ input#newFileUpload_browse {
 	padding: 0px;
 	word-wrap: break-word;
 	text-align: left;
+	line-height: 16px;
 }
 
 .userGameFileLink {
@@ -709,7 +733,7 @@ input#newFileUpload_browse {
 }
 
 input#FilesFromUser_viewableBtn {
-	width: 100%;
+	width: 60%;
 	font-weight: bold;
 	margin-top: 5px;
 	margin-bottom: 5px;
@@ -788,7 +812,7 @@ input#FilesFromUser_viewableBtn {
 .gameSourceNav_tab:active {}
 
 .gameSourceNav_tab.active {
-	background-color: darkgoldenrod;
+	background-color: #a17a18;
 }
 
 .emulatorControls_section.miniview {
@@ -838,11 +862,16 @@ input#FilesFromUser_viewableBtn {
 }
 
 .navButton {
-	background-color: #797447;
+	background-color: #6d4804;
 }
 
 .navButton.active {
-	background-color: darkkhaki;
+	background-color: #6b8dbd;
+	background-color: #6a6cc7;
+	background-color: #a17a18;
+	font-size: 24px;
+	font-weight: bold;
+	border-radius: 20px 20px 0px 0px;
 }
 
 
@@ -887,4 +916,75 @@ div#CUzeBox_controls {}
 .directGameLinks{
 	font-size: 16px;
 	font-weight: normal;
+}
+
+input#emulatorControls_section_gamefromurl_url {
+	width: 99%;
+	font-size: 9px;
+}
+
+
+
+.emu_button1 {
+	width: 95px;
+	height: 25px;
+	margin-right: 5px;
+	display: inline-block;
+	font-size: 11px;
+	padding: 0px;
+}
+
+#app_emulator_emulator_controls2 {
+	z-index: 501;
+	margin: auto;
+	width: 630px;
+	height: 25px;
+	position: relative;
+	/* left: 570px; */
+	/* top: 50px; */
+	background-color: #091724;
+	/* background-color: black; */
+	text-align: center;
+	padding: 5px;
+	border: 5px solid black;
+	/* border-top: 15px solid black; */
+	border-radius: 15px;
+	margin-top: 5px;
+	/* margin-left: 5px; */
+	/* opacity: 0.5; */
+}
+
+.button {
+	/* background-color: #cece5b; */
+	background-color: #585835;
+	border-radius: 10px;
+	/* border: 2px solid lightgray; */
+	border: 2px solid darkslateblue;
+	box-shadow: 0px 0px 2px 2px darkslategrey;
+}
+
+.button:hover {
+	background-color: #ffff51;
+}
+
+figure#projectsvg {
+	display: block;
+	margin: auto;
+}
+
+.hover_group {
+	/* opacity: 0.5; */
+	/* background-color: yellow; */
+	fill: rgba(255, 255, 0, 0.3);
+	/* border: 10px solid black; */
+}
+
+.hover_group:hover {
+	/* opacity: 0.90; */
+	/* background-color: yellow; */
+	fill: rgba(0, 128, 91, 0.5);
+}
+
+#app_emulator_emulator_controls2:hover {
+	opacity: 1.0;
 }

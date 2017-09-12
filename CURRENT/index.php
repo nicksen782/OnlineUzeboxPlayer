@@ -138,8 +138,8 @@
 
 							<br>
 							<div style="font-size:18px;font-weight:bold;text-decoration:underline;text-align:center;">Direct Links:</div>
-							<div class="directGameLinks" id="serverGame_directurl">    N/A</div>
-							<div class="directGameLinks" id="serverGame_directurl_min">N/A</div>
+							<div class="directGameLinks" id="serverGame_directurl"></div>
+							<!--<div class="directGameLinks" id="serverGame_directurl_min">N/A</div>-->
 							<br>
 
 						</div>
@@ -162,8 +162,13 @@
 									<div class="datafiles"></div>
 									<br>
 								</div>
+
+								<div style="text-align:center;">
 								<input style="display:none;" id="FilesFromUser" type="file" value="CHOOSE" multiple>
 								<input type="button" id="FilesFromUser_viewableBtn" value="Import File(s)" onclick="document.querySelector('#FilesFromUser').click();">
+								<input type="button" title="Google Chrome only!" value="Re-read file(s)" onclick="document.querySelector('#FilesFromUser').dispatchEvent(new Event('change'));;">
+								</div>
+
 							</div>
 
 
@@ -182,6 +187,8 @@
 							<input id="emulatorControls_section_gamefromurl_url" placeholder="Enter URL" type="text" value="">
 							<input id="emulatorControls_section_gamefromurl_get" type="button" value="Retrieve!">
 							<input id="emulatorControls_section_gamefromurl_clear" type="button" value="Clear URL!">
+							<br>
+							<br>
 
 							<div id="userGameFiles_fromURL">
 								<div>GAME LOADED:</div>
@@ -201,84 +208,65 @@
 					</div>
 
 					<hr>
+					<hr>
 
-						<div class="emulatorControls_section_title">Emulator Controls: </div>
+					<div class="emulatorControls_section_title">Emulator Controls: </div>
+
 					<div class="emulatorControls_section active">
-						<div class="emulatorControls_buttons" id="showEmuControls">Display Controls</div>
-						<div class="emulatorControls_buttons" id="stopEmulator_button">Stop Emulator</div>
-						<div class="emulatorControls_buttons" id="emulatorControls_resize">Resize Emulator</div>
-						<div class="emulatorControls_buttons" id="emulatorControls_F2">F2: Quality</div>
-						<div class="emulatorControls_buttons" id="emulatorControls_F3">F3: Debug</div>
-						<div class="emulatorControls_buttons" id="emulatorControls_F7">F7: Flicker</div>
-						<div class="emulatorControls_buttons" id="emulatorControls_F8">F8: Controls</div>
-						<div class="emulatorControls_buttons" id="emulatorControls_F9">F9: Pause</div>
-						<div class="emulatorControls_buttons" id="emulatorControls_F10">F10: Frame-step</div>
-					</div>
+
+						<figure id="projectsvg">
+							<svg width="338" height="158" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 338 158" preserveAspectRatio="xMinYMin meet">
+							<image xlink:href="img/CUzeBox_controls.png" x="0" y="0" width="100%" height="100%"></image>
+
+							<g class="hover_group" opacity="0.75"><rect class="svg_gamepad1_btn" name="dirUP" x="69" y="40" width="17" height="32"></rect></g>
+							<g class="hover_group" opacity="0.75"><rect class="svg_gamepad1_btn" name="dirDN" x="69" y="96" width="17" height="32"></rect></g>
+							<g class="hover_group" opacity="0.75"><rect class="svg_gamepad1_btn" name="dirLT" x="32" y="72" width="32" height="17"></rect></g>
+							<g class="hover_group" opacity="0.75"><rect class="svg_gamepad1_btn" name="dirRT" x="88" y="72" width="32" height="17"></rect></g>
+							<g class="hover_group" opacity="0.75"><rect class="svg_gamepad1_btn" name="select" x="128" y="80" width="24" height="24"></rect></g>
+							<g class="hover_group" opacity="0.75"><rect class="svg_gamepad1_btn" name="start" x="168" y="80" width="24" height="24"></rect></g>
+							<g class="hover_group" opacity="0.75"><rect class="svg_gamepad1_btn" name="sL" x="32" y="0" width="80" height="24"></rect></g>
+							<g class="hover_group" opacity="0.75"><rect class="svg_gamepad1_btn" name="sR" x="226" y="0" width="80" height="24"></rect></g>
+							<g class="hover_group" opacity="0.75"><rect class="svg_gamepad1_btn" name="btnY" x="217" y="69" width="24" height="24"></rect></g>
+							<g class="hover_group" opacity="0.75"><rect class="svg_gamepad1_btn" name="btnB" x="250" y="96" width="24" height="24"></rect></g>
+							<g class="hover_group" opacity="0.75"><rect class="svg_gamepad1_btn" name="btnX" x="248" y="46" width="24" height="24"></rect></g>
+							<g class="hover_group" opacity="0.75"><rect class="svg_gamepad1_btn" name="btnA" x="281" y="69" width="24" height="24"></rect></g>
+							</svg>
+						</figure>
+
+								<div class="emulatorControls_buttons" id="showEmuControls">Display Controls</div>
+								<div class="emulatorControls_buttons" id="stopEmulator_button">Stop Emulator</div>
+						</div>
+
 				</div>
 
 				<div class="gameframe_">
+
 					<div class="gameframe_border_top gameframe_borders"></div>
 
 					<div id="middle_cont1">
 						<div class="gameframe_border_left gameframe_borders"></div>
-						<div id="emscripten_iframe_container"> <iframe id="emscripten_iframe" frameBorder="0" src="loading.html"></iframe> </div>
+
+						<div id="emscripten_iframe_container">
+							<iframe id="emscripten_iframe" frameBorder="0" src="loading.html"></iframe>
+						</div>
+
 						<div class="gameframe_border_right gameframe_borders"></div>
 					</div>
 
+					<div id="app_emulator_emulator_controls2" class="">
+						<!--<input type="button" class="button emu_button1" onclick='document.querySelector("#app_emulator_emulator_iframe").contentWindow.resizeEmulatorView();'   value="Resize Emulator" id="emulatorControls_resize"><br>-->
+						<input type="button" class="button emu_button1" value="F2: Quality"       id="emulatorControls_F2">
+						<input type="button" class="button emu_button1" value="F3: Debug"         id="emulatorControls_F3">
+						<input type="button" class="button emu_button1" value="F7: Flicker"       id="emulatorControls_F7">
+						<input type="button" class="button emu_button1" value="F8: Controls"      id="emulatorControls_F8">
+						<input type="button" class="button emu_button1" value="F9: Pause"         id="emulatorControls_F9">
+						<input type="button" class="button emu_button1" value="F10: Frame-step"  id="emulatorControls_F10">
+
+					</div>
 					<div class="gameframe_border_bottom gameframe_borders"></div>
 
-					<style>
-.hover_group:hover {
-    opacity:1;
-    background-color:yellow;
-}
-#projectsvg {
-	position: relative;
-	width: 338px;
-	height: 158px;
-	z-index: 550;
-	overflow: hidden;
-	margin:auto;
-	display:none;
-}
-#projectsvg svg {
-	width: 338px;
-	height: 158px;
-	background-color:blue;
-	padding:0px;
-	margin:0px;
-	display:none;
-}
-
-</style>
-					<figure id="projectsvg">
-						<svg width="338" height="158" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 338 158" preserveAspectRatio="xMinYMin meet" >
-						    //set your background image
-						<image width="320" height="240" xlink:href="img/CUzeBox_controls.png">
-						<image width="338" height="158" xlink:href="img/CUzeBox_controls.png">
-						<image xlink:href="img/CUzeBox_controls.png">
-						</image>
-						<g class="hover_group" opacity="0"><rect id="dirUP"  name="dirUP"  x="68" y="40" width="16" height="24" opacity="0.5" fill="#FFFFFF"></rect></g>
-						<g class="hover_group" opacity="0"><rect id="dirDN"  name="dirDN"  x="68" y="96" width="16" height="24" opacity="0.5" fill="#FFFFFF"></rect></g>
-						<g class="hover_group" opacity="0"><rect id="dirLT"  name="dirLT"  x="32" y="72" width="32" height="16" opacity="0.5" fill="#FFFFFF"></rect></g>
-						<g class="hover_group" opacity="0"><rect id="dirRT"  name="dirRT"  x="88" y="72" width="32" height="16" opacity="0.5" fill="#FFFFFF"></rect></g>
-						<g class="hover_group" opacity="0"><rect id="select" name="select" x="128" y="80" width="24" height="24" opacity="0.5" fill="#FFFFFF"></rect></g>
-						<g class="hover_group" opacity="0"><rect id="start"  name="start"  x="168" y="80" width="24" height="24" opacity="0.5" fill="#FFFFFF"></rect></g>
-						<g class="hover_group" opacity="0"><rect id="sL"     name="sL"     x="32" y="0" width="80" height="24" opacity="0.5" fill="#FFFFFF"></rect></g>
-						<g class="hover_group" opacity="0"><rect id="sR"     name="sR"     x="226" y="0" width="80" height="24" opacity="0.5" fill="#FFFFFF"></rect></g>
-						<g class="hover_group" opacity="0"><rect id="btnY"   name="btnY"   x="216" y="72" width="24" height="24" opacity="0.5" fill="#FFFFFF"></rect></g>
-						<g class="hover_group" opacity="0"><rect id="btnB"   name="btnB"   x="252" y="96" width="24" height="24" opacity="0.5" fill="#FFFFFF"></rect></g>
-						<g class="hover_group" opacity="0"><rect id="btnX"   name="btnX"   x="252" y="46" width="24" height="24" opacity="0.5" fill="#FFFFFF"></rect></g>
-						<g class="hover_group" opacity="0"><rect id="btnA"   name="btnA"   x="282" y="72" width="24" height="24" opacity="0.5" fill="#FFFFFF"></rect></g>
-						</svg>
-					</figure>
-
-
-
-
-
-
 				</div>
+
 			</div>
 
 			<div id="VIEW_gamedbmanager" class="views">

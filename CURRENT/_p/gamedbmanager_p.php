@@ -1,12 +1,11 @@
 <?php
-// tattle5("i got here1", null);
+	// trigger_error("prepare". json_encode($dbhandle, JSON_PRETTY_PRINT), E_USER_ERROR);
+
 // DONE!
 function getGameList(){
-// tattle5("i got here2", null);
 	// List all files in the game database. Provide separate responses for SD and non-SD games.
 	// Prepares this query.
 	$eud_db = $GLOBALS['eud_db'];
-	// file_get_contents($eud_db)
 	$dbhandle  = new sqlite3_DB_PDO($eud_db) or exit("cannot open the database");
 
 	$statement_SQL = '
@@ -22,8 +21,7 @@ function getGameList(){
 
 	// Prepare, bind placeholders, then execute the SQL query.
 	$dbhandle->prepare($statement_SQL);
-	// trigger_error("prepare". json_encode($dbhandle, JSON_PRETTY_PRINT), E_USER_ERROR);
-		// $dbhandle->bind(':id', $_POST['id']);
+	// $dbhandle->bind(':id', $_POST['id']);
 	$retval_execute1 = $dbhandle->execute();
 
 	// Fetch the records.
@@ -42,7 +40,6 @@ function getGameList(){
 function loadGame(){
 	// Prepares this query.
 	$eud_db = $GLOBALS['eud_db'];
-	// file_get_contents($eud_db)
 	$dbhandle  = new sqlite3_DB_PDO($eud_db) or exit("cannot open the database");
 
 	// SQL delete query.
@@ -59,33 +56,33 @@ function loadGame(){
 
 	// Prepare, bind placeholders, then execute the SQL query.
 	$dbhandle->prepare($statement_SQL);
-	// trigger_error("prepare". json_encode($dbhandle, JSON_PRETTY_PRINT), E_USER_ERROR);
 		$dbhandle->bind(':id', $_POST['game']);
 	$retval_execute1 = $dbhandle->execute();
 
 	// Fetch the records.
 	$result = $dbhandle->statement->fetchAll(PDO::FETCH_ASSOC) ;
 	if(!sizeof($result)){ exit(); }
-  // Now get a list of the files that are within the game's directory.
-  $directory = $result[0]['gamedir'];
-  $scanned_directory = array_values(array_diff(scandir($directory), array('..', '.', '.git')));
-  // $scanned_directory = array_values(array_diff(scandir($directory), array()));
 
-  // Gather only the directory names.
-  $filelist = array();
-  for($i=0; $i<sizeof($scanned_directory); $i++){
-	if( ! is_dir($directory.'/'.$scanned_directory[$i]) ){
-		array_unshift($filelist,
-			[ "filename"=>$scanned_directory[$i], "completefilepath"=>$directory.''.$scanned_directory[$i] ]
-		);
+	  // Now get a list of the files that are within the game's directory.
+	  $directory = $result[0]['gamedir'];
+	  $scanned_directory = array_values(array_diff(scandir($directory), array('..', '.', '.git')));
+	  // $scanned_directory = array_values(array_diff(scandir($directory), array()));
 
-	}
-  }
+	  // Gather only the directory names.
+	  $filelist = array();
+	  for($i=0; $i<sizeof($scanned_directory); $i++){
+		if( ! is_dir($directory.'/'.$scanned_directory[$i]) ){
+			array_unshift($filelist,
+				[ "filename"=>$scanned_directory[$i], "completefilepath"=>$directory.''.$scanned_directory[$i] ]
+			);
+
+		}
+	  }
 
 	$dataFilesObj = [
-	  "title"=>$result[0]['title'],
-	  "uzerom"=> $result[0]['gamefile'],
-	  "datafiles"=>$filelist,
+	  "title"     => $result[0]['title']    ,
+	  "uzerom"    => $result[0]['gamefile'] ,
+	  "datafiles" => $filelist              ,
 	];
 
 	// Get the HTML that will be put into the iframe.
@@ -95,9 +92,9 @@ function loadGame(){
 	// Output the data.
 	echo json_encode(
 		array(
-			"iframehtml"  	=> $iframehtml,
-			"count"   	  	=> sizeof($result),
-			"dataFilesObj"  => $dataFilesObj
+			"iframehtml"   => $iframehtml     ,
+			"count"        => sizeof($result) ,
+			"dataFilesObj" => $dataFilesObj   ,
 		)
 	);
 
@@ -105,8 +102,6 @@ function loadGame(){
 
 // DONE!
 function loadUserGameIntoEmu(){
-	// $_POST['gamefile'];
-
 	// Get the HTML that will be put into the iframe.
 	$filelistType = 2;
 	$iframehtml = liveEditEmu(null, $filelistType);
@@ -114,17 +109,15 @@ function loadUserGameIntoEmu(){
 	// Output the data.
 	echo json_encode(
 		array(
-			"iframehtml"  	=> $iframehtml,
-			"count"   	  	=> sizeof($result),
-			"dataFilesObj"  => $dataFilesObj
+			"iframehtml"  	=> $iframehtml     ,
+			"count"   	  	=> sizeof($result) ,
+			"dataFilesObj"  => $dataFilesObj   ,
 		)
 	);
 }
 
 // DONE!
 function loadUserGameIntoEmu2(){
-	// $_POST['gamefile'];
-
 	// Get the HTML that will be put into the iframe.
 	$filelistType = 3;
 	$iframehtml = liveEditEmu(null, $filelistType);
@@ -132,9 +125,9 @@ function loadUserGameIntoEmu2(){
 	// Output the data.
 	echo json_encode(
 		array(
-			"iframehtml"  	=> $iframehtml,
-			"count"   	  	=> sizeof($result),
-			"dataFilesObj"  => $dataFilesObj
+			"iframehtml"  	=> $iframehtml     ,
+			"count"   	  	=> sizeof($result) ,
+			"dataFilesObj"  => $dataFilesObj   ,
 		)
 	);
 }
@@ -195,7 +188,6 @@ else if($filelistType==3){
 	";
 }
 
-
 $script0_toreplace.=
 	"
 	// Cuzebox Extra
@@ -206,6 +198,7 @@ $script0_toreplace.=
   </script>
   ";
 
+  // Replace a string with the replacement string.
   $cuzeboxhtml = str_replace($script0_tofind, $script0_toreplace, $cuzeboxhtml);
 
   // Send the modified page.
@@ -218,7 +211,6 @@ function loadGame_intoManager(){
 
 	// Prepares this query.
 	$eud_db = $GLOBALS['eud_db'];
-	// file_get_contents($eud_db)
 	$dbhandle  = new sqlite3_DB_PDO($eud_db) or exit("cannot open the database");
 
 	// SQL delete query.
@@ -238,6 +230,7 @@ function loadGame_intoManager(){
 
 	WHERE id = :id
 	;';
+
 	// Prepare, bind placeholders, then execute the SQL query.
 	$dbhandle->prepare($statement_SQL);
 		$dbhandle->bind(':id', $_POST['game']);
@@ -261,10 +254,10 @@ function loadGame_intoManager(){
 
 	$output =
 		array(
-			"retval_execute1" => $retval_execute1,
-			"result"          => $result[0],
-			"result2"         => $result,
-			"filelist"        => $filelist
+			"retval_execute1" => $retval_execute1 ,
+			"result"          => $result[0]       ,
+			"result2"         => $result          ,
+			"filelist"        => $filelist        ,
 		);
 
 	// Output the data.
@@ -307,7 +300,7 @@ function updateGameInfo(){
 	$retval_execute1 = $dbhandle->execute();
 
 	// Fetch the records.
-// 	$result = $dbhandle->statement->fetchAll(PDO::FETCH_ASSOC) ;
+	// 	$result = $dbhandle->statement->fetchAll(PDO::FETCH_ASSOC) ;
 
 	// Output the data.
 	echo json_encode(
@@ -342,7 +335,12 @@ function newFileUpload(){
 	$targetpath=getcwd()."/".$result[0]["gamedir"];
 
 	// List of allowed extensions.
-	$allowedEXTs = array("UZE", "uze", "HEX", "hex", "DAT", "dat", "bin", "lvl", "mid", "midi", "mp3", "umm", "ger", "eng");
+	$allowedEXTs = array(
+		"UZE", "uze",
+		"HEX", "hex",
+		"DAT", "dat",
+		"bin", "lvl", "mid", "midi", "mp3", "umm", "ger", "eng"
+	);
 
 	// Go through the filelist. Check file extensions. Move files.
 	foreach($_FILES as $key => $value) {
@@ -352,26 +350,27 @@ function newFileUpload(){
 		}
 	}
 
-
 	// Get the data from loadGame_intoManager, parse it, and return it as well.
 	$_POST['game'] = $_POST['gameid'];
+
 	ob_start();
 	loadGame_intoManager();
 	$res = ob_get_contents();
 	ob_end_clean();
-	$res=json_decode($res, true);
-	$gamedata = $res["result"];
-	$filelist = $res["filelist"];
+
+	$res      = json_decode($res, true) ;
+	$gamedata = $res["result"]          ;
+	$filelist = $res["filelist"]        ;
 
 	$output =
 		array(
-			"retval_execute1" => $retval_execute1,
-			"retval_execute2" => $retval_execute2,
-			"success"=>true,
-			"gamedata"=>$gamedata,
-			"filelist"=>$filelist,
-			"success"=>$retval_execute1,
-			"moved"=>$moved
+			"retval_execute1" => $retval_execute1 ,
+			"retval_execute2" => $retval_execute2 ,
+			"success"         => true             ,
+			"gamedata"        => $gamedata        ,
+			"filelist"        => $filelist        ,
+			"success"         => $retval_execute1 ,
+			"moved"           => $moved           ,
 		);
 
 	// Output the data.
@@ -405,11 +404,7 @@ function removeGameFile(){
 	// Use the games dir as the starting file path that all files will be relative to.
 	$targetpath=getcwd()."/".$result[0]["gamedir"];
 
-	// We DON'T want a true on this.
-	// $string = "#this isatest.ttt";
-
 	unlink($targetpath.basename($_POST['filename']));
-
 
   // Now get a list of the files that are within the game's directory.
   $directory = $result[0]['gamedir'];
@@ -488,11 +483,11 @@ function newGameRecord(){
 
 	$output =
 		array(
-			"retval_execute1" => $retval_execute1,
-			"retval_execute2" => $retval_execute2,
-			"success"=>true,
-			"gamedata"=>$gamedata,
-			"filelist"=>$filelist,
+			"retval_execute1" => $retval_execute1 ,
+			"retval_execute2" => $retval_execute2 ,
+			"success"         => true             ,
+			"gamedata"        => $gamedata        ,
+			"filelist"        => $filelist        ,
 		);
 
 	// Output the data.

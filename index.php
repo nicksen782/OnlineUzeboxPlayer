@@ -55,7 +55,8 @@ for($i=0; $i<sizeof($dirlist); $i++){
 <h1><?php echo basename(getcwd()); ?><h1>
 <h3>
 Youtube Video Demo:
-<a href="https://youtu.be/IaaIbDH8QZY">Demo 1</a>
+<li><a href="https://youtu.be/IaaIbDH8QZY">Demo 1 (2016-12-26)</a></li>
+<li><a href="https://youtu.be/ogGazXRQMj8">Demo 2 (2017-09-16)</a></li>
 </h3>
 <h2>Version Links:</h2>
 

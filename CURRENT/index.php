@@ -1,9 +1,8 @@
 <?php $properAccess=true; require_once("globals_p.php"); ?>
-<!doctype html>
-<html lang="en-us">
-
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang='en'>
 <head>
-	<meta http-equiv="X-UA-Compatible" content="IE=11" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 	<meta charset="utf-8">
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<title>Uzebox Game Changer</title>
@@ -311,7 +310,7 @@
 									<option value="1">(1) - Demo</option>
 									<option value="2">(2) - W.I.P.</option>
 									<option value="3">(3) - Complete</option>
-									<option value="4">(4) - RESERVED</option>
+									<option value="4">(4) - UCC</option>
 									<option value="5">(5) - RESERVED</option>
 								</select>
 							</tr>
@@ -375,7 +374,7 @@
 			<br>
 			<a href="http://www.nicksen782.net/a_demos/Emscripten_Uzebox_Gamechanger/" target="_blank">Non-development Version of this Application.</a><br>
 			<br>
-			<a target="_blank" href="http://vanilla-js.com/"> <img src="vanillajs_button.png"> </a>
+			<a target="_blank" href="http://vanilla-js.com/"> <img src="img/vanillajs_button.png"> </a>
 
 			<?php if($devenvironment == true){ ?>
 				<h1>Developer Links</h1>

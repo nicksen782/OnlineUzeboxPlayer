@@ -16,15 +16,12 @@ body {
 
 div#wrapAll {
 	padding: 5px;
-	/* background-color: rgb(57, 60, 169); */
-	/* background-color: #6a6cc7; */
 	border-radius: 10px;
 }
 
 div#top_panel {
 	position: relative;
 	left: 1px;
-	/* background-color: #6b8dbd; */
 	height: 45px;
 	padding: 5px 0px 0px 0px;
 	border-radius: 10px;
@@ -45,7 +42,6 @@ div#topNavMenu {
 	border-top-left-radius: 20px;
 	border-top-right-radius: 20px;
 	border-bottom: 0px solid black;
-	/* background-color: #393ca9; */
 	position: relative;
 	top: 0px;
 	left: 0px;
@@ -54,12 +50,8 @@ div#topNavMenu {
 
 .navButton {
 	display: inline-block;
-	/* background-color: goldenrod; */
-	/* background-color: darkkhaki; */
 	width: 150px;
 	text-align: center;
-	/* border-top-left-radius: 10px; */
-	/* border-top-right-radius: 10px; */
 	border-radius: 10px 10px 0px 0px;
 	border: 2px solid #000060;
 	border-bottom: 0px solid black;
@@ -69,7 +61,6 @@ div#topNavMenu {
 	line-height: 38px;
 	position: relative;
 	text-decoration: underline;
-	/* font-weight: bold; */
 	top: -4px;
 	left: 15px;
 	vertical-align: bottom;
@@ -164,10 +155,7 @@ input#restartEmulator_button {
 #content {
 	border: 2px solid #000060;
 	min-height: 550px;
-	/* background-color: #6a6cc7; */
-	/* background-color: #393ca9; */
 	background-color: rgb(161, 122, 24);
-	/* background-color: #000060; */
 	margin: 0px 1px 0px 1px;
 	padding-bottom: 15px;
 	border-radius: 5px 5px 10px 10px;
@@ -186,7 +174,7 @@ input#restartEmulator_button {
 	background-color: darkgray;
 	margin: auto;
 	margin-bottom: 15px;
-	width: 600px;
+	width: 800px;
 	padding-bottom: 10px;
 	overflow: auto;
 	border-radius: 15px;
@@ -200,8 +188,6 @@ input#restartEmulator_button {
 #VIEW_misc {
 	position: relative;
 	background-color: rgba(167, 120, 0, 0.6);
-	/* height: 100%; */
-	/* width: 100%; */
 }
 
 #emscripten_iframe_container iframe {
@@ -216,7 +202,6 @@ input#restartEmulator_button {
 	width: 650px;
 	display: inline-block;
 	vertical-align: top;
-	/* padding: 5px; */
 	box-shadow: 0px 0px 5px 5px rgba(0, 0, 0, 0.5);
 	background-color: #ab8118;
 	background-color: black;
@@ -226,7 +211,6 @@ input#restartEmulator_button {
 	border-radius: 15px;
 	border: 5px solid #000060;
 	border: 10px solid rgb(57, 60, 169);
-	/* padding-bottom: 10px; */
 }
 
 .gameframe_borders {
@@ -247,7 +231,6 @@ input#restartEmulator_button {
 	width: 100%;
 	height: 35px;
 	position: relative;
-	/* display: none; */
 }
 
 .gameframe_border_left {
@@ -372,6 +355,7 @@ input#restartEmulator_button {
 	margin: 0px;
 	height: 160px;
 	width: 245px;
+	width: 100%;
 }
 
 #completeData_1game_buttons {
@@ -388,7 +372,7 @@ input#restartEmulator_button {
 
 #filemanager_section {
 	text-align: left;
-	width: 550px;
+	width: 750px;
 	margin: auto;
 	border: 1px solid black;
 	margin-top: 10px;
@@ -419,7 +403,7 @@ input#newFileUpload_browse {
 	margin: auto;
 	margin-top: 10px;
 	padding: 10px;
-	width: 550px;
+	width: 750px;
 	background-color: lightgray;
 	border-radius: 10px;
 	position: relative;
@@ -551,9 +535,6 @@ input#newFileUpload_browse {
 	display: block;
 }
 
-
-
-
 #darkener_modal_3 {
 	position: fixed;
 	top: 0px;
@@ -572,8 +553,6 @@ input#newFileUpload_browse {
 #modal_3 {
 	background-color: rgba(89, 160, 230, 1);
 	overflow-y: scroll;
-	/* overflow-x: scroll; */
-	/* overflow: hidden; */
 	font-family: "Liberation Mono", Courier, monospace;
 	font-weight: bold;
 	color: black;
@@ -587,7 +566,6 @@ input#newFileUpload_browse {
 	left: 0;
 	right: 0;
 	width: 950px;
-	/* padding: 10px; */
 	padding-top: 0px;
 	height: 500px;
 	margin: auto;
@@ -612,8 +590,6 @@ input#newFileUpload_browse {
 	width: 350px;
 	padding: 3px 3px 3px 3px;
 	padding: 5px;
-	/* background-color: goldenrod; */
-	/* background-color: #008bc0; */
 	background-color: #336699;
 	background-color: #393ca9;
 	border-radius: 15px;
@@ -636,7 +612,6 @@ input#newFileUpload_browse {
 	z-index: 9;
 	position: relative;
 	border: 1px solid darkgoldenrod;
-	/* font-stretch: ultra-expanded; */
 	border-radius: 10px 10px 10px 10px;
 	display: inline-block;
 	text-align: center;
@@ -900,10 +875,8 @@ input#FilesFromUser_viewableBtn {
 }
 
 #showEmuControls {
-	/* position: absolute; */
-	/* top: 0px; */
-	/* left: 0px; */
 }
+
 #CUzeBox_controls{background-image: url('../img/CUzeBox_controls.png');width: 400px;height: 200px;background-size: 100% 100%;background-repeat: no-repeat;margin: auto;}
 
 div#CUzeBox_controls {}
@@ -940,25 +913,17 @@ input#emulatorControls_section_gamefromurl_url {
 	width: 630px;
 	height: 25px;
 	position: relative;
-	/* left: 570px; */
-	/* top: 50px; */
 	background-color: #091724;
-	/* background-color: black; */
 	text-align: center;
 	padding: 5px;
 	border: 5px solid black;
-	/* border-top: 15px solid black; */
 	border-radius: 15px;
 	margin-top: 5px;
-	/* margin-left: 5px; */
-	/* opacity: 0.5; */
 }
 
 .button {
-	/* background-color: #cece5b; */
 	background-color: #585835;
 	border-radius: 10px;
-	/* border: 2px solid lightgray; */
 	border: 2px solid darkslateblue;
 	box-shadow: 0px 0px 2px 2px darkslategrey;
 }
@@ -973,15 +938,10 @@ figure#projectsvg {
 }
 
 .hover_group {
-	/* opacity: 0.5; */
-	/* background-color: yellow; */
 	fill: rgba(255, 255, 0, 0.3);
-	/* border: 10px solid black; */
 }
 
 .hover_group:hover {
-	/* opacity: 0.90; */
-	/* background-color: yellow; */
 	fill: rgba(0, 128, 91, 0.5);
 }
 

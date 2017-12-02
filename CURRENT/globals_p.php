@@ -17,7 +17,7 @@
 		$GLOBALS['eud_db'] = "sqlite:eud.db";
 
 		// Database functions - sqlite
-		require_once("_sysp/db_sqlite_p.php");
+		require_once("_p/db_sqlite_p.php");
 
 		// Detect if this is dev.
 		if( $_SERVER['SERVER_NAME'] == "dev2-nicksen782.c9users.io" ){

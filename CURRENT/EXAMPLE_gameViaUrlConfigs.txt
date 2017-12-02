@@ -1,6 +1,12 @@
 ******
-Example .json file contents:
+NOTE: For security purposes the .htaccess file should be in the download directory ONLY.
+NOTE: Remove the "*" lines. They are only here to differentiate the two files.
+NOTE: completefilepath gets appended to the base directory name that the .json file was downloaded from. It will become a complete file path.
+******
 
+
+Example .json file contents:
+******
 {
  "files": [
   {"filename":"gamefile.uze", "completefilepath":"gamefile.uze", "ext":"uze"},
@@ -9,21 +15,30 @@ Example .json file contents:
  "title": "Title for your game",
  "gamefile": "gamefile.uze"
 }
-
-NOTE: completefilepath gets appended to the base directory name that the .json file was downloaded from. It will become a complete file path.
-
 ******
 
-******
 
 Example Apache .htaccess file contents:
+******
+# This config will allow more than one domain to have access to the files in further child directories.
+# Look to the "SetEnvIf" line. This is where you could add more than one server.
+# Browsers typically only allow one "Header add Access-Control-Allow-Origin".
+# Requires the mod_headers.c module!!
 
-Header always set Access-Control-Allow-Origin "http://www.nicksen782.net"
-Header always set Access-Control-Allow-Credentials "true"
-Header always set Access-Control-Allow-Methods "POST, GET, OPTIONS"
-Header always set Access-Control-Allow-Headers "x-requested-with, Content-Type, origin, authorization, accept, client-security-token"
-Header always set Access-Control-Max-Age: 60
+<IfModule mod_headers.c>
+ # The code serves to create entry but with your present domain if there is a match.
+ # With the following configuration this file would allow for two different domains.
+ SetEnvIf Origin "http(s)?://(www\.)?(nicksen782\.net|dev2\-nicksen782\.c9users\.io)$" AccessControlAllowOrigin=$0
+ Header add Access-Control-Allow-Origin %{AccessControlAllowOrigin}e env=AccessControlAllowOrigin
+ Header always set Access-Control-Allow-Credentials "true"
+ Header always set Access-Control-Allow-Methods "POST, GET, OPTIONS"
+ Header always set Access-Control-Allow-Headers "X-Requested-With, Content-Type, Origin, Authorization, Accept, Client-Security-Token, Accept-Encoding"
+ Header always set Access-Control-Max-Age: "5"
 
-This .htaccess file should be in the download directory ONLY.
-
+ # This part is for caching. Not 100% required.
+ Header unset ETag
+ Header set Cache-Control "max-age=0, no-cache, no-store, must-revalidate"
+ Header set Pragma "no-cache"
+ Header set Expires "Wed, 11 Jan 1984 05:00:00 GMT"
+</IfModule>
 ******

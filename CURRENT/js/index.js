@@ -707,7 +707,7 @@ function getGameList(autostartGame, gameDbValue) {
 			addToGamelistMenu(resp, 'status', '2', '', 'W.I.P.');
 			addToGamelistMenu(resp, 'status', '1', '', 'Demo');
 			addToGamelistMenu(resp, 'status', '0', '', 'Not Defined Yet');
-			addToGamelistMenu(resp, 'status', '4', '', 'RESERVED');
+			addToGamelistMenu(resp, 'status', '4', '', 'UCC');
 			addToGamelistMenu(resp, 'status', '5', '', 'RESERVED');
 		}
 

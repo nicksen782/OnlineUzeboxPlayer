@@ -815,12 +815,12 @@ function serverGameMenu_select(){
 		gamename = "N/A";
 		return;
 	}
-	var directLink1=window.origin +''+ window.location.pathname+"?gameid="+gameid;
-	// var directLink2=window.location.href+"?gameid="+gameid+"&externalcontrol=true" ;
+	var directLink1=window.location.origin +''+ window.location.pathname+"?gameid="+gameid;
+	document.querySelector("#serverGame_directurl").innerHTML = "<a id='gamedlink' title='"+gamename+"' target='_blank' href='"+directLink1+"'> Direct link:  "+gamename+"</a>";
 
-	console.log("Direct play URL (normal UI):", window.location.href+"?gameid="+gameid );
-	console.log("Direct play URL (reduced UI):", window.location.href+"?gameid="+gameid );
-	document.querySelector("#serverGame_directurl").innerHTML          = "<a title='"+gamename+"' target='_blank' href='"+directLink1+"'> Direct link:  "+gamename+"</a>";
+	// var directLink2=window.location.href+"?gameid="+gameid+"&externalcontrol=true" ;
+	// console.log("Direct play URL (normal UI):", window.location.href+"?gameid="+gameid );
+	// console.log("Direct play URL (reduced UI):", window.location.href+"?gameid="+gameid );
 	// document.querySelector("#serverGame_directurl_min").innerHTML      = "<a title='"+gamename+"' target='_blank' href='"+directLink2+"'> Reduced UI (id "+gameid+")</a>";
 
 	loadGameIntoEmu(gameid);

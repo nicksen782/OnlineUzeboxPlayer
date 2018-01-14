@@ -335,19 +335,19 @@ function newFileUpload(){
 	$targetpath=getcwd()."/".$result[0]["gamedir"];
 
 	// List of allowed extensions.
-	$allowedEXTs = array(
-		"UZE", "uze",
-		"HEX", "hex",
-		"DAT", "dat",
-		"bin", "lvl", "mid", "midi", "mp3", "umm", "ger", "eng"
-	);
+	// $allowedEXTs = array(
+	// 	"UZE", "uze",
+	// 	"HEX", "hex",
+	// 	"DAT", "dat",
+	// 	"bin", "lvl", "mid", "midi", "mp3", "umm", "ger", "eng"
+	// );
 
 	// Go through the filelist. Check file extensions. Move files.
 	foreach($_FILES as $key => $value) {
-		$extension = strtolower(pathinfo($_FILES[$key]['name'])["extension"]);
-		if (in_array($extension, $allowedEXTs)) {
+		// $extension = strtolower(pathinfo($_FILES[$key]['name'])["extension"]);
+		// if (in_array($extension, $allowedEXTs)) {
 			$moved[$key] = move_uploaded_file( $_FILES[$key]['tmp_name'], $targetpath . "" . basename($_FILES[$key]['name']) );
-		}
+		// }
 	}
 
 	// Get the data from loadGame_intoManager, parse it, and return it as well.

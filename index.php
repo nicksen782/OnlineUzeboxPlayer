@@ -1,6 +1,7 @@
 <?php
 date_default_timezone_set('America/Detroit');
-if( $_SERVER['HTTP_HOST'] == "dev2-nicksen782.c9users.io" || $_SERVER['SERVER_NAME'] == "dev2-nicksen782.c9users.io" ){ $devenvironment=true;} else{$devenvironment=false;}
+if( $_SERVER['HTTP_HOST'] == "dev2-nicksen782.c9users.io" || $_SERVER['SERVER_NAME'] == "dev2-nicksen782.c9users.io" ){ $devenvironment=true; }
+else{ $devenvironment=false; }
 
 // Get file listing minus the '.' and '..'.
 $directory = ".";
@@ -19,7 +20,9 @@ for($i=0; $i<sizeof($scanned_directory); $i++){
 // Now, figure out which one is the 'CURRENT' folder.
 $dirlist = array_diff($dirlist, ["CURRENT"]);
 
-header("Refresh:15; url='CURRENT'");
+if(!$devenvironment){
+	header("Refresh:15; url='CURRENT'");
+}
 
 for($i=0; $i<sizeof($dirlist); $i++){
 	array_push($links, "<a href='".$dirlist[$i]."'>".$dirlist[$i]."</a>");
@@ -74,8 +77,11 @@ Youtube Video Demo:
 	}
 ?>
 
-<h3>Page will automatically redirect to == <?php echo 'CURRENT' ;?> == in 15 seconds.</h3>
-<h4>... or you could just click <a href='<?php echo 'CURRENT' ;?>/'>HERE (<?php echo 'CURRENT' ;?>)</a> to see the latest version</h4>
+<?php if(!$devenvironment){ ?>
+	<h3>Page will automatically redirect to == <?php echo 'CURRENT' ;?> == in 15 seconds.</h3>
+<?php } ?>
+
+<h4>Click <a href='<?php echo 'CURRENT' ;?>/'>HERE (<?php echo 'CURRENT' ;?>)</a> to see the latest version of the application.</h4>
 
 <?php
 clearstatcache();

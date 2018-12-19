@@ -1,0 +1,3 @@
+ This is a version of the classic Fifteen Puzzle, where the tiles are rearranged by sliding them into the open space until the original configuration is achieved.
+ Puzzle consists of a frame of numbered square tiles in random order with one tile missing.
+ The rules are simple: place the number in ascending orde.

@@ -1,0 +1,17 @@
+// Polyfill for .closest.
+// https://developer.mozilla.org/en-US/docs/Web/API/Element/closest
+if (window.Element && !Element.prototype.closest) {
+    // console.log("FEATURE REPLACEMENT: Element.prototype.closest is missing. Adding with polyfill...");
+
+    Element.prototype.closest =
+    function(s) {
+        var matches = (this.document || this.ownerDocument).querySelectorAll(s),
+            i,
+            el = this;
+        do {
+            i = matches.length;
+            while (--i >= 0 && matches.item(i) !== el) {};
+        } while ((i < 0) && (el = el.parentElement));
+        return el;
+    };
+}

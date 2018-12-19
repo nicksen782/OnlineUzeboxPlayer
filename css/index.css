@@ -1,0 +1,293 @@
+.unavailableView {
+    /*cursor: not-allowed !important;*/
+	pointer-events: none;
+	opacity: 0.40;
+	/*text-decoration: line-through;*/
+	/* cursor: not-allowed; */
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+/**/
+/* UAM ONLY*/
+.uamOnly{
+	/*display:none;*/
+	opacity: 0.15;
+}
+.uamOnly.enabled{
+	/*display:block;*/
+	opacity: 1.0;
+}
+.uamOnly.sectionWindow{
+	background-color: rgba(40, 160, 210, 1);
+	border-style: solid;
+	/* border-width: 2px; */
+	/* border-color: black; */
+}
+.uamOnly .sectionWindow_title{
+	background-color: hsla(40, 69%, 53%, 1);
+}
+/* UAM ONLY*/
+/**/
+
+
+
+
+canvas {
+  /* Older versions of FF          */
+  image-rendering: optimizeSpeed;
+
+  /* FF 6.0+                       */
+  image-rendering: -moz-crisp-edges;
+
+  /* Safari                        */
+  image-rendering: -webkit-optimize-contrast;
+
+  /* OS X & Windows Opera (12.02+) */
+  image-rendering: -o-crisp-edges;
+
+  /* Awesome future-browsers       */
+  image-rendering: pixelated;
+
+  /* IE                            */
+  -ms-interpolation-mode: nearest-neighbor;
+}
+
+html {
+	max-width: 1200px;
+	width: 880px;
+	margin: auto;
+	/*scroll-behavior: smooth;*/
+}
+html.wide  { width: 1175px; }
+
+body {
+	position: relative;
+	background-color: #213a4e;
+}
+#bodyHeader {
+	text-align: center;
+	margin: 5px;
+	padding: 5px;
+	background-color: #b9c6d0;
+	border: 1px solid black;
+	border-radius: 5px;
+}
+#bodyContainer {
+	min-height: 200px;
+	margin: 5px;
+	padding: 5px;
+	background-color: rgb(185, 198, 208);
+	background-color: hsl(206, 51%, 37%);
+	border: 1px solid black;
+	border-radius: 5px;
+}
+#bodyFooter {
+	text-align: left;
+	margin: 5px;
+	padding: 5px;
+	background-color: #b9c6d0;
+	border: 1px solid black;
+	border-radius: 5px;
+}
+
+
+/* USED AS THE CONTAINER FOR THE MAIN SECTIONS OF THIS APPLICATION */
+.sectionDivs {
+	position: relative;
+	min-height: 600px;
+	border: 2px solid black;
+	border-radius: 5px;
+	background-color: #aec4e0;
+	background-color: #6b7a8c;
+	/* margin-bottom: 20px; */
+	display:none;
+}
+.sectionDivs.active{
+	display:block;
+}
+
+.sectionWindow_title, .sectionDivs_title {
+	background-color: #85a3e0;
+	padding: 5px;
+	text-align: center;
+	border-bottom: 1px solid steelblue;
+	border-radius: 4px 4px 0px 0px;
+	height: 30px;
+	font-size: 16px;
+}
+
+.sectionDivs_content {
+	padding: 5px;
+	border-radius: 0px 0px 4px 4px;
+	border: 5px solid blue;
+}
+
+.sectionDivs_title_text {
+	position: absolute;
+	left: 5px;
+	top: 5px;
+	font-size: 26px;
+	vertical-align: top;
+}
+
+.sectionDivs_title_options {
+	position: absolute;
+	right: 5px;
+	top: 0px;
+	width: 600px;
+	height: 2em;
+	text-align: right;
+	vertical-align: top;
+}
+
+/* USED AS CONTAINERS WITHING EACH MAIN SECTION OF THIS APPLICATION */
+.sectionWindow {
+	width: 250px;
+	height: 100px;
+	border: 2px solid black;
+	border-radius: 5px 5px 5px 5px;
+	position: absolute;
+	box-shadow: 0px 0px 10px 0px black;
+	background-color: #85a3e0;
+}
+
+.sectionWindow_title {
+	height: 15px;
+	background-color: hsla(220, 69%, 53%, 1);
+}
+
+.sectionWindow_content {
+	padding: 5px;
+	position:relative;
+}
+
+.navOptions {
+	font-size: 1.0em;
+	line-height: 1em;
+	display: inline-block;
+	background-color: #6994e9;
+	border-radius: 5px;
+	padding: 5px;
+	margin: 3px;
+	border: 2px solid #1e5a88;
+	vertical-align: top;
+}
+.navOptions:hover {
+	background-color: #a4c3ff;
+}
+.navOptions.hidden {
+	display:none;
+}
+
+#emu_view{height: 650px;}
+#emu_gameSelector    {left: 10px;top: 50px;width: 200px;height: 100px;width: 345px;height: 95px;}
+#emu_gameFiles       {width: 345px;height: 125px;min-height: 150px;height: auto;position: absolute;top: 165px;left: 10px;z-index: 18;padding: 0px;border-radius: 5px;overflow: hidden;}
+#emu_onscreenGamepads{width: 345px;height: 300px;position: absolute;top: 335px;left: 10px;z-index: 18;}
+#emu_emuControls     {left: 370px;top: 50px; width: 470px;height: 100px;}
+#emu_emulator        {left: 370px;top: 165px;width: 470px;height: 470px;}
+
+#emu_view_uam{
+	background-color: #65b0427a;
+	left: 860px;
+	top: 50px;
+	width: 200px;
+	height: 100px;
+	width: 286px;
+	height: 590px;
+	position: absolute;
+	font-size: 14px;
+	padding: 0px;
+	overflow: hidden;
+	display:none;
+}
+#emu_view_uam.enabled{
+	display:block;
+}
+#emu_gameSelector_uam{left: 0px;top: 0px  ; width: 200px;height: 100px;width: 280px;height: 210px;position: absolute;font-size: 14px; padding: 0px;overflow: hidden;}
+#emu_miniOutput1_uam {left: 0px;top: 220px; width: 280px;height: auto;position: absolute;padding: 0px;overflow: hidden;}
+#emu_miniOutput2_uam {left: 0px;top: 405px; width: 280px;height: auto;position: absolute;padding: 0px;overflow: hidden;}
+
+.dataHolder {
+	background-color: black;
+	color: palegoldenrod;
+	width: 280px;
+	height: 130px;
+	text-align: left;
+	overflow: auto;
+	font-family: monospace;
+	font-size: 10px;
+	white-space: pre-line;
+	display: inline-block;
+	vertical-align: top;
+	z-index: 1;
+	position: relative;
+	padding: 4px;
+}
+
+.table1 {
+	width: 100%;
+	background-color: rgba(90, 120, 181, 0.4);
+}
+.table1 caption {
+	background-color: rgba(34, 66, 129, 0.4);
+}
+
+#emu_db{height: 650px;}
+#emu_db_gameChoice{
+	left: 10px;
+	top: 50px;
+	width: 200px;
+	height: 100px;
+	width: 600px;
+	height: 100px;
+}
+#emu_db_gameMetadata{
+	left: 10px;
+	top: 170px;
+	width: 200px;
+	height: 100px;
+	width: 550px;
+	height: 350px;
+}
+#emu_db_files{
+	left: 630px;
+	top: 50px;
+	width: 200px;
+	height: 100px;
+	width: 500px;
+	height: 395px;
+}
+#emu_db_upload{
+	left: 630px;
+	top: 490px;
+	width: 200px;
+	height: 100px;
+	width: 500px;
+	height: 95px;
+}
+
+
+
+div#emu_filesList_div {
+	height: 80px;
+	overflow: auto;
+}
+div#emu_filesList_div .table1 th:nth-child(1) {width: 20%;background-color:green;}
+div#emu_filesList_div .table1 th:nth-child(2) {width: 60%;background-color:blue;}
+div#emu_filesList_div .table1 th:nth-child(3) {width: 20%;background-color:red;}
+
+div#emu_filesList_div .table1 td:nth-child(1) { }
+div#emu_filesList_div .table1 td:nth-child(2) { font-family:monospace; }
+div#emu_filesList_div .table1 td:nth-child(3) { font-family:monospace; }
+/*.table2 thead > tr {*/
+/*}*/
+/*.table2 :not(thead) > tr {*/
+/*}*/
+
+/*div#emu_filesList_div table { width:100%;}*/
+/*div#emu_filesList_div table { width:100%;}*/

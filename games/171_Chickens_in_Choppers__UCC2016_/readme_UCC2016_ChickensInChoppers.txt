@@ -1,0 +1,2 @@
+Note from Uze: I have generated the .UZE file with the packrom tool. But received 
+"ignoring unknown record type 3 in line 3163 of cchopper.hex". Althought it seems to work, revert to the HEX file if teh game runs into problems.

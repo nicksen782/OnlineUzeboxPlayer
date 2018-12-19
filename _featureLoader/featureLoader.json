@@ -1,0 +1,204 @@
+{
+ "Promise"  : {
+  "type"        : "library",
+  "text"        : "Bluebird Promise Library. Supports IE9+",
+  "req"         : true,
+  "have"        : null,
+  "hadNatively" : null,
+  "url"         : "_featureLoader/libs/bluebird.min.js",
+  "test"        : "if(typeof Promise === \"undefined\") { false; } else { true; };",
+  "website"     : "https:/github.com/petkaantonov/bluebird"
+ },
+ "JSZip"    : {
+  "type"        : "library",
+  "text"        : "Allows for the creation of a .zip file.",
+  "req"         : false,
+  "have"        : null,
+  "hadNatively" : null,
+  "url"         : "_featureLoader/libs/jszip.min.js",
+  "test"        : "if(typeof JSZip === \"undefined\") { false; } else { true; };",
+  "website"     : "https:/github.com/Stuk/jszip"
+ },
+ "FileSaver": {
+  "type"        : "library",
+  "text"        : "Allows for downloading of a file that is already in browser memory.",
+  "req"         : false,
+  "have"        : null,
+  "hadNatively" : null,
+  "url"         : "_featureLoader/libs/FileSaver.min.js",
+  "test"        : "if(typeof saveAs === \"undefined\")  { false; } else { true; };",
+  "website"     : "https:/github.com/eligrey/FileSaver.js/"
+ },
+ "sha512"   : {
+  "type"        : "library",
+  "text"        : "Hashing library that can be used for hashing passwords.",
+  "req"         : false,
+  "have"        : null,
+  "hadNatively" : null,
+  "url"         : "_featureLoader/libs/sha512.min.js",
+  "test"        : "if(typeof hex_sha512 == \"undefined\")  { false; } else { true; };",
+  "website"     : "https://coursesweb.net/javascript/sha512-encrypt-hash_cs"
+ },
+ "chartsJs" : {
+  "type"        : "library",
+  "text"        : "Simple yet flexible JavaScript charting for designers & developers",
+  "req"         : false,
+  "have"        : null,
+  "hadNatively" : null,
+  "url"         : "_featureLoader/libs/ChartJs.min.js",
+  "test"        : "if(typeof Chart === \"undefined\")  { false; } else { true; };",
+  "website"     : "https:/www.chartjs.org/"
+ },
+ "momentJs" : {
+  "type"        : "library",
+  "text"        : "Parse, validate, manipulate, and display dates and times in JavaScript.",
+  "req"         : false,
+  "have"        : null,
+  "hadNatively" : null,
+  "url"         : "_featureLoader/libs/moment.min.js",
+  "test"        : "if(typeof moment === \"undefined\")  { false; } else { true; };",
+  "website"     : "http:/momentjs.com/"
+ },
+ "X2JS"     : {
+  "type"        : "library",
+  "text"        : "XML to JSON and back for JavaScript",
+  "req"         : false,
+  "have"        : null,
+  "hadNatively" : null,
+  "url"         : "_featureLoader/libs/xml2json.min.js",
+  "test"        : "if(typeof X2JS === \"undefined\")  { false; } else { true; };",
+  "website"     : "https://github.com/abdmob/x2js"
+ },
+
+ "repeat"           : {
+  "type"        : "polyfill",
+  "text"        : "Required for .padEnd and .padStart. The repeat() method constructs and returns a new string which contains the specified number of copies of the string on which it was called, concatenated together.",
+  "req"         : true,
+  "have"        : null,
+  "hadNatively" : null,
+  "url"         : "_featureLoader/polyfills/repeat.js",
+  "test"        : "if(!String.prototype.repeat) { false; } else { true; }",
+  "website"     : "https:/developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/repeat"
+ },
+ "padStart"         : {
+  "type"        : "polyfill",
+  "text"        : "The padStart() method pads the current string with another string (multiple times, if needed)",
+  "req"         : true,
+  "have"        : null,
+  "hadNatively" : null,
+  "url"         : "_featureLoader/polyfills/padStart.js",
+  "test"        : "if(!String.prototype.padStart) { false; } else { true; }",
+  "website"     : "https:/developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padStart"
+ },
+ "padEnd"           : {
+  "type"        : "polyfill",
+  "text"        : "The padEnd() method pads the current string with a given string (repeated, if needed) so that the resulting string reaches a given length.",
+  "req"         : true,
+  "have"        : null,
+  "hadNatively" : null,
+  "url"         : "_featureLoader/polyfills/padEnd.js",
+  "test"        : "if(!String.prototype.padEnd) { false; } else { true; }",
+  "website"     : "https:/developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padEnd"
+ },
+ "closest"          : {
+  "type"        : "polyfill",
+  "text"        : "The Element.closest() method returns the closest ancestor of the current element (or the current element itself) which matches the selectors given in parameter. If there is not such an ancestor, it returns null.",
+  "req"         : true,
+  "have"        : null,
+  "hadNatively" : null,
+  "url"         : "_featureLoader/polyfills/closest.js",
+  "test"        : "if (window.Element && !Element.prototype.closest) { false; } else { true; }",
+  "website"     : "https:/developer.mozilla.org/en-US/docs/Web/API/Element/closest"
+ },
+ "findIndex"        : {
+  "type"        : "polyfill",
+  "text"        : "The findIndex() method returns the index of the first element in the array that satisfies the provided testing function. Otherwise, it returns -1, indicating no element passed the test.",
+  "req"         : true,
+  "have"        : null,
+  "hadNatively" : null,
+  "url"         : "_featureLoader/polyfills/findIndex.js",
+  "test"        : "if(!Array.prototype.findIndex) { false; } else { true; }",
+  "website"     : "https:/developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/findIndex"
+ },
+ "Number.isNaN"     : {
+  "type"        : "polyfill",
+  "text"        : "The Number.isNaN() method determines whether the passed value is NaN and its type is Number. It is a more robust version of the original, global isNaN().",
+  "req"         : true,
+  "have"        : null,
+  "hadNatively" : null,
+  "url"         : "_featureLoader/polyfills/isNaN.js",
+  "test"        : "if(!Array.prototype.findIndex) { false; } else { true; }",
+  "website"     : "https:/developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/isNaN"
+ },
+ "Object.assign"    : {
+  "type"        : "polyfill",
+  "text"        : "The Object.assign() method is used to copy the values of all enumerable own properties from one or more source objects to a target object. It will return the target object.",
+  "req"         : true,
+  "have"        : null,
+  "hadNatively" : null,
+  "url"         : "_featureLoader/polyfills/Object.assign.js",
+  "test"        : "if(typeof Object.assign != 'function') { false; } else { true; }",
+  "website"     : "https:/developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign"
+ },
+ "forEach_array"    : {
+  "type"        : "polyfill",
+  "text"        : "Covers array.",
+  "req"         : true,
+  "have"        : null,
+  "hadNatively" : null,
+  "url"         : "_featureLoader/polyfills/forEach_array.js",
+  "test"        : "if(!Array.prototype.forEach) { false; } else { true; }",
+  "website"     : "https:/developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach"
+ },
+ "forEach_nodeList" : {
+  "type"        : "polyfill",
+  "text"        : "Covers nodeList.",
+  "req"         : true,
+  "have"        : null,
+  "hadNatively" : null,
+  "url"         : "_featureLoader/polyfills/forEach_nodeList.js",
+  "test"        : "if(window.NodeList && !NodeList.prototype.forEach) { false; } else { true; }",
+  "website"     : "https:/developer.mozilla.org/en-US/docs/Web/API/NodeList/forEach"
+ },
+ "smoothScroll"     : {
+  "type"        : "polyfill",
+  "text"        : "Allows for {behavior:smooth} scrolling.",
+  "req"         : true,
+  "have"        : null,
+  "hadNatively" : null,
+  "url"         : "_featureLoader/polyfills/smoothscroll.min.js",
+  "test"        : "if (!('scrollBehavior' in document.documentElement.style || !0 !== window.__forceSmoothScrollPolyfill__ )) { false; } else { true; }",
+  "website"     : "https:/github.com/iamdustan/smoothscroll"
+ },
+ "CustomEvent"      : {
+  "type"        : "polyfill",
+  "text"        : "Normalizes CustomEvent which is different in IE.",
+  "req"         : true,
+  "have"        : null,
+  "hadNatively" : null,
+  "url"         : "_featureLoader/polyfills/CustomEvent.js",
+  "test"        : "if ( typeof window.CustomEvent !== \"function\" ) { false; } else { true; }",
+  "website"     : "https:/developer.mozilla.org/en-US/docs/Web/API/CustomEvent/CustomEvent"
+ },
+ "matches"          : {
+  "type"        : "polyfill",
+  "text"        : "The Element.matches() method returns true if the element would be selected by the specified selector string; otherwise, returns false.",
+  "req"         : true,
+  "have"        : null,
+  "hadNatively" : null,
+  "url"         : "_featureLoader/polyfills/matches.js",
+  "test"        : "if ( !Element.prototype.matches ) { false; } else { true; }",
+  "website"     : "https://developer.mozilla.org/en-US/docs/Web/API/Element/matches"
+ },
+
+ "getQueryStringAsObj": {
+  "type"        : "customFunction",
+  "text"        : "Breaks out the queryString into key/value pairs and returns them as an object.",
+  "req"         : false,
+  "have"        : null,
+  "hadNatively" : null,
+  "url"         : "_featureLoader/customFunctions/getQueryStringAsObj.js",
+  "test"        : "if(typeof window.getQueryStringAsObj != \"function\")  { false; } else { true; };",
+  "website"     : "https://www.nicksen782/featureLoader/customFunctions/getQueryStringAsObj.js"
+ }
+}

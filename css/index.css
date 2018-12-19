@@ -291,3 +291,17 @@ div#emu_filesList_div .table1 td:nth-child(3) { font-family:monospace; }
 
 /*div#emu_filesList_div table { width:100%;}*/
 /*div#emu_filesList_div table { width:100%;}*/
+
+#emscripten_iframe_container{
+	background-color: #4682b4;
+	background-color: black;
+	width: 430px;
+	height: 430px;
+}
+#emscripten_iframe{
+	width: 430px;
+	height: 430px;
+	background-color: black;
+	/*width: 465px;*/
+	/*height: 405px;*/
+}

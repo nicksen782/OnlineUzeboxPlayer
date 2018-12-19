@@ -137,6 +137,7 @@ Games and Demos
 		<div id="emu_emulator" class="sectionWindow">
 			<div class="sectionWindow_title">Emulator Screen</div>
 			<div class="sectionWindow_content">
+				<div id="emscripten_iframe_container"></div>
 			</div>
 		</div>
 

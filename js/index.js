@@ -45,6 +45,7 @@ emu.vars                  = {
 	gameFile   : "" ,
 	gameTitle  : "" ,
 	baseURL    : "" ,
+	iframeHTML : ""
 };
 emu.funcs                 = {
 	emu_getBuiltInGamelist : function(){
@@ -116,9 +117,14 @@ emu.funcs                 = {
 	getGameFiles                 : function(methodType){
 		// Get DOM handles on the loading inputs.
 		var emu_builtInGames_select1 = emu.vars.dom.view.builtInGames_select;
+		// var userFiles      = document.querySelector("#emu_FilesFromUser");
+		// var select_UAM     = document.querySelector("#emu_userGames_fromUAM");
 
 		// Allow the game load?
-		//
+		if(methodType==1 && emu_builtInGames_select1.value==""){ return; }
+		// if(methodType==2 && !userFiles.files.length ){ return; }
+		// if(methodType==3 && select_UAM.value==""    ){ return; }
+
 		var fixUzeHeader = function(filename, data){
 			let view8 = new Uint8Array( data );
 			// Fix the header on the .uze file?
@@ -177,9 +183,8 @@ emu.funcs                 = {
 
 						if(doWeLoadTheGame){
 							setTimeout(function(){
-								// emu.addFileListToDisplay(false, true);
-								// emu.loadGame();
 
+								// emu.addFileListToDisplay(false, true);
 								function addFileListToDisplay(){
 									let doNotCreateLinks=true;
 
@@ -258,6 +263,8 @@ emu.funcs                 = {
 								}
 								addFileListToDisplay();
 
+								emu.funcs.loadGame();
+
 							}, 100);
 						}
 						else{
@@ -272,7 +279,7 @@ emu.funcs                 = {
 
 			var proms = [ ];
 
-			// Download each tile.
+			// Download each file.
 			res.remoteload.files.map(function(d,i,a){
 				proms.push(
 					{
@@ -322,8 +329,216 @@ emu.funcs                 = {
 
 	},
 
+	emu_removeEmuIframes         : function(){
+		// Remove previous iframe(s).
+		var container = document.querySelector('#emscripten_iframe_container');
+		var previousIframes = container.querySelectorAll('iframe');
+		if( previousIframes.length){
+			for(var i=0; i<previousIframes.length; i++){
+				previousIframes[i].remove();
+			}
+		}
+	} ,
 
-	OLD_getGameFiles                 : function(methodType){
+	emu_removeListeners          : function(){
+		// Adds a mouseenter listener to the iframe container. On mouseenter it will give the Emscripten iframe the focus.
+		var container          = document.querySelector('#emscripten_iframe_container');
+		// var emscripten_iframe  = document.querySelector('#emscripten_iframe');
+
+		container.onmouseenter = null ;
+		container.onmousedown  = null ;
+		container.onmouseleave = null ;
+	}  ,
+
+
+	loadGame : function(){
+			// Prevent game load if game is already loading.
+			// Remove previous emulator iframes and event listeners.
+
+			var emuFilesReady = function(data){
+				// console.log("cuzebox.js          :", data["cuzebox.js"]);
+				// console.log("cuzebox_minimal.html:", data["cuzebox_minimal.html"]);
+
+				// Create config var.
+				var config = '<script name="cuzebox_js">'+data["cuzebox.js"]+'</script>';
+
+				// Replace the placeholder text in the cuzebox_minimal.html file with the config var.
+				var newHTML = data["cuzebox_minimal.html"].replace("<!-- PLACE HOLDER FOR REPLACEMENT -->", config);
+
+				// Cache the full html (including the replaced stuff) for easy reloading later.
+				emu.vars.iframeHTML = newHTML;
+
+				// Create iframe.
+				var newIframe = document.createElement('iframe');
+					// Remove frameborder
+					newIframe.setAttribute("frameBorder", "0");
+
+					// Set id to emscripten_iframe.
+					newIframe.id = "emscripten_iframe";
+
+					// Get handle on the container for the iframe.
+					var container = document.querySelector('#emscripten_iframe_container');
+
+					// Create iframe onload event listener.
+					newIframe.onload=function(){
+						// Open the iframe contentWindow.document.
+						newIframe.contentWindow.document.open();
+
+							// Write the newHTML to into it.
+							newIframe.contentWindow.document.write(newHTML);
+
+							// Close the iframe contentWindow.document.
+							newIframe.contentWindow.document.close();
+
+						// Display the new status of the emulator.
+						// Detect auto-pause checkbox value.
+							// If checked then pauseMainLoop for Emscripten
+								// If the mouse is not currently over the iframe.
+							// If not checked then just set the status as "Accepting input"
+					};
+
+					// Set the iframe src to "about:blank"
+					// newIframe.src="about:blank";
+					// newIframe.src="iframe_unloaded.html";
+					newIframe.src="loading.html";
+
+					// Remove previous emulator iframes and event listeners.
+					if(document.querySelector("#emscripten_iframe")!=null){
+						// document.querySelector("#emscripten_iframe").remove();
+						emu.funcs.emu_removeEmuIframes();
+						emu.funcs.emu_removeListeners();
+					}
+
+					// Append the iframe to the container.
+					container.appendChild(newIframe);
+
+					// emu.gameFilesDownloading = false ;
+					// emu.gameAllowedToLoad    = true  ;
+					// emu.emu_displayStatus();
+
+			};
+
+			// Get the cuzebox_minimal.html file and the cuzebox.js file.
+			var proms = [ ];
+			proms.push(
+				{
+					"filename" : "cuzebox_minimal.html",
+					"data":"",
+					"prom":emu.funcs.shared.serverRequest( {
+						"o":"", "_config":{"responseType":"text", "processor":"cuzebox_minimal.html"}}
+					)
+				},
+				{
+					"filename" : "cuzebox.js",
+					"data":"",
+					"prom":emu.funcs.shared.serverRequest( {
+						"o":"", "_config":{"responseType":"text", "processor":"cuzebox.js"}}
+					)
+				}
+			);
+			var promsOnly = proms.map(function(d,i,a){ return d.prom; });
+			var filenamesOnly = proms.map(function(d,i,a){ return d.filename; });
+			Promise.all(promsOnly).then(
+				function(res){
+					var data = {};
+					res.map(function(d,i,a){ data[ filenamesOnly[i] ]=res[i]; });
+					emuFilesReady(data);
+				},
+				emu.funcs.shared.rejectedPromise
+			);
+
+
+
+
+		return;
+	},
+
+	OLDloadGame                  : function(){
+		// Bail if emu.gameFilesDownloading == true
+		if( emu.gameFilesDownloading ){ console.warn("***Game file download is already in progress.***"); return; }
+
+		// Remove previous iframe(s).
+		emu.emu_removeEmuIframes();
+		emu.emu_removeListeners();
+
+		// Get the cuzebox_minimal.html file.
+		emu.ajaxGETfile("cuzebox_minimal.html", "text", function(FILE1){
+			// Get the cuzebox.js file.
+			emu.ajaxGETfile("cuzebox.js", "text", function(FILE2){
+				// Embed the cuzebox.js file.
+				var config = `<script name="cuzebox_js">`+FILE2+`</script>`;
+
+				// Put the script at the designated location in the file.
+				var newHTML = FILE1.replace("<!-- PLACE HOLDER FOR REPLACEMENT -->", config);
+
+				// Save this HTML for later resuming if the game is stopped but not unloaded.
+				emu.iframeHTML = newHTML;
+
+				var newIframe = document.createElement('iframe');
+				newIframe.setAttribute("frameBorder", "0");
+				newIframe.id = "emscripten_iframe";
+				var container = document.querySelector('#emscripten_iframe_container');
+
+				newIframe.onload=function(){
+					newIframe.contentWindow.document.open();
+					newIframe.contentWindow.document.write(newHTML);
+					newIframe.contentWindow.document.close();
+					emu.emu_addListeners();
+					parent.window.emu.emu_displayStatus();
+
+					if( document.querySelector("#emu_autoPauseChkbox").checked==true){
+						setTimeout(function(){
+							emu.emuIframe_Document = document.querySelector('#emscripten_iframe').contentDocument;
+							emu.emuIframe_Window   = document.querySelector('#emscripten_iframe').contentWindow;
+							if( document.querySelectorAll('#emscripten_iframe:hover').length ){
+								emu.emu_setStatus('Accepting input');
+							}
+							else{
+								newIframe.contentWindow.Module.pauseMainLoop();
+								emu.emu_setStatus('Paused');
+							}
+						}, 500);
+					}
+					else{
+						emu.emu_setStatus('Accepting input');
+					}
+
+					newIframe.onload=null;
+				};
+
+				newIframe.src="about:blank";
+				container.appendChild(newIframe);
+
+			}
+			,function(){
+				console.log("ERROR! 404 (Not Found)");
+				emu.gameFilesDownloading = false ;
+				emu.gameAllowedToLoad    = true  ;
+				emu.emu_displayStatus();
+				return;
+			}
+			);
+		}
+		,function(){
+			console.log("ERROR! 404 (Not Found)");
+			emu.gameFilesDownloading = false ;
+			emu.gameAllowedToLoad    = true  ;
+			emu.emu_displayStatus();
+			return;
+		}
+		);
+	},
+	OLDemu_displayStatus         : function(){
+		var app_emu_status = document.querySelector("#app_emu_status");
+		if      (emu.gameFilesDownloading){
+			app_emu_status.innerHTML = "Downloading...";
+
+		}
+		else if (emu.gameAllowedToLoad   ){
+			app_emu_status.innerHTML = "Ready!";
+		}
+	},
+	OLD_getGameFiles             : function(methodType){
 			if(   emu.gameFilesDownloading ){
 				console.warn("***Game file download is already in progress.***");
 				return;
@@ -552,6 +767,7 @@ emu.funcs                 = {
 			}
 
 		},
+
 	addAllListeners : function(){
 		// Add the event listeners for the quick nav buttons.
 		var allTitleNavGroups = document.querySelectorAll(".sectionDivs_title_options");

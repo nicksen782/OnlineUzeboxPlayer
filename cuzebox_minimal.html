@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en-us">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>CUzeBox/Emscripten/Game-changer</title>
+		<style>
+			html{
+				font-family: arial;
+				padding:0px;
+				margin: 0px;
+				overflow: hidden;
+			}
+			body {
+				margin: 0px;
+				padding: 0px;
+				overflow: hidden;
+			}
+			div.emscripten{
+				border: 0px solid black;
+				padding: 0px;
+				margin: 0px;
+				display: block;
+				overflow: hidden;
+			}
+			canvas.emscripten {
+				border: 0px solid black;
+				padding: 0px;
+				margin: 0px;
+				display: block;
+				overflow: hidden;
+			}
+		</style>
+
+		<script>
+			// window.onload = function(e){
+				// setTimeout(function(){ console.log("START"); resizeIframe(); console.log("END"); }, 3025);
+				// window.onload=null;
+			// };
+			// Receive a message.
+			window.addEventListener('message',function(e) {
+				// console.log("postMessage listener");
+
+				// Make sure the orgin domain is allowed.
+				var allowed_domains = [
+					"https://dev3-nicksen782.c9users.io",
+					"https://www.nicksen782.net",
+				];
+				if (allowed_domains.indexOf(e.origin) == -1){
+					console.log(
+						"\n", "ERROR",
+						"\n", e.origin,
+						"\n", allowed_domains.indexOf(e.origin)
+					);
+					return;
+				}
+
+				console.log("Parent message:", e.data);
+
+				switch(e.data.function){
+					case 'keyToEmu' : {
+						console.log("&&&&&&&&&&&");
+						try{console.log("Emscripten iframe: keyToEmu:2", e.data);  } catch(e){ console.log("error2"); }
+						try{console.log("Emscripten iframe: keyToEmu:3", e.data);  } catch(e){ console.log("error3"); }
+						console.log("&&&&&&&&&&&");
+						// var data = event.data.data;
+						// // var e = new Event( data.type );
+						// // var e = new Event( "keydown" );
+
+						// var event1_obj = {
+						// 	'shiftKey' : data.shiftKey ,
+						// 	'location' : data.location ,
+						// 	'code'     : data.code     ,
+						// 	'key'      : data.key      ,
+						// 	'keyCode'  : data.keyCode  ,
+						// 	'which'    : data.which    ,
+						// 	'altKey'   : data.altKey   ,
+						// 	'ctrlKey'  : data.ctrlKey  ,
+						// 	'metaKey'  : data.metaKey  ,
+						// 	'bubbles'  : data.bubbles  ,
+						// 	'type'     : data.type     ,
+						// 	'isTrusted': true          ,
+						// };
+						// var event1 = new KeyboardEvent( event1_obj.type , event1_obj);
+
+						// console.log("EMU:", event1);
+						// window.dispatchEvent(event1);
+						// document.dispatchEvent(event1);
+						// document.body.dispatchEvent(event1);
+						// document.body.querySelector("#canvas").dispatchEvent(event1);
+						// Module['canvas'].dispatchEvent(event1);
+						// parent.window.document.querySelector("#emscripten_iframe").contentWindow.dispatchEvent(event1);
+						// parent.window.document.querySelector("#emscripten_iframe").contentDocument.dispatchEvent(event1);
+						// parent.window.document.querySelector("#emscripten_iframe").dispatchEvent(event1);
+						// console.log("EMU:", event1);
+
+						break;
+					}
+					default : { console.log("Unexpected message.", event.data); break; }
+				}
+
+			}, false);
+		</script>
+
+	</head>
+
+	<body>
+
+		<div class="emscripten">
+			<canvas class="emscripten" id="canvas"></canvas>
+		</div>
+
+		<script name="cuzebox_minimal_html">
+			var resizeIframe = function(){
+				setTimeout(function(){
+				var canvas       = document.getElementById('canvas');
+				var parentIframe = parent.document.querySelector("#emscripten_iframe");
+				var parentIframeContainer = parent.document.querySelector("#emscripten_iframe_container");
+
+				// var emuWidth  = parent.window.emu.vars.emuWidth;
+				// var emuHeight = parent.window.emu.vars.emuHeight;
+
+				console.log(parentIframeContainer);
+				var emuWidth  = parentIframeContainer.getBoundingClientRect().width;
+				var emuHeight = parentIframeContainer.getBoundingClientRect().height;
+
+				console.log(parentIframeContainer, emuWidth, emuHeight);
+
+				// console.log(emuWidth, emuHeight);
+
+				canvas      .style.width  = emuWidth  + "px" ;
+				canvas      .style.height = emuHeight + "px" ;
+
+				// canvas      .width  = emuWidth  ;
+				// canvas      .height = emuHeight  ;
+
+				parentIframe.style.width  = emuWidth  + "px" ;
+				parentIframe.style.height = emuHeight + "px" ;
+				}, 1500);
+			};
+
+			document.addEventListener("keydown", function(e){
+				// console.log("****");
+				// console.log("emu keydown!! e:", e);
+				// console.log("****");
+				// console.log("window.event.code:", window.event.code);
+				// switch(window.event.code){
+				switch(e.code){
+					// Emulator controls.
+					case 'F2'  : { setTimeout(function(){ resizeIframe(); }, 25); break; }
+					case 'F3'  : { setTimeout(function(){ resizeIframe(); }, 25); break; }
+					default    : { setTimeout(function(){ resizeIframe(); }, 25); break; }
+				}
+			});
+
+			// Retrieve the data from this iframe's parent.
+			var gameTitle                  = parent.window.emu.vars.gameTitle;
+			var currentgame                = parent.window.emu.vars.gameFile;
+			var uzerom                     = parent.window.emu.vars.gameFile;
+			var parentGameFiles            = parent.window.emu.vars.gameFiles;
+			var parentgameFilesDownloading = parent.window.emu.vars.gameFilesDownloading;
+
+			if(   parentgameFilesDownloading ) { throw new Error('DATA FULLY LOADED?: gameFilesDownloading: ' + parentgameFilesDownloading); }
+			if( ! gameTitle.length           ) { throw new Error('DATA MISSING: gameTitle                   ' + gameTitle);                  }
+			if( ! currentgame.length         ) { throw new Error('DATA MISSING: currentgame                 ' + currentgame);                }
+			if( ! uzerom.length              ) { throw new Error('DATA MISSING: uzerom                      ' + uzerom);                     }
+			if( ! parentGameFiles.length     ) { throw new Error('DATA MISSING: parentGameFiles. Length:    ' + parentGameFiles.length);     }
+
+			// Emscripten config.
+			var Module = {
+				// Specifies which file the emulator should start.
+				arguments : [ parent.window.emu.vars.gameFile ],
+
+				// Load the files from the files list.
+				preInit   : [function(){
+					for(var i=0; i<parentGameFiles.length; i++){
+						try{
+							FS.createPreloadedFile('/', parentGameFiles[i].name , parentGameFiles[i].data , true, true);
+						}
+						catch(e){
+							console.log("Error in downloading file. Trying one more time.", e);
+							try{
+								console.log("SECOND ATTEMPT: Creating file:", parentGameFiles[i].name);
+								FS.createPreloadedFile('/', parentGameFiles[i].name , parentGameFiles[i].data , true, true);
+							}
+							catch(e){
+								console.log("FAILED THE SECOND TIME. GIVING UP!", e);
+								return;
+							}
+						}
+					}
+				}],
+
+				// The Emscripten output canvas.
+				canvas    : (function() { return document.getElementById('canvas'); })(),
+
+				preRun    : [],
+
+				postRun   : [
+
+					function(){
+						parent.window.emu.vars.gameAllowedToLoad=true;
+						// parent.window.emu.vars.emu_displayStatus();
+
+						resizeIframe();
+
+						// Send a message to the parent.
+						window.parent.postMessage(
+							{
+								'function': 'emuStarted',
+								'data'    : [],
+							}
+							, document.location.href
+						);
+
+					}
+				],
+
+				print: (function() {
+					var element = document.getElementById('output');
+					if (element) { element.value = ''; }// clear browser cache
+					return function(text) {
+						if (arguments.length > 1) { text = Array.prototype.slice.call(arguments).join(' '); }
+						// These replacements are necessary if you render to raw HTML
+						console.log("FROM EMSCRIPTEN!", text);
+						if (element) {
+							element.value += text + ' \n ';
+							element.scrollTop = element.scrollHeight; // focus on bottom
+						}
+					};
+				})(),
+
+				printErr: function(text) {
+					if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
+					console.log("EMSCRIPTEN:", text);
+				},
+
+			};
+		</script>
+
+		<!-- PLACE HOLDER FOR REPLACEMENT -->
+
+	</body>
+</html>

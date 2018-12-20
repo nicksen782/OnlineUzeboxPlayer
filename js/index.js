@@ -140,9 +140,9 @@ emu.funcs                 = {
 					view8[5] = 88; // X
 					console.log("GAMEFILE:", filename, " -- The header has been corrected.");
 				}
-				else{
-					console.log("GAMEFILE:", filename, " -- The header IS CORRECT.");
-				}
+				// else{
+				// 	console.log("GAMEFILE:", filename, " -- The header IS CORRECT.");
+				// }
 			}
 
 			return view8;
@@ -340,17 +340,6 @@ emu.funcs                 = {
 		}
 	} ,
 
-	emu_removeListeners          : function(){
-		// Adds a mouseenter listener to the iframe container. On mouseenter it will give the Emscripten iframe the focus.
-		var container          = document.querySelector('#emscripten_iframe_container');
-		// var emscripten_iframe  = document.querySelector('#emscripten_iframe');
-
-		container.onmouseenter = null ;
-		container.onmousedown  = null ;
-		container.onmouseleave = null ;
-	}  ,
-
-
 	loadGame : function(){
 			// Prevent game load if game is already loading.
 			// Remove previous emulator iframes and event listeners.
@@ -406,7 +395,6 @@ emu.funcs                 = {
 					if(document.querySelector("#emscripten_iframe")!=null){
 						// document.querySelector("#emscripten_iframe").remove();
 						emu.funcs.emu_removeEmuIframes();
-						emu.funcs.emu_removeListeners();
 					}
 
 					// Append the iframe to the container.
@@ -768,6 +756,41 @@ emu.funcs                 = {
 
 		},
 
+	emu_iframeFocusing : function(e, typeOverride){
+		var type = "";
+
+		var emscripten_iframe = document.querySelector("#emscripten_iframe");
+
+		// Is there an iframe there?
+		if(null==emscripten_iframe){ return; }
+
+		// Is it loaded and ready?
+		else if(
+			emscripten_iframe.contentWindow.Module &&
+			emscripten_iframe.contentWindow.emulatorIframeIsReady===true
+		){
+			// Get the type.
+			if(undefined==e){ type = typeOverride; }
+			else            { type = e.type; }
+
+			// Make sure that the specified type is an accepted type.
+			if(["mouseenter", "mouseleave"].indexOf(type) == -1){ return ; }
+
+			// Should we focus the emulator iframe?
+			if(["mouseenter"].indexOf(type) != -1){
+				emscripten_iframe.focus();
+				emscripten_iframe.contentWindow.Module.resumeMainLoop();
+			}
+
+			// Should we blur the emulator iframe focus?.
+			else if(["mouseleave"].indexOf(type) != -1){
+				emscripten_iframe.blur();
+				emscripten_iframe.contentWindow.Module.pauseMainLoop();
+			}
+		}
+
+	},
+
 	addAllListeners : function(){
 		// Add the event listeners for the quick nav buttons.
 		var allTitleNavGroups = document.querySelectorAll(".sectionDivs_title_options");
@@ -777,7 +800,12 @@ emu.funcs                 = {
 			});
 		});
 
+		// Handle new built-in DB game selection.
 		emu.vars.dom.view.builtInGames_select.addEventListener("change", function(){ emu.funcs.getGameFiles("1") }, false);
+
+		// Handle input focus on the emulator iframe. (Delegated)
+		document.querySelector('#emscripten_iframe_container').addEventListener("mouseenter", emu.funcs.emu_iframeFocusing, false);
+		document.querySelector('#emscripten_iframe_container').addEventListener("mouseleave", emu.funcs.emu_iframeFocusing, false);
 	}
 };
 emu.funcs.UAM             = {

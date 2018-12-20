@@ -7,36 +7,84 @@
 		<style>
 			html{
 				font-family: arial;
-				padding:0px;
-				margin: 0px;
-				overflow: hidden;
+				padding    : 0px;
+				margin     : 0px;
+				overflow   : hidden;
 			}
 			body {
-				margin: 0px;
-				padding: 0px;
+				margin  : 0px;
+				padding : 0px;
 				overflow: hidden;
 			}
 			div.emscripten{
-				border: 0px solid black;
-				padding: 0px;
-				margin: 0px;
-				display: block;
+				border  : 0px solid black;
+				padding : 0px;
+				margin  : 0px;
+				display : block;
 				overflow: hidden;
 			}
 			canvas.emscripten {
-				border: 0px solid black;
-				padding: 0px;
-				margin: 0px;
-				display: block;
+				border  : 0px solid black;
+				padding : 0px;
+				margin  : 0px;
+				display : block;
 				overflow: hidden;
 			}
 		</style>
+	</head>
 
-		<script>
-			// window.onload = function(e){
-				// setTimeout(function(){ console.log("START"); resizeIframe(); console.log("END"); }, 3025);
-				// window.onload=null;
-			// };
+	<body>
+		<div class="emscripten">
+			<canvas class="emscripten" id="canvas"></canvas>
+		</div>
+
+		<script name="cuzebox_minimal_html">
+			var emulatorIframeIsReady=false;
+			var resizeIframe = function(){
+				// Get DOM handles on the Emscripten canvas, the parent iframe and the parent iframe container.
+				var canvas       = document.querySelector('#canvas');
+				var parentIframe = parent.document.querySelector("#emscripten_iframe");
+				var parentIframeContainer = parent.document.querySelector("#emscripten_iframe_container");
+
+				// Determine what the new width and height should be.
+				var emuWidth  = parentIframeContainer.getBoundingClientRect().width  + "px";
+				var emuHeight = parentIframeContainer.getBoundingClientRect().height + "px";
+
+				// Set the new width and height of the Emscripten canvas and the parent iframe.
+				canvas      .style.width  = emuWidth  ;
+				canvas      .style.height = emuHeight ;
+				parentIframe.style.width  = emuWidth  ;
+				parentIframe.style.height = emuHeight ;
+			};
+			var emuIsReady = function(){
+				// console.log("Emulator is ready!");
+
+				emulatorIframeIsReady=true;
+				parent.window.emu.vars.gameAllowedToLoad=true;
+				// parent.window.emu.vars.emu_displayStatus();
+
+				// setTimeout(function(){
+					resizeIframe();
+				// }, 5);
+
+				// Send a message to the parent.
+				window.parent.postMessage(
+					{
+						'function': 'emuStarted',
+						'data'    : [],
+					}
+					, document.location.href
+				);
+			};
+			// Handle the iframe resizing on certain key events.
+			document.addEventListener("keydown", function(e){
+				switch(e.code){
+					// Emulator controls.
+					case 'F2'  : { setTimeout(function(){ resizeIframe(); }, 25); break; }
+					case 'F3'  : { setTimeout(function(){ resizeIframe(); }, 25); break; }
+					default    : { setTimeout(function(){ resizeIframe(); }, 25); break; }
+				}
+			});
 			// Receive a message.
 			window.addEventListener('message',function(e) {
 				// console.log("postMessage listener");
@@ -100,142 +148,66 @@
 				}
 
 			}, false);
-		</script>
-
-	</head>
-
-	<body>
-
-		<div class="emscripten">
-			<canvas class="emscripten" id="canvas"></canvas>
-		</div>
-
-		<script name="cuzebox_minimal_html">
-			var resizeIframe = function(){
-				setTimeout(function(){
-				var canvas       = document.getElementById('canvas');
-				var parentIframe = parent.document.querySelector("#emscripten_iframe");
-				var parentIframeContainer = parent.document.querySelector("#emscripten_iframe_container");
-
-				// var emuWidth  = parent.window.emu.vars.emuWidth;
-				// var emuHeight = parent.window.emu.vars.emuHeight;
-
-				console.log(parentIframeContainer);
-				var emuWidth  = parentIframeContainer.getBoundingClientRect().width;
-				var emuHeight = parentIframeContainer.getBoundingClientRect().height;
-
-				console.log(parentIframeContainer, emuWidth, emuHeight);
-
-				// console.log(emuWidth, emuHeight);
-
-				canvas      .style.width  = emuWidth  + "px" ;
-				canvas      .style.height = emuHeight + "px" ;
-
-				// canvas      .width  = emuWidth  ;
-				// canvas      .height = emuHeight  ;
-
-				parentIframe.style.width  = emuWidth  + "px" ;
-				parentIframe.style.height = emuHeight + "px" ;
-				}, 1500);
-			};
-
-			document.addEventListener("keydown", function(e){
-				// console.log("****");
-				// console.log("emu keydown!! e:", e);
-				// console.log("****");
-				// console.log("window.event.code:", window.event.code);
-				// switch(window.event.code){
-				switch(e.code){
-					// Emulator controls.
-					case 'F2'  : { setTimeout(function(){ resizeIframe(); }, 25); break; }
-					case 'F3'  : { setTimeout(function(){ resizeIframe(); }, 25); break; }
-					default    : { setTimeout(function(){ resizeIframe(); }, 25); break; }
-				}
-			});
-
-			// Retrieve the data from this iframe's parent.
-			var gameTitle                  = parent.window.emu.vars.gameTitle;
-			var currentgame                = parent.window.emu.vars.gameFile;
-			var uzerom                     = parent.window.emu.vars.gameFile;
-			var parentGameFiles            = parent.window.emu.vars.gameFiles;
-			var parentgameFilesDownloading = parent.window.emu.vars.gameFilesDownloading;
-
-			if(   parentgameFilesDownloading ) { throw new Error('DATA FULLY LOADED?: gameFilesDownloading: ' + parentgameFilesDownloading); }
-			if( ! gameTitle.length           ) { throw new Error('DATA MISSING: gameTitle                   ' + gameTitle);                  }
-			if( ! currentgame.length         ) { throw new Error('DATA MISSING: currentgame                 ' + currentgame);                }
-			if( ! uzerom.length              ) { throw new Error('DATA MISSING: uzerom                      ' + uzerom);                     }
-			if( ! parentGameFiles.length     ) { throw new Error('DATA MISSING: parentGameFiles. Length:    ' + parentGameFiles.length);     }
 
 			// Emscripten config.
 			var Module = {
 				// Specifies which file the emulator should start.
 				arguments : [ parent.window.emu.vars.gameFile ],
 
+				// The Emscripten output canvas.
+				canvas    : (function() { return document.querySelector('#canvas'); })(),
+
 				// Load the files from the files list.
 				preInit   : [function(){
-					for(var i=0; i<parentGameFiles.length; i++){
-						try{
-							FS.createPreloadedFile('/', parentGameFiles[i].name , parentGameFiles[i].data , true, true);
-						}
-						catch(e){
-							console.log("Error in downloading file. Trying one more time.", e);
-							try{
-								console.log("SECOND ATTEMPT: Creating file:", parentGameFiles[i].name);
-								FS.createPreloadedFile('/', parentGameFiles[i].name , parentGameFiles[i].data , true, true);
-							}
-							catch(e){
-								console.log("FAILED THE SECOND TIME. GIVING UP!", e);
-								return;
-							}
-						}
-					}
+					// console.log("Loading files");
+
+					// Retrieve the data from this iframe's parent.
+					// var gameTitle                  = parent.window.emu.vars.gameTitle;
+					// var currentgame                = parent.window.emu.vars.gameFile;
+					// var uzerom                     = parent.window.emu.vars.gameFile;
+					var parentGameFiles            = parent.window.emu.vars.gameFiles;
+					var parentgameFilesDownloading = parent.window.emu.vars.gameFilesDownloading;
+
+					if(   parentgameFilesDownloading ) { throw new Error('DATA FULLY LOADED?: gameFilesDownloading: ' + parentgameFilesDownloading); }
+					// if( ! gameTitle.length           ) { throw new Error('DATA MISSING: gameTitle                   ' + gameTitle);                  }
+					// if( ! currentgame.length         ) { throw new Error('DATA MISSING: currentgame                 ' + currentgame);                }
+					// if( ! uzerom.length              ) { throw new Error('DATA MISSING: uzerom                      ' + uzerom);                     }
+					if( ! parentGameFiles.length     ) { throw new Error('DATA MISSING: parentGameFiles. Length:    ' + parentGameFiles.length);     }
+
+					parentGameFiles.map(function(d,i,a){
+						try{ FS.createPreloadedFile('/', d.name , d.data , true, true); }
+						catch(e){ console.log("Error loading file!", d.name); alert("Error loading file! " + d.name); }
+					});
+
 				}],
 
-				// The Emscripten output canvas.
-				canvas    : (function() { return document.getElementById('canvas'); })(),
+				preRun    : [ function(){
+					// console.log("Files have been loaded.");
+				}],
 
-				preRun    : [],
+				postRun   : [ emuIsReady ],
 
-				postRun   : [
-
-					function(){
-						parent.window.emu.vars.gameAllowedToLoad=true;
-						// parent.window.emu.vars.emu_displayStatus();
-
-						resizeIframe();
-
-						// Send a message to the parent.
-						window.parent.postMessage(
-							{
-								'function': 'emuStarted',
-								'data'    : [],
-							}
-							, document.location.href
-						);
-
-					}
-				],
-
-				print: (function() {
-					var element = document.getElementById('output');
-					if (element) { element.value = ''; }// clear browser cache
-					return function(text) {
-						if (arguments.length > 1) { text = Array.prototype.slice.call(arguments).join(' '); }
-						// These replacements are necessary if you render to raw HTML
-						console.log("FROM EMSCRIPTEN!", text);
-						if (element) {
-							element.value += text + ' \n ';
-							element.scrollTop = element.scrollHeight; // focus on bottom
-						}
-					};
+				print     : (function() {
+					// var element = document.querySelector('#output');
+					// if (element) { element.value = ''; }// clear browser cache
+					// return function(text) {
+					// 	if (arguments.length > 1) { text = Array.prototype.slice.call(arguments).join(' '); }
+					// 	// These replacements are necessary if you render to raw HTML
+					// 	console.log("EMSCRIPTEN print:", text);
+					// 	if (element) {
+					// 		element.value += text + ' \n ';
+					// 		element.scrollTop = element.scrollHeight; // focus on bottom
+					// 	}
+					// };
 				})(),
 
-				printErr: function(text) {
-					if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
-					console.log("EMSCRIPTEN:", text);
+				printErr  : function(text) {
+					if (arguments.length > 1) { text = Array.prototype.slice.call(arguments).join(' '); }
+					console.log("EMSCRIPTEN printErr:", text);
 				},
 
 			};
+
 		</script>
 
 		<!-- PLACE HOLDER FOR REPLACEMENT -->

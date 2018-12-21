@@ -12,10 +12,11 @@ var featureDetection = {
 		useAsync              : true  ,
 		includeText           : false ,
 		includeWebsite        : false ,
-		hideProgressInConsole : false,
+		hideProgressInConsole : false ,
+		useLocalStorageCache  : false ,
 		userReqs  : []
 	},
-	version: "vd1 1.0.2",
+	version: "vd1 1.1.0",
 	funcs:{
 		// Performs eval within the specified context on a string.
 		evalInContext             : function(js, context) {
@@ -132,6 +133,76 @@ var featureDetection = {
 
 				});
 			};
+			var PHP_combinedFeatures2 = function(features){
+				return new Promise(function(resolve,reject){
+					var new_features = [];
+					for(var i=0; i<features.length; i+=1){
+						// Remove the feature from the list if it is already known to be loaded.
+						if( ! featureDetection.funcs.isTheFeatureAlreadyLoaded( features[i] ) ){
+							new_features.push( features[i] );
+						}
+					}
+
+					if( !new_features.length ) {
+						resolve();
+						return;
+					}
+
+					var finished = function(data) {
+						data = xhr.response;
+						data = JSON.parse(data);
+
+						// Find the matching key in the response. Eval the response. Perform the test again. Indicate success or failure.
+						new_features.map(function(d,i,a){
+							// Eval this entry.
+							featureDetection.funcs.evalInContext(data[d], window);
+
+							// Perform test then indicate success or failure.
+							try{
+								if( eval(featureDetection.reqs[d].test) == true ){
+									featureDetection.reqs[d].have=true;
+									console.log("  LOADED: ("+featureDetection.reqs[d].type+") ->" , d ,  " (OK)" );
+
+									// if(featureDetection.config.useLocalStorageCache){}
+								}
+								else{
+									featureDetection.reqs[d].have=false;
+									featureDetection.backup_console.log("** FAILURE TO LOAD: ("+featureDetection.reqs[d].type+") ->" , d ,  " (ERROR)" );
+									throw "Feature was NOT successfully loaded: "+d;
+								}
+							}
+							catch(e){
+								featureDetection.reqs[d].have=false;
+								featureDetection.backup_console.log("** FAILURE TO LOAD: ("+featureDetection.reqs[d].type+") ->" , d ,  " (ERROR)" );
+								throw "Feature was NOT successfully loaded: "+d;
+							}
+						});
+
+						resolve();
+					};
+					var error = function(data) {
+						featureDetection.backup_console.log("error:", this, data);
+						reject(data);
+					};
+					var xhr = new XMLHttpRequest();
+					xhr.addEventListener("load", finished);
+					xhr.addEventListener("error", error);
+
+					var fd   = new FormData();
+					var o    = "getData2" ;
+					fd.append("o"           , o);
+					fd.append("missingReqs" , new_features );
+
+					var url = "_featureLoader/_p/featureLoader_p.php?o="+o+"&missingReqs="+new_features.join(",");
+					// console.log(url);
+					xhr.open(
+						"POST", // Type of method (GET/POST)
+						url  // Destination
+					, true);
+					xhr.send(fd);
+
+				});
+			};
 			// Used if the loading method was not PHP:
 			var JS_features = function(features, syncType){
 				var loadFeature = function(feature){
@@ -156,6 +227,8 @@ var featureDetection = {
 								if( eval(featureDetection.reqs[feature].test) == true ){
 									featureDetection.reqs[feature].have=true;
 									console.log("  LOADED: ("+featureDetection.reqs[feature].type+") ->" , feature ,  " (OK)" );
+
+									// if(featureDetection.config.useLocalStorageCache){}
 								}
 								else {
 									featureDetection.reqs[feature].have=false;
@@ -247,7 +320,8 @@ var featureDetection = {
 				// Use PHP?
 				if(featureDetection.config.usePhp===true){
 					// Get the code for each feature as one download.
-					PHP_combinedFeatures(features).then(
+					// PHP_combinedFeatures(features).then(
+					PHP_combinedFeatures2(features).then(
 						function(res){
 							resolve(res);
 						},
@@ -528,7 +602,7 @@ window.onload = function(){
 	];
 
 	console.log("**********************************");
-	console.log("*** -- Feature Loader 1.0.2 -- ***");
+	console.log("*** -- Feature Loader 1.1.0 -- ***");
 	console.log("**********************************");
 
 	// Feature detect/replace.

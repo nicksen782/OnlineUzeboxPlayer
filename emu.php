@@ -26,11 +26,6 @@
 
 <div id="bodyHeader">
 	ONLINE UZEBOX EMULATOR V2B
-
-	<!--<input type="button" value="Close"  onclick="frameElement.src='';">-->
-	<input type="button" value="Reload" onclick="document.location.href = document.location.href;">
-	<input type="button" value="New Window" onclick="window.open(document.location.href);">
-
 </div>
 
 <div id="bodyContainer">
@@ -42,6 +37,8 @@
 			</div>
 
 			<div class="sectionDivs_title_options">
+				<input type="button" value="Reload" onclick="document.location.href = document.location.href;">
+				<input type="button" value="New Window" onclick="window.open(document.location.href);">
 				<div class="navOptions" newview="TOP">TOP</div>
 				<div class="navOptions uamOnly" newview="VIEW">VIEW</div>
 				<div class="navOptions uamOnly" newview="DEBUG1">DEBUG1</div>
@@ -55,7 +52,18 @@
 			<div class="sectionWindow_content">
 				<table class="table1">
 					<tr> <td>DB  </td> <td> <select id="emu_builtInGames_select"><option value="">Choose a game from the database</option></select> </td> </tr>
-					<tr> <td>User</td> <td></td> </tr>
+					<tr>
+						<td>User</td>
+						<td>
+						<!--Actual file upload buttons (hidden)-->
+						<input id="emu_FilesFromUser" type="file" value="CHOOSE" multiple="">
+						<!--Actual file upload buttons (hidden)-->
+
+						<!--Visible upload buttons-->
+						<input type="button" id="emu_FilesFromUser_viewableBtn" value="Import File(s)">
+						<!--Visible upload buttons-->
+						</td>
+					</tr>
 					<tr> <td>JSON</td> <td></td> </tr>
 				</table>
 			</div>
@@ -118,17 +126,38 @@ Games and Demos
 			<div class="sectionWindow_content">
 				<table class="table1">
 					<tr>
-						<td colspan="2">AUTO-PAUSE</td>
-						<td>STOP</td>
-						<td>RELOAD</td>
-						<td>UNLOAD</td>
+						<td colspan="2">
+							<label class="emuControls">
+								<input type="checkbox" id="emuControls_autopause">
+								<span>AUTO-PAUSE</span>
+							</label>
+						</td>
+						<td>
+							<input type="button" value="STOP" class="emuControls" id="emuControls_stop">
+						</td>
+						<td>
+							<input type="button" value="RELOAD" class="emuControls" id="emuControls_reload">
+						</td>
+						<td>
+							<input type="button" value="UNLOAD" class="emuControls" id="emuControls_unload">
+						</td>
 					</tr>
 					<tr>
-						<td>F2 QUALITY</td>
-						<td>F3 DEBUG</td>
-						<td>F7 FLICKER</td>
-						<td>F9 PAUSE</td>
-						<td>F10 STEP</td>
+						<td>
+							<input type="button" value="F2 QUALITY" class="emuControls" id="emuControls_">
+						</td>
+						<td>
+							<input type="button" value="F3 DEBUG" class="emuControls" id="emuControls_">
+						</td>
+						<td>
+							<input type="button" value="F7 FLICKER" class="emuControls" id="emuControls_">
+						</td>
+						<td>
+							<input type="button" value="F9 PAUSE" class="emuControls" id="emuControls_">
+						</td>
+						<td>
+							<input type="button" value="F10 STEP" class="emuControls" id="emuControls_">
+						</td>
 					</tr>
 				</table>
 			</div>
@@ -137,7 +166,9 @@ Games and Demos
 		<div id="emu_emulator" class="sectionWindow">
 			<div class="sectionWindow_title">Emulator Screen</div>
 			<div class="sectionWindow_content">
-				<div id="emscripten_iframe_container"></div>
+				<div id="emscripten_iframe_container">
+					<iframe src="iframe_msg_template.html" frameBorder="0" id="emscripten_iframe"></iframe>
+				</div>
 			</div>
 		</div>
 

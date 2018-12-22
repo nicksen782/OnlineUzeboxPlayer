@@ -42,19 +42,22 @@
 			var emulatorIframeIsReady=false;
 			var resizeIframe = function(){
 				// Get DOM handles on the Emscripten canvas, the parent iframe and the parent iframe container.
-				var canvas       = document.querySelector('#canvas');
-				var parentIframe = parent.document.querySelector("#emscripten_iframe");
+				// var canvas       = document.querySelector('#canvas');
+				var canvas       = Module.canvas;
+				// var parentIframe = parent.document.querySelector("#emscripten_iframe");
 				var parentIframeContainer = parent.document.querySelector("#emscripten_iframe_container");
 
 				// Determine what the new width and height should be.
 				var emuWidth  = parentIframeContainer.getBoundingClientRect().width  + "px";
 				var emuHeight = parentIframeContainer.getBoundingClientRect().height + "px";
 
+				// console.log(canvas,emuWidth, emuHeight);
+
 				// Set the new width and height of the Emscripten canvas and the parent iframe.
 				canvas      .style.width  = emuWidth  ;
 				canvas      .style.height = emuHeight ;
-				parentIframe.style.width  = emuWidth  ;
-				parentIframe.style.height = emuHeight ;
+				// parentIframe.style.width  = emuWidth  ;
+				// parentIframe.style.height = emuHeight ;
 			};
 			var emuIsReady = function(){
 				// console.log("Emulator is ready!");
@@ -157,7 +160,8 @@
 				// memoryInitializer : "nohkgjg",
 
 				// The Emscripten output canvas.
-				canvas    : (function() { return document.querySelector('#canvas'); })(),
+				// canvas    : (function() { return document.querySelector('#canvas'); })(),
+				canvas    : (function() { return parent.window.emu.vars.dom.view["emuCanvas"] })(),
 
 				// Load the files from the files list.
 				preInit   : [function(){

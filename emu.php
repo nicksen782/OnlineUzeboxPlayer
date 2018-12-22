@@ -19,7 +19,26 @@
 	<script src="_featureLoader/js/featureLoader.js"></script>
 	<script src="js/index.js"></script>
 	<script src="js/dom.js"></script>
+	<script src="js/crossBrowser_initKeyboardEvent.js"></script>
 	<!--<script src="js/xml2json.min.js"></script>-->
+
+<script>
+
+// console.log(
+// JSON.stringify({
+// 	"charCode": e["charCode"] ,
+// 	"code"    : e["code"]     ,
+// 	"key"     : e["key"]      ,
+// 	"keyCode" : e["keyCode"]  ,
+// 	"which"   : e["which"]    ,
+// 	"code"    : e["code"]     ,
+// 	"location": e["location"]
+// }, null, 0)
+// );
+
+
+</script>
+
 </head>
 
 <body>
@@ -37,6 +56,7 @@
 			</div>
 
 			<div class="sectionDivs_title_options">
+				<input type="button" value="Resize" onclick="document.querySelector('#emscripten_iframe').contentWindow.resizeIframe();;">
 				<input type="button" value="Reload" onclick="document.location.href = document.location.href;">
 				<input type="button" value="New Window" onclick="window.open(document.location.href);">
 				<div class="navOptions" newview="TOP">TOP</div>
@@ -50,21 +70,36 @@
 		<div id="emu_gameSelector" class="sectionWindow">
 			<div class="sectionWindow_title">Game Selection</div>
 			<div class="sectionWindow_content">
-				<table class="table1">
-					<tr> <td>DB  </td> <td> <select id="emu_builtInGames_select"><option value="">Choose a game from the database</option></select> </td> </tr>
-					<tr>
-						<td>User</td>
-						<td>
-						<!--Actual file upload buttons (hidden)-->
-						<input id="emu_FilesFromUser" type="file" value="CHOOSE" multiple="">
-						<!--Actual file upload buttons (hidden)-->
 
-						<!--Visible upload buttons-->
-						<input type="button" id="emu_FilesFromUser_viewableBtn" value="Import File(s)">
-						<!--Visible upload buttons-->
+				<table class="table1">
+					<tr>
+						<td>From database</td>
+						<td>
+							<select id="emu_builtInGames_select">
+								<option value="">Choose a game</option>
+							</select>
 						</td>
 					</tr>
-					<tr> <td>JSON</td> <td></td> </tr>
+
+					<tr>
+						<td>From file(s)</td>
+						<td>
+							<!--Actual file upload buttons (hidden)-->
+							<input id="emu_FilesFromUser" type="file" value="CHOOSE" multiple="">
+							<!--Actual file upload buttons (hidden)-->
+
+							<!--Visible upload buttons-->
+							<input type="button" id="emu_FilesFromUser_viewableBtn" value="Import File(s)">
+							<!--Visible upload buttons-->
+						</td>
+					</tr>
+
+					<tr>
+						<td>From JSON</td>
+						<td>
+							<input type="text" id="emu_FilesFromJSON" value="">
+						</td>
+					</tr>
 				</table>
 			</div>
 		</div>
@@ -121,54 +156,40 @@ Games and Demos
 			</div>
 		</div>
 
-		<div id="emu_emuControls" class="sectionWindow">
-			<div class="sectionWindow_title">Emulator Controls</div>
-			<div class="sectionWindow_content">
-				<table class="table1">
-					<tr>
-						<td colspan="2">
-							<label class="emuControls">
-								<input type="checkbox" id="emuControls_autopause">
-								<span>AUTO-PAUSE</span>
-							</label>
-						</td>
-						<td>
-							<input type="button" value="STOP" class="emuControls" id="emuControls_stop">
-						</td>
-						<td>
-							<input type="button" value="RELOAD" class="emuControls" id="emuControls_reload">
-						</td>
-						<td>
-							<input type="button" value="UNLOAD" class="emuControls" id="emuControls_unload">
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<input type="button" value="F2 QUALITY" class="emuControls" id="emuControls_">
-						</td>
-						<td>
-							<input type="button" value="F3 DEBUG" class="emuControls" id="emuControls_">
-						</td>
-						<td>
-							<input type="button" value="F7 FLICKER" class="emuControls" id="emuControls_">
-						</td>
-						<td>
-							<input type="button" value="F9 PAUSE" class="emuControls" id="emuControls_">
-						</td>
-						<td>
-							<input type="button" value="F10 STEP" class="emuControls" id="emuControls_">
-						</td>
-					</tr>
-				</table>
-			</div>
-		</div>
+		<!--<div id="emu_emuControls" class="sectionWindow">-->
+		<!--	<div class="sectionWindow_title">Emulator Controls</div>-->
+		<!--	<div class="sectionWindow_content">-->
+		<!--	</div>-->
+		<!--</div>-->
 
 		<div id="emu_emulator" class="sectionWindow">
 			<div class="sectionWindow_title">Emulator Screen</div>
 			<div class="sectionWindow_content">
+				<div id="emu_emuControls2">
+					<!--<label class="emuControls">-->
+					<!--</label>-->
+
+					<button class="emuControls checkbox" id="emuControls_autopause_btn">
+						<span id="emuControls_autopause_chk"></span>
+						<span>AUTO-PAUSE</span>
+					</button>
+
+					<input type="button" value="STOP" class="emuControls" id="emuControls_stop">
+					<input type="button" value="RELOAD" class="emuControls" id="emuControls_reload">
+					<input type="button" value="UNLOAD" class="emuControls" id="emuControls_unload">
+					<br>
+					<input type="button" value="F2 QUALITY" class="emuControls" id="emuControls_QUALITY">
+					<input type="button" value="F3 DEBUG"   class="emuControls" id="emuControls_DEBUG">
+					<input type="button" value="F7 FLICKER" class="emuControls" id="emuControls_FLICKER">
+					<input type="button" value="F9 PAUSE"   class="emuControls" id="emuControls_PAUSE">
+					<input type="button" value="F10 STEP"   class="emuControls" id="emuControls_STEP">
+				</div>
 				<div id="emscripten_iframe_container">
+					<canvas id="emuCanvas" width="100" height="100"></canvas>
 					<iframe src="iframe_msg_template.html" frameBorder="0" id="emscripten_iframe"></iframe>
 				</div>
+
+
 			</div>
 		</div>
 

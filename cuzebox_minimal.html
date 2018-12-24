@@ -4,60 +4,22 @@
 		<meta charset="utf-8">
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<title>CUzeBox/Emscripten/Game-changer</title>
-		<style>
-			html{
-				font-family: arial;
-				padding    : 0px;
-				margin     : 0px;
-				overflow   : hidden;
-			}
-			body {
-				margin  : 0px;
-				padding : 0px;
-				overflow: hidden;
-			}
-			div.emscripten{
-				border  : 0px solid black;
-				padding : 0px;
-				margin  : 0px;
-				display : block;
-				overflow: hidden;
-			}
-			canvas.emscripten {
-				border  : 0px solid black;
-				padding : 0px;
-				margin  : 0px;
-				display : block;
-				overflow: hidden;
-			}
-		</style>
 	</head>
 
 	<body>
-		<div class="emscripten">
-			<canvas class="emscripten" id="canvas"></canvas>
-		</div>
-
 		<script name="cuzebox_minimal_html">
 			var emulatorIframeIsReady=false;
 			var resizeIframe = function(){
-				// Get DOM handles on the Emscripten canvas, the parent iframe and the parent iframe container.
-				// var canvas       = document.querySelector('#canvas');
 				var canvas       = Module.canvas;
-				// var parentIframe = parent.document.querySelector("#emscripten_iframe");
 				var parentIframeContainer = parent.document.querySelector("#emscripten_iframe_container");
 
 				// Determine what the new width and height should be.
 				var emuWidth  = parentIframeContainer.getBoundingClientRect().width  + "px";
 				var emuHeight = parentIframeContainer.getBoundingClientRect().height + "px";
 
-				// console.log(canvas,emuWidth, emuHeight);
-
 				// Set the new width and height of the Emscripten canvas and the parent iframe.
 				canvas      .style.width  = emuWidth  ;
 				canvas      .style.height = emuHeight ;
-				// parentIframe.style.width  = emuWidth  ;
-				// parentIframe.style.height = emuHeight ;
 			};
 			var emuIsReady = function(){
 				// console.log("Emulator is ready!");
@@ -88,6 +50,7 @@
 					default    : { setTimeout(function(){ resizeIframe(); }, 25); break; }
 				}
 			});
+
 			// Receive a message.
 			window.addEventListener('message',function(e) {
 				// console.log("postMessage listener");
@@ -157,27 +120,15 @@
 				// Specifies which file the emulator should start.
 				arguments : [ parent.window.emu.vars.gameFile ],
 
-				// memoryInitializer : "nohkgjg",
-
 				// The Emscripten output canvas.
-				// canvas    : (function() { return document.querySelector('#canvas'); })(),
 				canvas    : (function() { return parent.window.emu.vars.dom.view["emuCanvas"] })(),
 
 				// Load the files from the files list.
 				preInit   : [function(){
-					// console.log("Loading files");
-
-					// Retrieve the data from this iframe's parent.
-					// var gameTitle                  = parent.window.emu.vars.gameTitle;
-					// var currentgame                = parent.window.emu.vars.gameFile;
-					// var uzerom                     = parent.window.emu.vars.gameFile;
 					var parentGameFiles            = parent.window.emu.vars.gameFiles;
 					var parentgameFilesDownloading = parent.window.emu.vars.gameFilesDownloading;
 
 					if(   parentgameFilesDownloading ) { throw new Error('DATA FULLY LOADED?: gameFilesDownloading: ' + parentgameFilesDownloading); }
-					// if( ! gameTitle.length           ) { throw new Error('DATA MISSING: gameTitle                   ' + gameTitle);                  }
-					// if( ! currentgame.length         ) { throw new Error('DATA MISSING: currentgame                 ' + currentgame);                }
-					// if( ! uzerom.length              ) { throw new Error('DATA MISSING: uzerom                      ' + uzerom);                     }
 					if( ! parentGameFiles.length     ) { throw new Error('DATA MISSING: parentGameFiles. Length:    ' + parentGameFiles.length);     }
 
 					parentGameFiles.map(function(d,i,a){

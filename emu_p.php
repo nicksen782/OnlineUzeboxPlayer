@@ -27,7 +27,7 @@ else { $dev=0; }
 $emu_dir = './';
 $emu_games_dir = $emu_dir . '/games/';
 
-// require_once("sys_files/audit_s.php");
+require_once("emu_uam_p.php");
 
 // if( ! file_exists( $_db_file )){ createInitialDatabase(); }
 
@@ -71,15 +71,13 @@ function API_REQUEST( $api, $type ){
 	// EMULATOR FUNCTIONS (NON-UAM)
 	$o_values["emu_getBuiltInGamelist"]      = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
 	$o_values["emu_returnJSON_byGameId"]      = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
-	// $o_values["emu_getBuiltInGamelist"]      = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
-	// $o_values["emu_getBuiltInGamelist"]      = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
-	// $o_values["emu_getBuiltInGamelist"]      = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
-	// $o_values["emu_getBuiltInGamelist"]      = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
-	// $o_values["emu_getBuiltInGamelist"]      = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
-	// $o_values["emu_getBuiltInGamelist"]      = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
 
 	// EMULATOR FUNCTIONS (UAM)
-	// $o_values["gameman_manifest_all"]      = [ "p"=>( ( $loggedIn) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
+	$o_values["gameman_manifest_user"]                 = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
+	$o_values["c2bin_UamGame"]                         = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
+	$o_values["compile_UamGame"]                       = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
+	$o_values["c2bin_UamGame_2"]                       = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
+	$o_values["getGamesAndXmlFilepathsViaUserId"]      = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
 
 	// DETERMINE IF THE API IS AVAILABLE TO THE USER.
 

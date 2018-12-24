@@ -190,6 +190,26 @@
   "test"        : "if ( !Element.prototype.matches ) { false; } else { true; }",
   "website"     : "https://developer.mozilla.org/en-US/docs/Web/API/Element/matches"
  },
+ "requestFullScreen" : {
+  "type"        : "polyfill",
+  "text"        : "Polyfill for browser prefixes for the fullscreen api. (Supports IE11)",
+  "req"         : true,
+  "have"        : null,
+  "hadNatively" : null,
+  "url"         : "_featureLoader/polyfills/requestFullScreen.js",
+  "test"        : "if (!Element.prototype.requestFullscreen) { false; } else { true; }",
+  "website"     : "https://vanillajstoolkit.com/polyfills/elementrequestfullscreen/"
+ },
+ "crossBrowser_initKeyboardEvent" : {
+  "type"        : "polyfill",
+  "text"        : "Polyfill cross-browser keyboard events.",
+  "req"         : false,
+  "have"        : null,
+  "hadNatively" : null,
+  "url"         : "_featureLoader/polyfills/crossBrowser_initKeyboardEvent.js",
+  "test"        : "if ( typeof window.crossBrowser_initKeyboardEvent !== \"function\" ) { false; } else { true; }",
+  "website"     : "https://gist.github.com/termi/4654819"
+ },
 
  "getQueryStringAsObj": {
   "type"        : "customFunction",

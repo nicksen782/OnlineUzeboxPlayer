@@ -1,0 +1,70 @@
+/* Firefox puts extra border/padding on inputs. Remove it! */
+select,button
+input[type="reset"],
+input[type="button"],
+input[type="submit"],
+input[type="number"],
+input[type="text"],
+input[type="file"]
+{
+    padding: 2px;
+    margin: 1px;
+    border-radius: 5px;
+    border: 1px solid #888841;
+    background-color: #dddddd;
+}
+
+select:hover,
+button:hover,
+input[type="reset"]:hover,
+input[type="button"]:hover,
+input[type="submit"]:hover,
+input[type="number"]:hover,
+input[type="text"]:hover,
+input[type="file"]:hover
+{
+    border: 1px solid black;
+    background-color: #d3dbfc;
+}
+/* Firefox puts extra border/padding on inputs. Remove it! */
+
+/*Used color palettes*/
+.bgcolor1{ background-color: #003CBF; }
+.bgcolor2{ background-color: #00287F; }
+.bgcolor3{ background-color: #0050FF; }
+.bgcolor4{ background-color: #001440; }
+.bgcolor5{ background-color: #0048E5; }
+.color-primary-0     { background-color: #56678E }	/* Main Primary color */
+.color-primary-1     { background-color: #B0B9CD }
+.color-primary-2     { background-color: #7C8AA8 }
+.color-primary-3     { background-color: #364975 }
+.color-primary-4     { background-color: #1F325D }
+.color-secondary-1-0 { background-color: #675992 }	/* Main Secondary color (1) */
+.color-secondary-1-1 { background-color: #B9B2D0 }
+.color-secondary-1-2 { background-color: #8B80AD }
+.color-secondary-1-3 { background-color: #483978 }
+.color-secondary-1-4 { background-color: #30215F }
+.color-secondary-2-0 { background-color: #477F7F }	/* Main Secondary color (2) */
+.color-secondary-2-1 { background-color: #A3C2C2 }
+.color-secondary-2-2 { background-color: #6B9797 }
+.color-secondary-2-3 { background-color: #2A6969 }
+.color-secondary-2-4 { background-color: #165353 }
+/*Used color palettes*/
+
+/*DEBUG: Color palette viewer*/
+#paletteViewTable   {display: inline-block;}
+#paletteViewTable td{padding: 1px;}
+#paletteViewTable td div.notVisible{
+	visibility:hidden;
+}
+#paletteViewTable td div {
+	border-radius: 10px;
+	border: 2px solid black;
+	width: 15px;
+	height: 15px;
+}
+#paletteViewTable td div:hover {
+	transform:scale(1.5);
+	cursor:pointer;
+}
+/*DEBUG: Color palette viewer*/

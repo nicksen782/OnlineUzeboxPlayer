@@ -121,7 +121,8 @@ html {
 	width: 895px;
 	margin: 0 auto;
 	/*scroll-behavior: smooth;*/
-	font-family: "Times New Roman";
+	font-family: "Times New Roman, Helvetica, serif";
+	font-size: 16px ;
 }
 html.wide  {width: 1180px;}
 
@@ -291,7 +292,7 @@ body {
 	text-align: left;
 	overflow: auto;
 	font-family: monospace;
-	font-size: 10px;
+	font-size: 12px;
 	white-space: pre-line;
 	display: inline-block;
 	vertical-align: top;
@@ -551,26 +552,26 @@ svg#emu_gamepad1, svg#emu_gamepad2 {
     fill: rgba(0, 255, 255, 0.75);
 }
 #emu_onscreenGamepads_1{
-	width: 385px;
+	width: 380px;
 	height: 165px;
 	border-radius: 10px;
 	border: 2px solid black;
 	position: absolute;
 	top: 0px;
-	left: -34px;
+	left: -32px;
 	transform: scale(0.8, 0.60);
 	z-index: 100;
 	padding: 0px;
 	background-color: #7e3c3c;
 }
 #emu_onscreenGamepads_2{
-	width: 385px;
+	width: 380px;
 	height: 165px;
 	border-radius: 10px;
 	border: 2px solid black;
 	position: absolute;
 	top: 120px;
-	left: -34px;
+	left: -32px;
 	transform: scale(0.8, 0.60);
 	z-index: 100;
 	padding: 0px;
@@ -649,4 +650,48 @@ div#emu_debug2 {
 canvas#emuCanvas {
     width: 520px;
     height: 455px;
+}
+
+#emu_misc_nav{
+	/*background-color:blue;*/
+	border-bottom: 0px solid black;
+	padding-left: 5px;
+}
+.emu_misc_navItem{
+	display:inline-block;
+	background-color: steelblue;
+	/* background-color: #dddddd; */
+	width: 85px;
+	font-size: 14px;
+	padding: 5px;
+	padding-bottom: 2px;
+	border-radius: 15px 15px 0px 0px;
+	text-align: center;
+	border: 1px solid black;
+	border-bottom: 0px;
+	cursor:pointer;
+}
+.emu_misc_navItem.active{
+	/* background-color: steelblue; */
+	background-color: #dddddd;
+}
+
+.emu_misc_view{
+	display:none;
+	width: 310px;
+	height: 235px;
+	background-color: #dddddd;
+}
+.emu_misc_view.active{
+	display:block;
+}
+
+#emu_misc_gamepads{
+	/* background-color:blue; */
+}
+#emu_misc_info{
+	/* background-color:red; */
+}
+#emu_misc_misc{
+	/* background-color:green; */
 }

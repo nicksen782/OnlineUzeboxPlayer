@@ -1007,6 +1007,10 @@ emu.funcs                 = {
 		emu.vars.dom.view["emu_FilesFromJSON"]     .addEventListener("click", function(){ this.select(); }, false);
 		emu.vars.dom.view["emu_FilesFromJSON_load"].addEventListener("click", function(){ emu.funcs.getGameFiles("3"); }, false);
 
+		// Misc views: nav buttons
+		emu.vars.dom.view["emu_misc_navs"].forEach(function(d,i,a){
+			d.addEventListener("click", function(){ changeMiscView(this.getAttribute("view"), this)  }, false);
+		});
 	},
 
 };
@@ -1056,15 +1060,17 @@ emu.funcs.UAM             = {
 	},
 	// * UAM setup.
 	setupUAM          : function(){
-		document.querySelector("#bodyHeader").style.display="none";
-		document.querySelector("#bodyFooter").style.display="none";
-		document.getElementById( 'bodyContainer' ).scrollIntoView( emu.funcs.quickNav.scrollIntoView_options );
 
 		// Show UAM, set some variables.
 		emu.funcs.UAM.enableUAM();
 
 		// Wait for UAM to finish loading... then continue.
+		console.log("promise check!")
 		emu.vars.uamwindow.shared.UAMisReady.then(function(){
+			console.log("promise ready!")
+			document.querySelector("#bodyHeader").style.display="none";
+			document.querySelector("#bodyFooter").style.display="none";
+			document.getElementById( 'bodyContainer' ).scrollIntoView( emu.funcs.quickNav.scrollIntoView_options );
 
 			// Set up the UAM DOM.
 			emu.funcs.domHandleCache_populate_UAM();
@@ -1075,6 +1081,8 @@ emu.funcs.UAM             = {
 			emu.vars.dom.view["emuControls_autopause_chk"].classList.add("enabled");
 
 			emu.funcs.UAM.getGamesListUAM();
+
+			changeView("VIEW");
 
 			// document.getElementById( 'emu_view' ).scrollIntoView( emu.funcs.quickNav.scrollIntoView_options );
 
@@ -1119,8 +1127,8 @@ emu.funcs.UAM             = {
 		emu.funcs.shared.serverRequest(formData).then(
 			function(res){
 				// console.log(res);
-				let c2binCount   = res.compileCount;
 				let compileCount = res.c2binCount;
+				let c2binCount   = res.compileCount;
 				let error        = res.error;
 				let execResults  = res.execResults;
 				let info         = res.info;
@@ -1150,7 +1158,6 @@ emu.funcs.UAM             = {
 				// UAM_chk3 // Debug on errors
 				// UAM_chk4 // Debug on warnings
 
-
 				// Work with debug output 1
 				var preStyle="";
 				var errorstring   =" font-weight: bolder;background-color: black;color: red;border:2px solid ghostwhite;";
@@ -1168,6 +1175,30 @@ emu.funcs.UAM             = {
 				var count_errors   = thestring2.split(        "<span class='emu_errors'   style='" +errorstring  + "'> ERROR:   </span>") .length-1;
 				var count_warnings = thestring2.split(        "<span class='emu_warnings' style='" +warningstring+ "'> WARNING: </span>") .length-1;
 
+				var consoleOutputString = thestring2.split("--STARTLASTBUILD.TXT--");
+				consoleOutputString=consoleOutputString[1];
+				consoleOutputString=consoleOutputString.substr(0, consoleOutputString.indexOf("---ENDLASTBUILD.TXT---"));
+				consoleOutputString += "\n";
+				consoleOutputString += "\n";
+				consoleOutputString += "FAILURES     :"+count_failures + "\n";
+				consoleOutputString += "ERRORS       :"+count_errors   + "\n";
+				consoleOutputString += "WARNINGS     :"+count_warnings + "\n";
+				consoleOutputString += "\n";
+				consoleOutputString += "\n";
+				consoleOutputString += "COMPILE COUNT:"+compileCount   + "\n";
+				consoleOutputString += "C2BIN COUNT  :"+c2binCount     + "\n";
+				consoleOutputString = consoleOutputString
+					.replace(/\r\n/g , "\n"   ) // Normalize to Unix line endings.
+					.replace(/\n\n/g , "\n"   ) // Remove double line-breaks;
+					.replace("AVR Memory Usage\n"  , ""    )
+					.replace("----------------\n"  , ""    )
+					.replace("Device: atmega644\n" , ""    )
+					.replace("(.text + .data + .bootloader)\n" , ""    ) // Replace all double-spaces with one space.
+					.replace("(.data + .bss + .noinit)\n\n" , ""    ) // Replace all double-spaces with one space.
+					.replace(/  /g   , " "    ) // Replace all double-spaces with one space.
+					.replace(/\n/g   , "\r\n" ) // Normalize to Windows line endings.
+					.trim()
+					;
 				output1.innerHTML = `<div style='color:greenyellow;'><pre style="`+preStyle+`">`+thestring2 +`</pre><br>` ;
 
 				// Start after compile
@@ -1191,8 +1222,13 @@ emu.funcs.UAM             = {
 				}
 
 				// Work with debug output 2
-				// Work with emu_latestCompile
+				//
 				// Work with emu_previousCompile
+				console.log(emu_latestCompile.innerHTML);
+				emu_previousCompile.innerHTML=emu_latestCompile.innerHTML;
+
+				// Work with emu_latestCompile
+				emu_latestCompile.innerHTML = consoleOutputString ;
 
 				// changeView("VIEW");
 				// changeView("DEBUG1");
@@ -1715,6 +1751,24 @@ function changeView(newview){
 		default : { break; }
 	};
 };
+function changeMiscView(newview, navButton){
+	console.log( "changeMiscView:", newview );
+
+	// Remove the active class on all nav buttons and views.
+	emu.vars.dom.view["emu_misc_navs"].forEach(function(d,i,a){
+		d.classList.remove("active");
+	});
+	emu.vars.dom.view["emu_misc_view"].forEach(function(d,i,a){
+		d.classList.remove("active");
+	});
+
+	// Set the clicked nav button to active.
+	navButton.classList.add("active");
+
+	// Show the view associated with the nav button.
+	document.querySelector("#"+newview).classList.add("active");
+
+};
 
 window.onload=function(){
 	window.onload=null;
@@ -1746,8 +1800,6 @@ window.onload=function(){
 					emu.funcs.UAM.setupUAM();
 
 					messageText = "<u><b>ONLINE UZEBOX EMULATOR</b></u><br><br>Choose a game.<br><br>(<span style='color:yellow;font-size: 90%;'>UAM ENABLED</span>)";
-
-
 				}
 				else {
 					emu.funcs.UAM.disableUAM();

@@ -1,6 +1,16 @@
 emu.funcs.domHandleCache_populate = function(){
 	emu.vars.dom.view = {};
 
+	// Misc views: nav buttons
+	emu.vars.dom.view["emu_misc_navs"]  = document.querySelectorAll("#emu_misc_nav .emu_misc_navItem");
+	// Misc views: all views
+	emu.vars.dom.view["emu_misc_view"]             = document.querySelectorAll(".emu_misc_view");
+
+	// Misc views: individual views
+	emu.vars.dom.view["emu_misc_gamepads"]         = document.querySelector(".emu_misc_gamepads");
+	emu.vars.dom.view["emu_misc_info"]             = document.querySelector(".emu_misc_info");
+	emu.vars.dom.view["emu_misc_misc"]             = document.querySelector(".emu_misc_misc");
+
 	// Test data load.
 	emu.vars.dom.view["builtInGames_select"]           = document.querySelector("#emu_builtInGames_select");
 	// Hidden file upload button.

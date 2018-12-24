@@ -1,5 +1,5 @@
 /* Firefox puts extra border/padding on inputs. Remove it! */
-select,button
+select,button,
 input[type="reset"],
 input[type="button"],
 input[type="submit"],
@@ -25,6 +25,9 @@ input[type="file"]:hover
 {
     border: 1px solid black;
     background-color: #d3dbfc;
+    padding: 2px;
+    margin: 1px;
+    border-radius: 5px;
 }
 /* Firefox puts extra border/padding on inputs. Remove it! */
 

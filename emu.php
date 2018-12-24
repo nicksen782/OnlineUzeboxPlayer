@@ -10,6 +10,7 @@
 	<!-- Basic styling -->
 	<link rel="stylesheet" type="text/css" href="css/css_reset.css">
 	<link rel="stylesheet" type="text/css" href="css/normalize801.css">
+	<link rel="stylesheet" type="text/css" href="html5boilerplate.css">
 	<link rel="stylesheet" type="text/css" href="css/customBaseline.css">
 	<link rel="stylesheet" type="text/css" href="css/emu.css">
 
@@ -124,13 +125,13 @@
 			<div class="sectionWindow_title">Gamepads and Info</div>
 			<div class="sectionWindow_content">
 
-				<div id="emu_onscreenGamepads_nav">
-					<div class="emu_onscreenGamepads_navItem">GAMEPADS</div>
-					<div class="emu_onscreenGamepads_navItem">INFO/HELP</div>
-					<div class="emu_onscreenGamepads_navItem">MISC</div>
+				<div id="emu_misc_nav">
+					<div view="emu_misc_gamepads" class="emu_misc_navItem active">GAMEPADS</div>
+					<div view="emu_misc_info"     class="emu_misc_navItem">INFO/HELP</div>
+					<div view="emu_misc_misc"     class="emu_misc_navItem">MISC</div>
 				</div>
 
-				<div class="emu_onscreenGamepads_navView noSelect" draggable="false">
+				<div class="emu_misc_view noSelect active" id="emu_misc_gamepads" draggable="false">
 
 					<div id="emu_onscreenGamepads_1" draggable="false">
 						<figure>
@@ -188,37 +189,35 @@
 						</figure>
 					</div>
 
-						<!--<button draggable="false" class="noSelect" id="emuGamepad_2_key_RSHIFT">P2 RSHIFT</button>-->
-					</div>
-
 				</div>
 
-				<div class="emu_onscreenGamepads_navView">
-DB	Choose a built-in game.
-User	Use your own game files.
-JSON	Supply a URL to a remoteload.json file. You can play games hosted on other servers this way.
+				<div class="emu_misc_view" id="emu_misc_info">
+					DB	Choose a built-in game.
+					User	Use your own game files.
+					JSON	Supply a URL to a remoteload.json file. You can play games hosted on other servers this way.
 
-NOTE: JSON Method:
-** On remote servers you MUST configure Access Control headers or this will not work!
-** Example .htaccess config: View
+					NOTE: JSON Method:
+					** On remote servers you MUST configure Access Control headers or this will not work!
+					** Example .htaccess config: View
 				</div>
 
-				<div class="emu_onscreenGamepads_navView">
-LINKS:
+				<div class="emu_misc_view" id="emu_misc_misc">
+					LINKS:
 
-Uzebox Forums
-All Uzebox Games Online! (Cuzebox and Emscripten)
-CUzeBox - a new Uzebox emulator in progress
+					Uzebox Forums
+					All Uzebox Games Online! (Cuzebox and Emscripten)
+					CUzeBox - a new Uzebox emulator in progress
 
-Github
-nicksen782/OnlineUzeboxPlayer
-Jubatian/cuzebox
+					Github
+					nicksen782/OnlineUzeboxPlayer
+					Jubatian/cuzebox
 
-Uzebox Wiki
-Games and Demos
+					Uzebox Wiki
+					Games and Demos
 				</div>
 
 			</div>
+		</div>
 
 		<div id="emu_emulator" class="sectionWindow">
 			<div class="sectionWindow_title">Emulator Screen</div>

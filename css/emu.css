@@ -90,39 +90,14 @@ canvas {
   -ms-interpolation-mode: nearest-neighbor;
 }
 
-/* Firefox puts extra border/padding on inputs. Remove it! */
-/*select,*/
-/*button::-moz-focus-inner,*/
-/*input[type="reset"]::-moz-focus-inner,*/
-/*input[type="button"]::-moz-focus-inner,*/
-/*input[type="submit"]::-moz-focus-inner,*/
-/*input[type="file"] > input[type="button"]::-moz-focus-inner{*/
-/*    padding:0;*/
-/*    background:#080;*/
-/*    color:white;*/
-/*    border:solid 2px;*/
-/*    border-color: #0c0 #030 #030 #0c0;*/
-/*    margin:0;*/
-/*}*/
-/*select,*/
-/*button,*/
-/*input{*/
-/*    padding:0;*/
-/*    background:#080;*/
-/*    color:white;*/
-/*    border:solid 2px;*/
-/*    border-color: #0c0 #030 #030 #0c0;*/
-/*    margin:0;*/
-/*}*/
-
-
 html {
 	max-width: 1200px;
-	width: 895px;
+	width: 900px;
 	margin: 0 auto;
 	/*scroll-behavior: smooth;*/
-	font-family: "Times New Roman, Helvetica, serif";
-	font-size: 16px ;
+	/*font-family: "Times New Roman, Helvetica, serif";*/
+	font-family: Arial, Helvetica, Sans-Serif;
+	font-size: 16px;
 }
 html.wide  {width: 1180px;}
 
@@ -364,16 +339,18 @@ div#emu_filesList_div .table1 td:nth-child(3) { font-family:monospace; }
 	margin: 0px auto;
 	width: 515px;
 	height: 451px;
-	background-color: black;
+	/* background-color: black; */
 }
 #emscripten_iframe{
-	width: 5px;
-	height: 5px;
-	background-color: black;
+	width: 100%;
+	height: 10px;
+	background-color: #7492cf6e;
 	position: absolute;
-	top: 0px;
+	top: -5px;
 	left: 0px;
-	/* z-index: 0; */
+	z-index: 0;
+	overflow: hidden;
+	/* visibility: hidden; */
 }
 
 #emu_FilesFromUser{
@@ -383,7 +360,7 @@ div#emu_filesList_div .table1 td:nth-child(3) { font-family:monospace; }
 
 /*UAM*/
 #emu_gameSelect_UAM_select{
-	width: 150px;
+	width: 145px;
 }
 .checkbox_button{
     /*border: 1px solid black;*/
@@ -429,7 +406,7 @@ div#emu_filesList_div .table1 td:nth-child(3) { font-family:monospace; }
 	border: 1px solid black;
 	display: inline-block;
 	background-color: #e4e4e4;
-	height: 2.25em;
+	/* height: 2.25em; */
 	vertical-align: top;
 }
 .emuControls.checkbox{
@@ -614,7 +591,7 @@ div#emu_debug1 {
     text-align: left;
     overflow: auto;
 }
-#emu_debug1_output2{
+#emu_debug2_output1{
 	left: 5px;
     top: 40px;
     width: 1150px;
@@ -624,7 +601,7 @@ div#emu_debug1 {
     padding: 0px;
     overflow: hidden;
 }
-#emu_debug1_output2 .output{
+#emu_debug2_output1 .output{
 	background-color: black;width: 100%;height: 515px;
     color: palegoldenrod;
     text-align: left;
@@ -694,4 +671,9 @@ canvas#emuCanvas {
 }
 #emu_misc_misc{
 	/* background-color:green; */
+}
+
+.hovered{
+	/*transform:scale(0.9, 0.9);*/
+	border:2px solid blue;
 }

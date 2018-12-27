@@ -358,4 +358,38 @@ ORDER BY id
 
 }
 
+// If the game's gamefiles field is not filled this will gather values and also put those values in the the field.
+// DOES NOT SET THE GAME FILE.
+function get_and_populate_fileslist_field($gameId, $directory){
+	$filelist  = array();
+	$filelist2 = array();
+
+	// Now get a list of the files that are within the game's directory.
+	$scanned_directory = array_values(array_diff(scandir($directory), array('..', '.', '.git')));
+	$filelist2=array();
+
+	// Gather only the file names.
+	for($i=0; $i<sizeof($scanned_directory); $i++){
+		if( ! is_dir($directory.'/'.$scanned_directory[$i]) ){
+			array_unshift($filelist2, $scanned_directory[$i]);
+			array_unshift($filelist,
+				[ "filename"=>$scanned_directory[$i], "completefilepath"=>$directory.''.$scanned_directory[$i] ]
+			);
+		}
+	}
+
+	// update gamelist set gamefiles = "";
+	// Update the gamefiles entry. There may be some extra files but this is still a better way.
+	global $_appdir;
+	// global $_db;
+	$dbhandle = new sqlite3_DB_PDO__UAM5($_appdir.'sys_files/eud.db') or exit("cannot open the database");
+	$s_SQL2 = 'UPDATE "gamelist" SET "gamefiles"=:json WHERE id = :gameId';
+	$prp2     = $dbhandle->prepare($s_SQL2);
+	$dbhandle->bind(':gameId' , $gameId ) ;
+	$dbhandle->bind(':json' , json_encode($filelist2) ) ;
+	$retval2  = $dbhandle->execute();
+
+	return $filelist;
+}
+
 ?>

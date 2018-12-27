@@ -10,7 +10,7 @@
 	<!-- Basic styling -->
 	<link rel="stylesheet" type="text/css" href="css/css_reset.css">
 	<link rel="stylesheet" type="text/css" href="css/normalize801.css">
-	<link rel="stylesheet" type="text/css" href="html5boilerplate.css">
+	<link rel="stylesheet" type="text/css" href="css/html5boilerplate.css">
 	<link rel="stylesheet" type="text/css" href="css/customBaseline.css">
 	<link rel="stylesheet" type="text/css" href="css/emu.css">
 
@@ -79,7 +79,7 @@
 
 				<table class="table1">
 					<tr>
-						<td>From database</td>
+						<td>Database</td>
 						<td>
 							<select id="emu_builtInGames_select">
 								<option value="">Choose a game</option>
@@ -88,7 +88,7 @@
 					</tr>
 
 					<tr>
-						<td>From file(s)</td>
+						<td>File(s)</td>
 						<td>
 							<!--Actual file upload buttons (hidden)-->
 							<input id="emu_FilesFromUser" type="file" value="CHOOSE" multiple="">
@@ -101,7 +101,7 @@
 					</tr>
 
 					<tr>
-						<td>From JSON</td>
+						<td>JSON</td>
 						<td>
 							<input type="text" id="emu_FilesFromJSON" value="https://www.nicksen782.net/UzeBridge/NICKSEN782/BUBBLEBOBBLE/remoteload.json" placeholder="Enter JSON file URL">
 							<input type="button" id="emu_FilesFromJSON_load" value="Load">
@@ -234,11 +234,12 @@
 					<input type="button" value="STOP" class="emuControls" id="emuControls_stop">
 					<input type="button" value="RELOAD" class="emuControls" id="emuControls_reload">
 					<input type="button" value="UNLOAD" class="emuControls" id="emuControls_unload">
+					<input type="button" value="ROTATE" class="emuControls" id="emuControls_rotate">
 				</div>
 
 				<div id="emscripten_iframe_container_outer">
 					<div id="emscripten_iframe_container">
-						<canvas id="emuCanvas" width="640" height="560"></canvas>
+						<canvas tabindex="0" id="emuCanvas" width="640" height="560"></canvas>
 						<iframe src="iframe_msg_template.html" frameBorder="0" id="emscripten_iframe"></iframe>
 					</div>
 				</div>
@@ -359,8 +360,14 @@
 			</div>
 		</div>
 
-		<div id="emu_debug1_output2" class="sectionWindow uamOnly enabled">
-			<div class="sectionWindow_title">DEBUG #2</div>
+		<div id="emu_debug2_output1" class="sectionWindow uamOnly enabled">
+			<div class="sectionWindow_title">
+				DEBUG #2
+				<input type="button" onclick="document.querySelector('#emu_compile_UAM').click();" value="COMPILE">
+				<input type="button" onclick="document.querySelector('#emu_c2bin_UAM').click();"   value="C2BIN">
+				<input type="button" onclick="document.querySelector('#emu_c2bin2_UAM').click();"  value="C2BIN2">
+			</div>
+
 			<div class="sectionWindow_content">
 				<div class="output"></div>
 			</div>

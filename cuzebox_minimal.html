@@ -7,10 +7,111 @@
 	</head>
 
 	<body>
+
+	<div id="output"></div>
+
+		<script>
+			// One object to rule them all!
+
+		</script>
+		<script>var APPOBJECTS_START = {};</script>
 		<script name="cuzebox_minimal_html">
 			var emulatorIframeIsReady=false;
-			var resizeIframe = function(){
-				var canvas       = Module.canvas;
+		// 	var Module = {
+		// 	// doNotCaptureKeyboard: true
+		// 	// keyboardListeningElement : (function() { return parent.window.emu.vars.dom.view["emuCanvas"] })(),
+		// 	// keyboardListeningElement : (function() { return parent.document.querySelector("#emscripten_iframe_container iframe") })(),
+
+		// 	// Specifies which file the emulator should start.
+		// 	"arguments" : [ parent.window.emu.vars.gameFile ],
+
+		// 	// The Emscripten output canvas.
+		// 	"canvas"    : (function() { return parent.window.emu.vars.dom.view["emuCanvas"] })(),
+
+		// 	"preInit"   : [function(){
+		// 	}],
+
+		// 	// Load the files from the files list.
+		// 	"preRun"    : [ function(){
+		// 		var parentGameFiles            = parent.window.emu.vars.gameFiles;
+		// 		var parentgameFilesDownloading = parent.window.emu.vars.gameFilesDownloading;
+
+		// 		if(   parentgameFilesDownloading ) { throw new Error('DATA FULLY LOADED?: gameFilesDownloading: ' + parentgameFilesDownloading); }
+		// 		if( ! parentGameFiles.length     ) { throw new Error('DATA MISSING: parentGameFiles. Length:    ' + parentGameFiles.length);     }
+
+		// 		parentGameFiles.map(function(d,i,a){
+		// 			try{ emu["FS"].createPreloadedFile('/', d.name , d.data , true, true); }
+		// 			catch(e){
+		// 				console.log("Error loading file!", d.name);
+		// 				alert("Error loading file! " + d.name);
+		// 			}
+		// 		});
+		// 		// console.log("Files have been loaded.");
+		// 	}
+		// 	// ,function(){ SDL_EMSCRIPTEN_KEYBOARD_ELEMENT = ""; }
+		// 	],
+
+		// 	"postRun"   : [ emuIsReady ],
+
+	 //       "print": (function() {
+	 //         //console.log("error", window.arguments, arguments);
+	 //         //var element = document.getElementById('output');
+	 //         //if (element) element.value = ''; // clear browser cache
+	 //         //return function(text) {
+	 //         //  if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
+	 //         //  // These replacements are necessary if you render to raw HTML
+	 //         //  //text = text.replace(/&/g, "&amp;");
+	 //         //  //text = text.replace(/</g, "&lt;");
+	 //         //  //text = text.replace(/>/g, "&gt;");
+	 //         //  //text = text.replace('\n', '<br>', 'g');
+	 //         //  console.log("here it is:", text);
+	 //         //  if (element) {
+	 //         //    element.value += text + "\n";
+	 //         //    element.scrollTop = element.scrollHeight; // focus on bottom
+	 //         //  }
+	 //         //};
+	 //       })(),
+	 //       "printErr": function(text) {
+	 //         if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
+	 //         console.error(text);
+	 //       }
+		// };
+			function _debug_displayCustomGlobals(justReturnObj=false){
+				var customGlobals = {};
+				var windowKeys = Object.keys(window);
+				var START = (windowKeys).indexOf('APPOBJECTS_START') ;
+				var END   = (windowKeys).indexOf('APPOBJECTS_END')   ;
+
+				if(START==-1 || END == -1){
+				console.log(
+					'APPOBJECTS_START and/or APPOBJECTS_END were not found.\n'+
+					'You must put them around the script files you bring in to your application.\n'
+					);
+				console.log('EXAMPLE USAGE:\n');
+				console.log( "\<script\>var APPOBJECTS_START = {};  \</script\>" );
+				console.log( "\<script src='js/YOUR_JS_SCRIPT1.js'\>\</script\>" );
+				console.log( "\<script src='js/YOUR_JS_SCRIPT2.js'\>\</script\>" );
+				console.log( "\<script\>var APPOBJECTS_END   = {};  \</script\>" );
+				return;
+				}
+
+				for(var i=START+1; i<END; i++){ customGlobals[ windowKeys[i] ] = window[ windowKeys[i] ]; }
+
+				if(!justReturnObj){
+				// console.log("\n\n");
+				console.log("*******************************************************************************************");
+				console.log( "START  :", START , "\nEND    :", END ,"\nLENGTH :", END-START-1 ,	"");
+				console.log("customGlobals:\n", customGlobals);
+				console.log("*******************************************************************************************");
+				// console.log("\n\n");
+				customGlobals = {};
+				}
+				else{
+				return customGlobals;
+				}
+			}
+			function resizeIframe(){
+				var canvas                = emu["canvas"];
 				var parentIframeContainer = parent.document.querySelector("#emscripten_iframe_container");
 
 				// Determine what the new width and height should be.
@@ -18,156 +119,76 @@
 				var emuHeight = parentIframeContainer.getBoundingClientRect().height + "px";
 
 				// Set the new width and height of the Emscripten canvas and the parent iframe.
-				canvas      .style.width  = emuWidth  ;
-				canvas      .style.height = emuHeight ;
+				canvas.style.width  = emuWidth  ;
+				canvas.style.height = emuHeight ;
 			};
-			var emuIsReady = function(){
-				// console.log("Emulator is ready!");
+			function emuIsReady(){
+				console.log("Emulator is ready!", emu["arguments"]);
 
 				emulatorIframeIsReady=true;
 				parent.window.emu.vars.gameAllowedToLoad=true;
-				// parent.window.emu.vars.emu_displayStatus();
-
-				// setTimeout(function(){
-					resizeIframe();
-				// }, 5);
-
-				// Send a message to the parent.
-				window.parent.postMessage(
-					{
-						'function': 'emuStarted',
-						'data'    : [],
-					}
-					, document.location.href
-				);
+				resizeIframe();
 			};
+
 			// Handle the iframe resizing on certain key events.
 			document.addEventListener("keydown", function(e){
 				switch(e.code){
 					// Emulator controls.
 					case 'F2'  : { setTimeout(function(){ resizeIframe(); }, 25); break; }
 					case 'F3'  : { setTimeout(function(){ resizeIframe(); }, 25); break; }
-					default    : { setTimeout(function(){ resizeIframe(); }, 25); break; }
+					default    : { setTimeout(function(){ }, 25); break; }
 				}
 			});
-
-			// Receive a message.
-			window.addEventListener('message',function(e) {
-				// console.log("postMessage listener");
-
-				// Make sure the orgin domain is allowed.
-				var allowed_domains = [
-					"https://dev3-nicksen782.c9users.io",
-					"https://www.nicksen782.net",
-				];
-				if (allowed_domains.indexOf(e.origin) == -1){
-					console.log(
-						"\n", "ERROR",
-						"\n", e.origin,
-						"\n", allowed_domains.indexOf(e.origin)
-					);
-					return;
-				}
-
-				console.log("Parent message:", e.data);
-
-				switch(e.data.function){
-					case 'keyToEmu' : {
-						console.log("&&&&&&&&&&&");
-						try{console.log("Emscripten iframe: keyToEmu:2", e.data);  } catch(e){ console.log("error2"); }
-						try{console.log("Emscripten iframe: keyToEmu:3", e.data);  } catch(e){ console.log("error3"); }
-						console.log("&&&&&&&&&&&");
-						// var data = event.data.data;
-						// // var e = new Event( data.type );
-						// // var e = new Event( "keydown" );
-
-						// var event1_obj = {
-						// 	'shiftKey' : data.shiftKey ,
-						// 	'location' : data.location ,
-						// 	'code'     : data.code     ,
-						// 	'key'      : data.key      ,
-						// 	'keyCode'  : data.keyCode  ,
-						// 	'which'    : data.which    ,
-						// 	'altKey'   : data.altKey   ,
-						// 	'ctrlKey'  : data.ctrlKey  ,
-						// 	'metaKey'  : data.metaKey  ,
-						// 	'bubbles'  : data.bubbles  ,
-						// 	'type'     : data.type     ,
-						// 	'isTrusted': true          ,
-						// };
-						// var event1 = new KeyboardEvent( event1_obj.type , event1_obj);
-
-						// console.log("EMU:", event1);
-						// window.dispatchEvent(event1);
-						// document.dispatchEvent(event1);
-						// document.body.dispatchEvent(event1);
-						// document.body.querySelector("#canvas").dispatchEvent(event1);
-						// Module['canvas'].dispatchEvent(event1);
-						// parent.window.document.querySelector("#emscripten_iframe").contentWindow.dispatchEvent(event1);
-						// parent.window.document.querySelector("#emscripten_iframe").contentDocument.dispatchEvent(event1);
-						// parent.window.document.querySelector("#emscripten_iframe").dispatchEvent(event1);
-						// console.log("EMU:", event1);
-
-						break;
-					}
-					default : { console.log("Unexpected message.", event.data); break; }
-				}
-
-			}, false);
-
-			// Emscripten config.
-			var Module = {
-				// Specifies which file the emulator should start.
-				arguments : [ parent.window.emu.vars.gameFile ],
-
-				// The Emscripten output canvas.
-				canvas    : (function() { return parent.window.emu.vars.dom.view["emuCanvas"] })(),
-
-				// Load the files from the files list.
-				preInit   : [function(){
-					var parentGameFiles            = parent.window.emu.vars.gameFiles;
-					var parentgameFilesDownloading = parent.window.emu.vars.gameFilesDownloading;
-
-					if(   parentgameFilesDownloading ) { throw new Error('DATA FULLY LOADED?: gameFilesDownloading: ' + parentgameFilesDownloading); }
-					if( ! parentGameFiles.length     ) { throw new Error('DATA MISSING: parentGameFiles. Length:    ' + parentGameFiles.length);     }
-
-					parentGameFiles.map(function(d,i,a){
-						try{ FS.createPreloadedFile('/', d.name , d.data , true, true); }
-						catch(e){ console.log("Error loading file!", d.name); alert("Error loading file! " + d.name); }
-					});
-
-				}],
-
-				preRun    : [ function(){
-					// console.log("Files have been loaded.");
-				}],
-
-				postRun   : [ emuIsReady ],
-
-				print     : (function() {
-					// var element = document.querySelector('#output');
-					// if (element) { element.value = ''; }// clear browser cache
-					// return function(text) {
-					// 	if (arguments.length > 1) { text = Array.prototype.slice.call(arguments).join(' '); }
-					// 	// These replacements are necessary if you render to raw HTML
-					// 	console.log("EMSCRIPTEN print:", text);
-					// 	if (element) {
-					// 		element.value += text + ' \n ';
-					// 		element.scrollTop = element.scrollHeight; // focus on bottom
-					// 	}
-					// };
-				})(),
-
-				printErr  : function(text) {
-					if (arguments.length > 1) { text = Array.prototype.slice.call(arguments).join(' '); }
-					console.log("EMSCRIPTEN printErr:", text);
-				},
-
-			};
-
 		</script>
 
 		<!-- PLACE HOLDER FOR REPLACEMENT -->
+
+		<script>
+			// var gameFileArg="Tetris.uze";
+			var emu = UOP({
+				// Specifies which file the emulator should start.
+				"arguments" : [ parent.window.emu.vars.gameFile ],
+				// "arguments" : [ "Tetris.uze" ],
+				// "arguments" : [ "TilesDemo.hex" ],
+				// "arguments" : [ "RamTileTest_1.uze" ],
+				// "arguments" : [ gameFileArg ],
+
+				// The Emscripten output canvas.
+				"canvas"    : (function() { return parent.window.emu.vars.dom.view["emuCanvas"] })(),
+
+				"preInit"   : [function(){
+				}],
+
+				// Load the files from the files list.
+				"preRun"    : [ function(){
+					var parentGameFiles            = parent.window.emu.vars.gameFiles;
+					var parentgameFilesDownloading = parent.window.emu.vars.gameFilesDownloading;
+
+					if(   parentgameFilesDownloading ) { throw new Error('DATA NOT FULLY LOADED?: gameFilesDownloading   : ' + parentgameFilesDownloading); }
+					if( ! parentGameFiles.length     ) { throw new Error('DATA MISSING          : parentGameFiles. Length: ' + parentGameFiles.length);     }
+
+					parentGameFiles.map(function(d,i,a){
+						try{ emu["FS"].createPreloadedFile('/', d.name , d.data , true, true); }
+						catch(e){
+							console.log("Error loading file!", d.name);
+							alert("Error loading file! " + d.name);
+						}
+					});
+				}
+				],
+
+				"postRun"   : [ emuIsReady ],
+
+				"printErr": function(text) {
+				  if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
+				  console.error(text);
+				}
+			}
+		);
+		</script>
+
+		<script>var APPOBJECTS_END = {};</script>
+		<script>console.log(_debug_displayCustomGlobals());</script>
 
 	</body>
 </html>

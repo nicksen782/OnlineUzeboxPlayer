@@ -20,6 +20,12 @@ emu.funcs.domHandleCache_populate = function(){
 	// emscripten_iframe_container
 	emu.vars.dom.view["emscripten_iframe_container"]  = document.querySelector("#emscripten_iframe_container");
 
+	// emu_emulator
+	emu.vars.dom.view["emu_emulator_window"]  = document.querySelector("#emu_emulator");
+
+	// Gamepads
+	emu.vars.dom.view["emu_misc_gamepads"]  = document.querySelector("#emu_misc_gamepads");
+
 	// User JSON load.
 	emu.vars.dom.view["emu_FilesFromJSON"]  = document.querySelector("#emu_FilesFromJSON");
 	emu.vars.dom.view["emu_FilesFromJSON_load"]  = document.querySelector("#emu_FilesFromJSON_load");
@@ -28,6 +34,7 @@ emu.funcs.domHandleCache_populate = function(){
 	emu.vars.dom.view["emuControls_stop"]      = document.querySelector("#emuControls_stop")  ;
 	emu.vars.dom.view["emuControls_reload"]    = document.querySelector("#emuControls_reload");
 	emu.vars.dom.view["emuControls_unload"]    = document.querySelector("#emuControls_unload");
+	emu.vars.dom.view["emuControls_rotate"]    = document.querySelector("#emuControls_rotate");
 	emu.vars.dom.view["emuControls_autopause_chk"] = document.querySelector("#emuControls_autopause_chk");
 	emu.vars.dom.view["emuControls_autopause_btn"] = document.querySelector("#emuControls_autopause_btn");
 
@@ -98,7 +105,7 @@ emu.funcs.domHandleCache_populate_UAM = function(){
 		emu.vars.dom.view["emu_previousCompile"] = document.querySelector("#emu_previousCompile");
 
 		emu.vars.dom.debug1["output"] = document.querySelector("#emu_debug1_output1 .output");
-		emu.vars.dom.debug2["output"] = document.querySelector("#emu_debug1_output2 .output");
+		emu.vars.dom.debug2["output"] = document.querySelector("#emu_debug2_output1 .output");
 	}
 }
 

@@ -122,14 +122,14 @@ WHERE
 	else                         { chdir( $path  ); }
 
 	$buildCommand = "make";
-	file_put_contents( ('avr-nm.txt'), '... LOADING ...' );
+	// file_put_contents( ('avr-nm.txt'), '... LOADING ...' );
 	$execResults = shell_exec($buildCommand . " 2>&1" );
 
 	// Get the info file (special parsing to remove blank lines.)
-	$info = shell_exec("cat lastbuild.txt | sed '/^\s*$/d' 2>&1");
+	// $info = shell_exec("cat lastbuild.txt | sed '/^\s*$/d' 2>&1");
 
 	// Get the info file (special parsing to remove blank lines.)
-	// $cflow = shell_exec("cat cflow.txt 2>&1");
+	$cflow = shell_exec("cat cflow.txt 2>&1");
 
 	// One more thing, strip out all lines that do NOT contain a certain string.
 	function makeObj_avrnm(){
@@ -227,6 +227,14 @@ WHERE
 		}
 		else{
 			// error opening the file.
+			return array(
+				'bss_objects'          => array( 'data'=>[] , 'caption'=> 'BSS: OBJECTS'          . " (" . number_format(0) . " bytes)", ) ,
+				'text_funcs'           => array( 'data'=>[] , 'caption'=> 'TEXT: FUNCS'           . " (" . number_format(0) . " bytes)", ) ,
+				'text_objects'         => array( 'data'=>[] , 'caption'=> 'TEXT: OBJECTS'         . " (" . number_format(0) . " bytes)", ) ,
+				'text_objects_progmem' => array( 'data'=>[] , 'caption'=> 'TEXT: OBJECTS PROGMEM' . " (" . number_format(0) . " bytes)", ) ,
+				'other'                => array( 'data'=>[] , 'caption'=> 'OTHER'                 . " (" . number_format(0) . " bytes)", ) ,
+				// 'other'                => array( 'data'=>[]                   , 'caption'=> 'OTHER2'                 . " (" . number_format($bytes_in_other)                . " bytes)", ) ,
+			);
 		}
 
 		// Sort by key in reverse. (Largest size first.)
@@ -293,7 +301,7 @@ WHERE
 		// 'cflow'      => htmlspecialchars($cflow)       ,
 		'link1'      => $_SERVER['HTTP_HOST'].'/'.$results1[0]['gamedir'].'/'.'build_files'.'/cflow.pdf'       ,
 		'link2'      => $_SERVER['HTTP_HOST'].'/'.$results1[0]['gamedir'].'/'.'build_files'.'/cflow.txt'       ,
-		'link3'      => $_SERVER['HTTP_HOST'].'/'.$results1[0]['gamedir'].'/'.'build_files'.'/lastbuild.txt'       ,
+		'link3'      => "",//$_SERVER['HTTP_HOST'].'/'.$results1[0]['gamedir'].'/'.'build_files'.'/lastbuild.txt'       ,
 	) );
 
 }

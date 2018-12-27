@@ -7,11 +7,17 @@ input[type="number"],
 input[type="text"],
 input[type="file"]
 {
-    padding: 2px;
-    margin: 1px;
-    border-radius: 5px;
-    border: 1px solid #888841;
-    background-color: #dddddd;
+	display: inline;
+	/*height: 24px;*/
+	width: auto;
+	height: auto;
+	padding: 0px 5px 0px 5px;
+	font-size: 14px;
+	border: solid 1px gray;
+	border-radius: 5px;
+	color: black;
+	margin: 1px auto;
+	vertical-align: top;
 }
 
 select:hover,
@@ -23,11 +29,7 @@ input[type="number"]:hover,
 input[type="text"]:hover,
 input[type="file"]:hover
 {
-    border: 1px solid black;
-    background-color: #d3dbfc;
-    padding: 2px;
-    margin: 1px;
-    border-radius: 5px;
+   border: solid 1px black;
 }
 /* Firefox puts extra border/padding on inputs. Remove it! */
 

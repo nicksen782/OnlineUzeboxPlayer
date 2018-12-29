@@ -1,6 +1,9 @@
 emu.funcs.domHandleCache_populate = function(){
 	emu.vars.dom.view = {};
 
+	// emu_filesList_div
+	emu.vars.dom.view["emu_filesList_div"]  = document.querySelector("#emu_filesList_div");
+
 	// Misc views: nav buttons
 	emu.vars.dom.view["emu_misc_navs"]  = document.querySelectorAll("#emu_misc_nav .emu_misc_navItem");
 	// Misc views: all views
@@ -17,8 +20,11 @@ emu.funcs.domHandleCache_populate = function(){
 	emu.vars.dom.view["emu_FilesFromUser"]             = document.querySelector("#emu_FilesFromUser");
 	// Visible upload button.
 	emu.vars.dom.view["emu_FilesFromUser_viewableBtn"] = document.querySelector("#emu_FilesFromUser_viewableBtn");
-	// emscripten_iframe_container
-	emu.vars.dom.view["emscripten_iframe_container"]  = document.querySelector("#emscripten_iframe_container");
+	// emscripten_emu_container
+	emu.vars.dom.view["emscripten_emu_container"]  = document.querySelector("#emscripten_emu_container");
+
+	// emuCanvas
+	emu.vars.dom.view["emuCanvas"]  = document.querySelector("#emuCanvas");
 
 	// emu_emulator
 	emu.vars.dom.view["emu_emulator_window"]  = document.querySelector("#emu_emulator");
@@ -38,13 +44,12 @@ emu.funcs.domHandleCache_populate = function(){
 	emu.vars.dom.view["emuControls_autopause_chk"] = document.querySelector("#emuControls_autopause_chk");
 	emu.vars.dom.view["emuControls_autopause_btn"] = document.querySelector("#emuControls_autopause_btn");
 
-	emu.vars.dom.view["emuCanvas"]                 = document.querySelector("#emuCanvas");
-
 	emu.vars.dom.view["emuControls_QUALITY"] = document.querySelector("#emuControls_QUALITY");
 	emu.vars.dom.view["emuControls_DEBUG"]   = document.querySelector("#emuControls_DEBUG");
 	emu.vars.dom.view["emuControls_FLICKER"] = document.querySelector("#emuControls_FLICKER");
 	emu.vars.dom.view["emuControls_PAUSE"]   = document.querySelector("#emuControls_PAUSE");
 	emu.vars.dom.view["emuControls_STEP"]    = document.querySelector("#emuControls_STEP");
+	emu.vars.dom.view["emuControls_FULLSCREEN"]    = document.querySelector("#emuControls_FULLSCREEN");
 
 	emu.vars.dom.view["emuGamepad_1_key_Q"]      = document.querySelector("#emuGamepad_1_key_Q") ;
 	emu.vars.dom.view["emuGamepad_1_key_W"]      = document.querySelector("#emuGamepad_1_key_W") ;

@@ -24,11 +24,11 @@
 var emu = {};
 emu.vars = {
 	// UAM vars.
-	originUAM: false,
-	uamwindow: undefined,
-	uamwindow_objs: undefined,
-	user_id: undefined,
-	UAMisReady: undefined,
+	originUAM      : false     ,
+	uamwindow      : undefined ,
+	uamwindow_objs : undefined ,
+	user_id        : undefined ,
+	UAMisReady     : undefined ,
 
 	// Holds the DOM cache.
 	dom: {},
@@ -48,106 +48,110 @@ emu.vars = {
 
 	//
 	gameFiles: [],
-	gameFile: "",
+	gameFile : "",
 	gameTitle: "",
-	baseURL: "",
-	iframeHTML: ""
+
+	innerEmu : {
+		emulatorIsReady       : false,
+		createDefaultModule   : function(){
+			// Tells Emscripten what DOM element that it should be listening to for keyboard input.
+			this["keyboardListeningElement"] = (function() { return emu.vars.dom.view["emuCanvas"] })();
+
+			// this["noExitRuntime"] = 0;
+
+			// Specifies which file the emulator should start.
+			this["arguments"] = [ "" ];
+
+			// The Emscripten output canvas.
+			this["canvas"]    = (function() { return emu.vars.dom.view["emuCanvas"] })() ;
+
+			// Do this before initialization.
+			this["preInit"]   = [
+				function(){ }
+			];
+
+			// Load the files from the files list.
+			this["preRun"]    = [ function(){
+				var GameFiles        = emu.vars.gameFiles;
+				var FilesDownloading = emu.vars.gameFilesDownloading;
+
+				if(   FilesDownloading ) { throw new Error('GAME IS STILL LOADING     : FilesDownloading : ' + FilesDownloading); }
+				if( ! GameFiles.length ) { throw new Error('NO FILES HAVE BEEN LOADED : GameFiles. Length: ' + GameFiles.length); }
+
+				GameFiles.map(function(d,i,a){
+					try     { emu.vars.innerEmu.Module["FS"].createPreloadedFile('/', d.name , d.data , true, true); }
+					catch(e){ console.log("Error loading file!", d.name, e); }
+				});
+			}];
+
+			// Do this after initialization but before main() is called.
+			this["postRun"]   = [
+				// Set the emu ready flag.
+				function(){
+					emu.vars.innerEmu.emuIsReady();
+				},
+
+				// Focus on the emu canvas.
+				function(){
+					setTimeout(function(){
+						// Don't pause if the auto-pause checkbox is checked.
+						if (!emu.vars.dom.view["emuControls_autopause_chk"].classList.contains("enabled")) {
+							emu.funcs.emu_focusing(null, "mouseenter");
+						}
+						else{
+							emu.funcs.emu_focusing(null, "mouseleave");
+						}
+					}, 2000);
+				}
+
+				// Enable or disable the CUzeBox debug mode.
+				,function(){
+					// If this is NOT a UAM instance then auto-click the debug button which should turn off the debug bars.
+					if(emu.vars.originUAM){
+						setTimeout(function(){
+							emu.vars.dom.view["emuControls_DEBUG"].dispatchEvent( new CustomEvent("mousedown") );
+							emu.vars.dom.view["emuControls_DEBUG"].dispatchEvent( new CustomEvent("mouseup") );
+						}, 50);
+					}
+				}
+			];
+			this["printErr"]  = function(text) {
+				if (arguments.length > 1) { text = Array.prototype.slice.call(arguments).join(' '); }
+				console.error(text);
+			};
+		},
+		calculateAspectRatioFit : function(srcWidth, srcHeight, maxWidth, maxHeight) {
+			// https://stackoverflow.com/a/14731922
+			var ratio = Math.min(maxWidth / srcWidth, maxHeight / srcHeight);
+			return {
+				width : Math.floor(srcWidth  * ratio) ,
+				height: Math.floor(srcHeight * ratio) ,
+				ratio : ratio
+			};
+		},
+		resizeEmuCanvas       : function(){
+			var canvas        = emu.vars.dom.view["emuCanvas"];
+			var Container     = document.querySelector("#emscripten_emu_container");
+			var ContainerDims = Container.getBoundingClientRect();
+			var newDims       = emu.vars.innerEmu.calculateAspectRatioFit(canvas.width, canvas.height, ContainerDims.width, ContainerDims.height);
+
+			canvas.style.width  = newDims.width  +"px";
+			canvas.style.height = newDims.height +"px";
+		},
+		emuIsReady            : function(){
+			emu.vars.innerEmu.emulatorIsReady = true;
+			emu.vars.gameAllowedToLoad        = true;
+			emu.vars.innerEmu.resizeEmuCanvas();
+		},
+		Module                : { },
+	}
 };
 emu.funcs = {
-	//
-	recreateEmptyIframe: function() {
-		var emscripten_iframe = document.querySelector("#emscripten_iframe");
-		// Is there an iframe there?
-		if (null == emscripten_iframe) {
-			// console.log("No iframe here!");
-			return;
-		}
-		else {
-			// Create iframe.
-			var newIframe = document.createElement('iframe');
-
-			// Remove frameborder
-			newIframe.setAttribute("frameBorder", "0");
-
-			// Set id to emscripten_iframe.
-			newIframe.id = "emscripten_iframe";
-
-			// Get handle on the container for the iframe.
-			var container = document.querySelector('#emscripten_iframe_container');
-
-			newIframe.src = "about:blank";
-
-			// Remove the existing iframe.
-			document.querySelector('#emscripten_iframe').remove();
-
-			newIframe.onload = function() {
-				newIframe.onload = null;
-			};
-
-			// Append the iframe to the container.
-			container.appendChild(newIframe);
-		}
-	},
-	// * Stops the Emscripten instance by removing it's iframe and replacing the iframe with a blank one.
-	stopEmu: function() {
-		// This just removes the Emscripten iframe.
-		// The game can be restarted if emu.vars.iframeHTML is populated.
-		if (emu.vars.gameFiles.length) {
-			// let messageText = "The emulator has been stopped. You can restart the loaded game by pressing the \"RELOAD\" button.";
-			emu.funcs.recreateEmptyIframe();
-			emu.funcs.shared.grayTheCanvas(emu.vars.dom.view["emuCanvas"]);
-			emu.funcs.shared.textOnCanvas({ "canvas": emu.vars.dom.view["emuCanvas"], "text": " - STOPPED - " });
-		}
-		else {
-			return;
-		}
-	},
-	// * Will clear the cached game file data. Leaves the Emscripten core iframeHTML intact.
-	emu_reset: function() {
-		// Stop the emulator if it is active.
-		emu.funcs.recreateEmptyIframe();
-
-		// Clear last image from the canvas.
-		emu.funcs.shared.clearTheCanvas(emu.vars.dom.view["emuCanvas"]);
-
-		// Reset.
-		emu.vars.gameFiles = [];
-		emu.vars.gameFile = "";
-		emu.vars.gameTitle = "";
-		emu.vars.baseURL = "";
-	},
-	// * Will clear the cached game file data AND put a "GAME NOT LOADED" message on the emu canvas.
-	emu_resetFull: function() {
-		// Stop the emulator if it is active.
-		emu.funcs.recreateEmptyIframe();
-
-		// Clear last image from the canvas.
-		emu.funcs.shared.clearTheCanvas(emu.vars.dom.view["emuCanvas"]);
-
-		// Indicate that there is not a game loaded.
-		emu.funcs.shared.textOnCanvas({ "canvas": emu.vars.dom.view["emuCanvas"], "text": " - GAME NOT LOADED - " });
-
-		// Reset.
-		emu.vars.gameFiles = [];
-		emu.vars.gameFile = "";
-		emu.vars.gameTitle = "";
-		emu.vars.baseURL = "";
-		// emu.vars.iframeHTML = "" ;
-
-		emu.vars.dom.view.builtInGames_select.value = "";
-	},
-	// *
 	emu_rotate: function() {
-		console.log(JSON.stringify(emu.vars.iframeHTML.substr(0, 100), null, 1));
-		emu.vars.iframeHTML="";
-		console.log("cleared:", emu.vars.iframeHTML);
-		return;
-		console.log("emu_rotate: not ready yet!");
-		alert("emu_rotate: not ready yet!");
 		return;
 		// emu_rotate
 		var canvas = emu.vars.dom.view.emuCanvas;
-		var container = emu.vars.dom.view.emscripten_iframe_container;
+		var container = emu.vars.dom.view.emscripten_emu_container;
 
 		emu.vars.rotateDeg = 0;
 		emu.vars.rotateDeg = 90;
@@ -161,6 +165,74 @@ emu.funcs = {
 		// 360 // aspect ratio 8:7 (normal)
 	},
 	// * Queries the database for a list of built-in games. Puts the results in a game select menu.
+
+	// * Stops the Emscripten instance.
+	stopEmu: function(showStoppedText) {
+		// This just removes the Emscripten instance.
+		// The game can be restarted there are still game files loaded.
+		if (emu.vars.gameFiles.length) {
+			emu.funcs.shared.grayTheCanvas(emu.vars.dom.view["emuCanvas"]);
+			if(showStoppedText){
+				emu.funcs.shared.textOnCanvas({ "canvas": emu.vars.dom.view["emuCanvas"], "text": " - STOPPED - " });
+			}
+
+			// Abort the current emulator instance?
+			if(emu.vars.innerEmu.Module.abort) {
+				try{ emu.vars.innerEmu.Module.abort(); } catch(e){ }
+			}
+			// Clear Module.
+			emu.vars.innerEmu.Module = null;
+
+			// Reset Module.
+			emu.vars.innerEmu.Module = new emu.vars.innerEmu.createDefaultModule();
+
+			// Indicate that there is not a game loaded.
+			emu.vars.innerEmu.emulatorIsReady=false;
+		}
+		else {
+			return;
+		}
+	},
+	// * Will clear the cached game file data. Leaves the Emscripten core intact.
+	emu_reset: function() {
+		// Stop the emulator if it is active.
+		emu.funcs.stopEmu(false);
+
+		// Clear last image from the canvas.
+		emu.funcs.shared.clearTheCanvas(emu.vars.dom.view["emuCanvas"]);
+
+		// Reset.
+		emu.vars.gameFiles = [];
+		emu.vars.gameFile  = "";
+		emu.vars.gameTitle = "";
+
+		document.querySelector("#emu_filesList_links").innerHTML="";
+	},
+	// * Will clear the cached game file data AND put a "GAME NOT LOADED" message on the emu canvas.
+	emu_unload: function() {
+		// Stop the emulator if it is active.
+		emu.funcs.stopEmu(true);
+
+		// Clear last image from the canvas.
+		emu.funcs.shared.clearTheCanvas(emu.vars.dom.view["emuCanvas"]);
+
+		// Indicate that there is not a game loaded.
+		emu.funcs.shared.textOnCanvas({ "canvas": emu.vars.dom.view["emuCanvas"], "text": " - GAME NOT LOADED - " });
+
+		// Reset.
+		emu.vars.gameFiles = [];
+		emu.vars.gameFile  = "";
+		emu.vars.gameTitle = "";
+
+		// Clear the selected DB game.
+		emu.vars.dom.view.builtInGames_select.value = "";
+
+		// Clear the displayed filelist.
+		emu.vars.dom.view["emu_filesList_div"].innerHTML="No files are loaded.";
+
+		document.querySelector("#emu_filesList_links").innerHTML="";
+	},
+	// * Retrieve the built-in game list from the server.
 	emu_getBuiltInGamelist: function() {
 		var resolved = function(res) {
 			// Used to add games by category.
@@ -200,6 +272,8 @@ emu.funcs = {
 			// Clear the optgroups.
 			emu_builtInGames_select1.querySelectorAll('optgroup').forEach(function(d, i, a) { d.remove(); });
 
+			if(typeof res=="string"){ res = JSON.parse(res); } // IE11 Fix:
+
 			// Break the game data apart into separate categories.
 			var categories = [
 				{ 'groupTitle': '== ' + emu.vars.emu_statuses[3] + '', 'data': res.data.filter(function(e) { if (e.status == 3) { return true; } }), }, // 'Complete   '
@@ -235,7 +309,60 @@ emu.funcs = {
 		console.log(emu.vars);
 		emu.funcs.loadGame();
 	},
-	// *
+	// * Downloads the specified file out of the game files list.
+	downloadFile : function(filename){
+		var file  = emu.vars.gameFiles.filter(function(d,i,a){ if(d.name==filename) {return true;}});
+		var gametitle = emu.vars.dom.view["builtInGames_select"].options[emu.vars.dom.view["builtInGames_select"].selectedIndex].innerText;
+
+		if(file.length){ file=file[0]; } else {
+			console.log("The file was NOT found.");
+			alert      ("The file was NOT found.");
+			return;
+		}
+
+		// Load FileSaver if needed.
+		featureDetection.funcs.applyFeatures_fromList([ "FileSaver" ]).then(
+			function(res){
+				// Convert to blob.
+				var blob = new Blob( [file.data] , {type: "text/plain;charset=utf-8"});
+				// Present the download.
+				saveAs(blob, filename);
+			}
+			,emu.funcs.shared.rejectedPromise
+		);
+
+	},
+	// * Downloads all loaded game files as a .zip.
+	downloadZip : function(){
+		// var datas  = emu.vars.gameFiles.filter(function(d,i,a){ if(d.name==filename) {return true;}});
+		var datas  = emu.vars.gameFiles;
+		var gametitle = emu.vars.dom.view["builtInGames_select"].options[emu.vars.dom.view["builtInGames_select"].selectedIndex].innerText;
+
+		if(! datas.length){
+			console.log("No game files have been loaded.");
+			alert      ("No game files have been loaded.");
+			return;
+		}
+
+		// Load JSZip and FileSaver if needed.
+		featureDetection.funcs.applyFeatures_fromList([ "JSZip", "FileSaver" ]).then(
+			function(){
+				var zip = new JSZip();
+
+				for(var i=0; i<datas.length; i+=1){ zip.file( datas[i].name, datas[i].data ); }
+
+				zip.generateAsync({ type: "blob", compression: "DEFLATE", compressionOptions: { level: 9 } })
+				.then(
+					function(content) {
+						saveAs(content, gametitle+".zip");
+					}
+					,emu.funcs.shared.rejectedPromise
+				);
+			}
+			,emu.funcs.shared.rejectedPromise
+		);
+	},
+	// * Retrieves/loads game files.
 	getGameFiles: function(methodType) {
 		// Get DOM handles on the loading inputs.
 		var emu_builtInGames_select1 = emu.vars.dom.view.builtInGames_select;
@@ -243,18 +370,24 @@ emu.funcs = {
 		var jsonInput = emu.vars.dom.view["emu_FilesFromJSON"];
 		var jsonInputUAM = emu.vars.dom.view["emu_FilesFromJSON_UAM"];
 
+		var gameid;
+
 		// Allow the game load?
 		if (methodType == 1 && emu_builtInGames_select1.value == "") { console.log("method #1: no value."); return; }
 		if (methodType == 2 && !userFiles.files.length) { console.log("method #2: no value."); return; }
 		if (methodType == 3 && jsonInput.value == "") { console.log("method #3: no value."); return; }
 		if (methodType == 4 && jsonInputUAM.value == "") { console.log("method #4: no value."); return; }
 
-		var addFileListToDisplay = function() {
-			let doNotCreateLinks = true;
+		var addFileListToDisplay  = function() {
+			// let doNotCreateLinks = true;
+			let doNotCreateLinks = false;
 
 			// Get handle on destination div and clear it..
 			var destdiv = document.querySelector("#emu_filesList_div");
 			destdiv.innerHTML = "";
+
+			var destdiv2 = document.querySelector("#emu_filesList_links");
+			destdiv2.innerHTML = "";
 
 			// Create the table template.
 			var tableTemplate = document.createElement("table");
@@ -295,24 +428,22 @@ emu.funcs = {
 				let filesize = list[i].filesize;
 				let ext = (record.substr(-4, 4)).toLowerCase();
 				let isExecFile = (ext == ".uze" || ext == ".hex") ? 1 : 0;
-				let filesizeHTML = filesize.toLocaleString() + ``;
+				let filesizeHTML = filesize.toLocaleString() + "";
 
 				// Determine a shorter filename so that it will fit.
 				let shortenedName = "";
 				if (record.length > 23) { shortenedName = record.substr(0, 15) + "..." + record.substr(-6); }
 				else { shortenedName = record; }
 
-				// let playButton = "<button>PLAY</button>";
-				let linkHTML = "<button>linkHTML</button>";
-
-				let playButton = "<input type=\"button\" value=\"PLAY\" style=\"width:85%;font-size: 10px;\" onclick=\"emu.funcs.loadGameFromList('" + record + "');\">";
-				// let linkHTML     = `<a title="`+record+`" href='`+(href)+`' target="_blank">`+shortenedName+`</a>`;
+				let playButton = "<input type=\"button\" value=\"PLAY\" class=\"playButton\" onclick=\"emu.funcs.loadGameFromList('" + record + "');\">";
+				let linkHTML   = "<span class=\"hyperlink1\" onclick=\"emu.funcs.downloadFile('"+record+"');\">"+record+"</span> ";
 
 				// Create the new row and the cells.
 				let row = fragTable.insertRow(fragTable.rows.length);
 				let ceil0 = row.insertCell(0);
 				let ceil1 = row.insertCell(1);
 				let ceil2 = row.insertCell(2);
+
 
 				// Add the data to each cell.
 				ceil0.innerHTML = (isExecFile ? playButton : '--');
@@ -321,12 +452,27 @@ emu.funcs = {
 				ceil2.innerHTML = filesizeHTML;
 			}
 
-
-
 			// Append the fragTable to the dest div.
 			destdiv.appendChild(fragTable);
+
+			// <a href="https://dev3-nicksen782.c9users.io/web/ACTIVE/UAM5/uam5.php?gameid=100">Direct Play URL</a>
+			// downloadZip
+			// DOWNLOAD AS .ZIP
+			//
+
+			// Create game url and download as zip table.
+			var gameLinksHTML = "";
+			let gameURL_link=window.location.origin + window.location.pathname + "?gameid="+gameid;
+			gameLinksHTML += "<table id='gameLinksTable'>";
+			gameLinksHTML += "	<tr>";
+			gameLinksHTML += "		<td> <a target='_blank' href='"+gameURL_link+"' class='hyperlink1 gamelinks"+(gameid ? '': ' notVisible')+"'>Direct Play URL</a></td>";
+			gameLinksHTML += "		<td> <span onclick='emu.funcs.downloadZip();' class='hyperlink1 gamelinks'>DOWNLOAD AS .ZIP</span> </td>";
+			gameLinksHTML += "	</tr>";
+			gameLinksHTML += "</table>";
+
+			destdiv2.innerHTML += gameLinksHTML;
 		}
-		var finishFileLoading = function(proms, res, loadNow) {
+		var finishFileLoading     = function(proms, res, loadNow) {
 			var promsOnly = proms.map(function(d, i, a) { return d.prom; });
 
 			Promise.all(promsOnly).then(
@@ -350,8 +496,6 @@ emu.funcs = {
 						// Get the game title.
 						emu.vars.gameTitle = res.remoteload.title;
 
-						emu.vars.baseURL = res.remoteload.baseURL;
-
 						// Games are loaded. Make sure we can continue.
 						var doWeLoadTheGame = true;
 						if (!emu.vars.gameFile.length) { console.log("No gamefile in emu.gameFile!");
@@ -359,8 +503,6 @@ emu.funcs = {
 						if (!emu.vars.gameFiles.length) { console.log("No game files in emu.gameFiles!");
 							doWeLoadTheGame = false; }
 						if (!emu.vars.gameTitle.length) { console.log("No gameTitle files in emu.gameTitles!");
-							doWeLoadTheGame = false; }
-						if (!emu.vars.baseURL.length) { console.log("No baseURL in emu.baseURL!");
 							doWeLoadTheGame = false; }
 
 						if (doWeLoadTheGame) {
@@ -449,7 +591,7 @@ emu.funcs = {
 			// Now run the function that creates the Promise.all now that the promise array is fully populated.
 			finishFileLoading(proms, res, true);
 		};
-		var returnJSON_byGameId = function(gameid) {
+		var returnJSON_byGameId   = function(gameid) {
 			return new Promise(function(resolve, reject) {
 				var formData = {
 					"o": "emu_returnJSON_byGameId",
@@ -462,7 +604,7 @@ emu.funcs = {
 				);
 			});
 		};
-		var loadUserFilelist = function() {
+		var loadUserFilelist      = function() {
 			// Get the file list.
 			// Use a file reader to read as array buffer.
 			// Add each file to the gameFiles array.
@@ -499,7 +641,7 @@ emu.funcs = {
 
 			finishFileLoading(proms, null, true);
 		};
-		var fixUzeHeader = function(filename, data) {
+		var fixUzeHeader          = function(filename, data) {
 			let view8 = new Uint8Array(data);
 
 			// Fix the header on the .uze file?
@@ -529,9 +671,10 @@ emu.funcs = {
 
 		// Method #1 - Games DB
 		if (methodType == 1) {
-			let gameid = emu_builtInGames_select1.value;
+			gameid = emu_builtInGames_select1.value;
 			returnJSON_byGameId(gameid).then(
 				function(res) {
+					if(typeof res=="string"){ res = JSON.parse(res); } // IE11 Fix:
 					downloadFilesFromList(res);
 				}, emu.funcs.shared.rejectedPromise);
 		}
@@ -551,6 +694,8 @@ emu.funcs = {
 
 			getRemoteLoadJson.then(
 				function(res) {
+					emu_builtInGames_select1.value = "";
+					if(typeof res=="string"){ res = JSON.parse(res); } // IE11 Fix:
 					let baseURL = jsonInput.value.replace(/\\/g, '/').replace(/\/[^\/]*\/?$/, '');
 					res = { "remoteload": res };
 					res.remoteload.baseURL = baseURL;
@@ -572,6 +717,8 @@ emu.funcs = {
 
 			getRemoteLoadJson.then(
 				function(res) {
+					emu_builtInGames_select1.value = "";
+					if(typeof res=="string"){ res = JSON.parse(res); } // IE11 Fix:
 					let baseURL = jsonInputUAM.value.replace(/\\/g, '/').replace(/\/[^\/]*\/?$/, '');
 					res = { "remoteload": res };
 					res.remoteload.baseURL = baseURL;
@@ -584,175 +731,43 @@ emu.funcs = {
 		}
 
 	},
-	// * Removes any and all iframes from with the emscripten_iframe_container.
-	emu_removeEmuIframes: function() {
-		// Remove previous iframe(s).
-		var container = document.querySelector('#emscripten_iframe_container');
-		var previousIframes = container.querySelectorAll('iframe');
-		if (previousIframes.length) {
-			for (var i = 0; i < previousIframes.length; i++) {
-				previousIframes[i].remove();
-			}
-		}
-	},
 	// * Loads the cached game files into a new Emscripten instance.
-	loadGame: function() {
+	loadGame : function(){
 		if (!emu.vars.gameFiles.length) {
 			// console.log("No files are loaded.");
 			return;
 		}
 
-		// Runs after the Emscripten core files are loaded.
-		var emuFilesReady = function(data) {
-			var newHTML = "";
+		// The gameFile should be populated and so should all the game's files.
+		if (!emu.vars.gameFile.length) {
+			// console.log("No game file was specified.");
+			return;
+		}
 
-			// If the iframeHTML is NOT already cached.
-			if (!emu.vars.iframeHTML.length) {
-				// Create config var.
-				var config = '<script name="cuzebox_js">' + data["cuzebox.js"] + '</script>';
+		// Start new Emscripen instance by modifying Module.arguments and then running the Emscritpen module function.
+		emu.funcs.stopEmu(false);
 
-				// Fix the dataurl prefix.
-				data["cuzebox.html.mem"] = data["cuzebox.html.mem"].replace("data:text/html;base64,", "data:application/octet-stream;base64,");
+		// Edit Module: Set the game file.
+		emu.vars.innerEmu.Module.arguments = [emu.vars.gameFile];
 
-				// Replace the filename reference with the dataurl.
-				config = config.replace("cuzebox.html.mem", data["cuzebox.html.mem"]);
-
-				// Replace the placeholder text in the cuzebox_minimal.html file with the config var.
-				newHTML = data["cuzebox_minimal.html"].replace("<!-- PLACE HOLDER FOR REPLACEMENT -->", config);
-
-				// Cache the full html (including the replaced stuff) for easy reloading later.
-				emu.vars.iframeHTML = newHTML;
-			}
-			// If the iframeHTML is already cached.
-			else {
-				// console.log("PART2: Using cached copy of the emulator.");
-				newHTML = emu.vars.iframeHTML;
-			}
-
-			// Create iframe.
-			var newIframe = document.createElement('iframe');
-
-			// Remove frameborder
-			newIframe.setAttribute("frameBorder", "0");
-
-			// Set id to emscripten_iframe.
-			newIframe.id = "emscripten_iframe";
-
-			// Get handle on the container for the iframe.
-			var container = document.querySelector('#emscripten_iframe_container');
-
-			// Create iframe onload event listener.
-			newIframe.onload = function() {
-				// Open the iframe contentWindow.document.
-				newIframe.contentWindow.document.open();
-
-				// Write the newHTML to into it.
-				newIframe.contentWindow.document.write(newHTML);
-
-				// Close the iframe contentWindow.document.
-				newIframe.contentWindow.document.close();
-
-				// Detect auto-pause checkbox value.
-				setTimeout(function() {
-					// If checked then pauseMainLoop for Emscripten
-					if (!emu.vars.dom.view["emuControls_autopause_chk"].classList.contains("enabled")) {
-						emu.funcs.emu_iframeFocusing(null, "mouseenter");
-					}
-					// If not checked then just set the status as "Accepting input"
-					else {
-						// But NOT if the mouse is not currently over the emu window or gamepads.
-						var hasHover1 = emu.vars.dom.view["emu_emulator_window"].classList.contains("hovered");
-						var hasHover2 = emu.vars.dom.view["emu_misc_gamepads"].classList.contains("hovered");
-						if (!hasHover1 && !hasHover2) { emu.funcs.emu_iframeFocusing(null, "mouseleave"); }
-					}
-				}, 2000);
-			};
-
-			// Remove previous emulator iframes and event listeners.
-			if (document.querySelector("#emscripten_iframe") != null) {
-				emu.funcs.emu_removeEmuIframes();
-			}
-
-			// Append the iframe to the container.
-			container.appendChild(newIframe);
-		};
-
-		// Runs after the blank iframe loads.
-		document.querySelector("#emscripten_iframe").onload = function() {
-			document.querySelector("#emscripten_iframe").onload = null;
-			if (emu.vars.iframeHTML.length) {
-				// console.log("PART 1: Using cached copy of the emulator.");
-				emuFilesReady(null);
-			}
-			else {
-				// Get the cuzebox_minimal.html file, cuzebox.html.mem, and the cuzebox.js files.
-				var proms = [];
-				proms.push({
-						"filename": "cuzebox_minimal.html",
-						"data": "",
-						"prom": emu.funcs.shared.serverRequest({
-							"o": "",
-							"_config": { "responseType": "text", "processor": "cuzebox_minimal.html" }
-						})
-					}, {
-						"filename": "cuzebox.js",
-						"data": "",
-						"prom": emu.funcs.shared.serverRequest({
-							"o": "",
-							"_config": { "responseType": "text", "processor": "cuzebox.js" }
-						})
-					}, {
-						"filename": "cuzebox.html.mem",
-						"data": "",
-						"prom": new Promise(function(resolve, reject) {
-							emu.funcs.shared.serverRequest({
-								"o": "",
-								"_config": { "responseType": "blob", "processor": "cuzebox.html.mem" }
-							}).then(
-								function(res) {
-									var reader = new FileReader();
-									reader.onload = (function(e) { resolve(e.target.result); });
-									reader.readAsDataURL(res);
-								},
-								function(res) { console.log("error:", res); }
-							);
-						})
-					},
-					// data:application/octet-stream;base64,
-				);
-				var promsOnly = proms.map(function(d, i, a) { return d.prom; });
-				var filenamesOnly = proms.map(function(d, i, a) { return d.filename; });
-				Promise.all(promsOnly).then(
-					function(res) {
-						var data = {};
-						res.map(function(d, i, a) { data[filenamesOnly[i]] = res[i]; });
-						emuFilesReady(data);
-					},
-					emu.funcs.shared.rejectedPromise
-				);
-			}
-		};
-
-		emu.funcs.shared.clearTheCanvas(emu.vars.dom.view["emuCanvas"]);
-		emu.funcs.shared.textOnCanvas({ "canvas": emu.vars.dom.view["emuCanvas"], "text": " - STARTING GAME... - " });
-
-		document.querySelector("#emscripten_iframe").src = "about:blank";
+		// Start the new instance.
+		emu.vars.innerEmu.UOP( emu.vars.innerEmu.Module );
 	},
-	// * Sets/Clears focus to the emu iframe, pauses/unpauses Emscripten.
-	emu_iframeFocusing: function(e, typeOverride) {
+	// * Sets/Clears focus to the emu canvas, pauses/unpauses Emscripten.
+	emu_focusing: function(e, typeOverride) {
 		// Temp variable.
 		var type = "";
 
-		// Get DOM handle to the emu iframe.
-		var emscripten_iframe = document.querySelector("#emscripten_iframe");
+		// Get DOM handle to the emu canvas.
+		var target = emu.vars.dom.view.emuCanvas;
 
-		// Is there an iframe there?
-		if (null == emscripten_iframe) { console.log("no emscripten iframe."); return; }
+		// Is there an element there?
+		if (null == target) { console.log("no Emscripten canvas."); return; }
 
 		// Is it loaded and ready?
 		else if (
-			emscripten_iframe.contentWindow.emu &&
-			emscripten_iframe.contentWindow.emulatorIframeIsReady === true
+			emu.vars.innerEmu.Module &&
+			emu.vars.innerEmu.emulatorIsReady
 		) {
 			// Get the type.
 			if (undefined == e) { type = typeOverride; }
@@ -764,27 +779,33 @@ emu.funcs = {
 			// Make sure that the specified type is an accepted type.
 			if (["mouseenter", "mouseleave"].indexOf(type) == -1) { return; }
 
-			// Should we focus the emulator iframe?
+			// Should we focus the emulator canvas?
 			if (["mouseenter"].indexOf(type) != -1) {
-				emscripten_iframe.focus();
-				// emscripten_iframe.contentWindow.Module.resumeMainLoop();
-				emscripten_iframe.contentWindow.emu.resumeMainLoop();
+				target.focus();
+				emu.vars.innerEmu.Module.resumeMainLoop();
 			}
 
-			// Should we blur the emulator iframe focus?.
+			// Should we blur the emulator canvas focus?.
 			else if (["mouseleave"].indexOf(type) != -1) {
-				emscripten_iframe.blur();
-				// emscripten_iframe.contentWindow.Module.pauseMainLoop();
-				emscripten_iframe.contentWindow.emu.pauseMainLoop();
+				target.blur();
+				emu.vars.innerEmu.Module.pauseMainLoop();
 
 				// Draw PAUSED to the canvas.
 				emu.funcs.shared.grayTheCanvas(emu.vars.dom.view["emuCanvas"]);
 				emu.funcs.shared.textOnCanvas({ "canvas": emu.vars.dom.view["emuCanvas"], "text": " - PAUSED - " });
 			}
 		}
+		else{
+			// console.log(
+			// 	"emu_focusing: The emulator is not ready!" ,
+			// 	"\n emu.vars.innerEmu.Module         :", emu.vars.innerEmu.Module          ,
+			// 	"\n emu.vars.innerEmu.emulatorIsReady:", emu.vars.innerEmu.emulatorIsReady ,
+			// 	'\n emu.vars.dom.view["emuControls_autopause_chk"].classList.contains("enabled") :', emu.vars.dom.view["emuControls_autopause_chk"].classList.contains("enabled")
+			// );
+		}
 
 	},
-	// * Accepts gamefiles from the user.
+	// * Loads gamefiles from the user.
 	emu_processUserUploads: function(e) {
 		emu.funcs.getGameFiles(2);
 	},
@@ -792,88 +813,113 @@ emu.funcs = {
 	emu_clickUserUpload: function(e) {
 		emu.vars.dom.view["emu_FilesFromUser"].click();
 	},
-
-	// * Sends keyboard events to the iframe.
+	// * Sends keyboard events to the Emscripten emulator.
 	emu_sendKeyEvent: function(type, key, gamePadNumber) {
-		// Get DOM handle to the emu iframe.
-		var emscripten_iframe = document.querySelector("#emscripten_iframe");
+		// console.log("emu_sendKeyEvent:", type, key, gamePadNumber);
+		// Get DOM handle to the emu canvas.
+		var target = emu.vars.dom.view.emuCanvas;
 
-		// Is there an iframe there?
-		if (null == emscripten_iframe) {
-			// console.log("No iframe here!");
+		// Is there an element there?
+		if (null == target) {
+			// console.log("DOM element not found!");
 			return;
 		}
 
 		// Create temp variables.
-		var newEvent = undefined;
+		var newEvent     = undefined;
 		var newEvent_ALT = undefined;
-		let altKey = undefined;
-		let location = undefined;
+		let altKey       = undefined;
+		let location     = undefined;
 
 		// Determine which key was specifed and create an event for it.
 		switch (key) {
 			// case "key_AltGr"  : { newEvent = window.crossBrowser_initKeyboardEvent(type, {"altKey":false, "charCode":0,"code":"AltRight","key":"Alt","keyCode":18,"which":18,"location":2})         ; break; }
-			case "key_RALT":
-				{ newEvent = window.crossBrowser_initKeyboardEvent(type, { "altKey": true, "charCode": 0, "code": "AltRight", "key": "Alt", "keyCode": 18, "which": 18, "location": 2 }); break; }
-			case "key_F1":
-				{ newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "F1", "key": "F1", "keyCode": 112, "which": 112, "location": 0 }); break; }
-			case "key_F2":
-				{ newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "F2", "key": "F2", "keyCode": 113, "which": 113, "location": 0 }); break; }
-			case "key_F3":
-				{ newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "F3", "key": "F3", "keyCode": 114, "which": 114, "location": 0 }); break; }
-			case "key_F4":
-				{ newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "F4", "key": "F4", "keyCode": 115, "which": 115, "location": 0 }); break; }
-			case "key_F5":
-				{ newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "F5", "key": "F5", "keyCode": 116, "which": 116, "location": 0 }); break; }
-			case "key_F6":
-				{ newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "F6", "key": "F6", "keyCode": 117, "which": 117, "location": 0 }); break; }
-			case "key_F7":
-				{ newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "F7", "key": "F7", "keyCode": 118, "which": 118, "location": 0 }); break; }
-			case "key_F8":
-				{ newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "F8", "key": "F8", "keyCode": 119, "which": 119, "location": 0 }); break; }
-			case "key_F9":
-				{ newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "F9", "key": "F9", "keyCode": 120, "which": 120, "location": 0 }); break; }
-			case "key_F10":
-				{ newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "F10", "key": "F10", "keyCode": 121, "which": 121, "location": 0 }); break; }
-			case "key_F11":
-				{ newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "F11", "key": "F11", "keyCode": 122, "which": 122, "location": 0 }); break; }
-			case "key_F12":
-				{ newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "F12", "key": "F12", "keyCode": 123, "which": 123, "location": 0 }); break; }
-			case "key_Q":
-				{ newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "KeyQ", "key": "q", "keyCode": 81, "which": 81, "location": 0 }); break; }
-			case "key_W":
-				{ newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "KeyW", "key": "w", "keyCode": 87, "which": 87, "location": 0 }); break; }
-			case "key_A":
-				{ newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "KeyA", "key": "a", "keyCode": 65, "which": 65, "location": 0 }); break; }
-			case "key_S":
-				{ newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "KeyS", "key": "s", "keyCode": 83, "which": 83, "location": 0 }); break; }
-			case "key_ENTER":
-				{ newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "Enter", "key": "Enter", "keyCode": 13, "which": 13, "location": 0 }); break; }
-			case "key_SPACE":
-				{ newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "Space", "key": " ", "keyCode": 32, "which": 32, "location": 0 }); break; }
-			case "key_UP":
-				{ newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "ArrowUp", "key": "ArrowUp", "keyCode": 38, "which": 38, "location": 0 }); break; }
-			case "key_DOWN":
-				{ newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "ArrowDown", "key": "ArrowDown", "keyCode": 40, "which": 40, "location": 0 }); break; }
-			case "key_LEFT":
-				{ newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "ArrowLeft", "key": "ArrowLeft", "keyCode": 37, "which": 37, "location": 0 }); break; }
-			case "key_RIGHT":
-				{ newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "ArrowRight", "key": "ArrowRight", "keyCode": 39, "which": 39, "location": 0 }); break; }
-			case "key_LSHIFT":
-				{ newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "ShiftLeft", "key": "Shift", "keyCode": 16, "which": 16, "location": 1 }); break; }
-			case "key_RSHIFT":
-				{ newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "ShiftRight", "key": "Shift", "keyCode": 16, "which": 16, "location": 2 }); break; }
+			case "key_RALT": { newEvent = window.crossBrowser_initKeyboardEvent(type, { "altKey": true, "charCode": 0, "code": "AltRight", "key": "Alt", "keyCode": 18, "which": 18, "location": 2 }); break; }
+			case "key_F1"  : { newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "F1", "key": "F1", "keyCode": 112, "which": 112, "location": 0 }); break; }
+			case "key_F2"  : {
+				newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "F2", "key": "F2", "keyCode": 113, "which": 113, "location": 0 });
+				setTimeout(function(){ emu.vars.innerEmu.resizeEmuCanvas(); }, 75);
+				break;
+			}
+			case "key_F3"  : {
+				newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "F3", "key": "F3", "keyCode": 114, "which": 114, "location": 0 });
+				setTimeout(function(){ emu.vars.innerEmu.resizeEmuCanvas(); }, 100);
+				break;
+			}
+			case "key_F4":    { newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "F4", "key": "F4", "keyCode": 115, "which": 115, "location": 0 }); break; }
+			case "key_F5":    { newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "F5", "key": "F5", "keyCode": 116, "which": 116, "location": 0 }); break; }
+			case "key_F6":    { newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "F6", "key": "F6", "keyCode": 117, "which": 117, "location": 0 }); break; }
+			case "key_F7":    { newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "F7", "key": "F7", "keyCode": 118, "which": 118, "location": 0 }); break; }
+			case "key_F8":    { newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "F8", "key": "F8", "keyCode": 119, "which": 119, "location": 0 }); break; }
+			case "key_F9":    { newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "F9", "key": "F9", "keyCode": 120, "which": 120, "location": 0 }); break; }
+			case "key_F10":   { newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "F10", "key": "F10", "keyCode": 121, "which": 121, "location": 0 }); break; }
+			case "key_F11":   { newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "F11", "key": "F11", "keyCode": 122, "which": 122, "location": 0 }); break; }
+			case "key_F12":   { newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "F12", "key": "F12", "keyCode": 123, "which": 123, "location": 0 }); break; }
+
+			case "key_Q":     { newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "KeyQ"      , "key": "q"         , "keyCode": 81, "which": 81, "location": 0 }); break; }
+			case "key_W":     { newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "KeyW"      , "key": "w"         , "keyCode": 87, "which": 87, "location": 0 }); break; }
+			case "key_A":     { newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "KeyA"      , "key": "a"         , "keyCode": 65, "which": 65, "location": 0 }); break; }
+			case "key_S":     { newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "KeyS"      , "key": "s"         , "keyCode": 83, "which": 83, "location": 0 }); break; }
+			case "key_ENTER": { newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "Enter"     , "key": "Enter"     , "keyCode": 13, "which": 13, "location": 0 }); break; }
+			case "key_SPACE": { newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "Space"     , "key": " "         , "keyCode": 32, "which": 32, "location": 0 }); break; }
+			case "key_UP":    { newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "ArrowUp"   , "key": "ArrowUp"   , "keyCode": 38, "which": 38, "location": 0 }); break; }
+			case "key_DOWN":  { newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "ArrowDown" , "key": "ArrowDown" , "keyCode": 40, "which": 40, "location": 0 }); break; }
+			case "key_LEFT":  { newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "ArrowLeft" , "key": "ArrowLeft" , "keyCode": 37, "which": 37, "location": 0 }); break; }
+			case "key_RIGHT": { newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "ArrowRight", "key": "ArrowRight", "keyCode": 39, "which": 39, "location": 0 }); break; }
+			case "key_LSHIFT":{ newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "ShiftLeft" , "key": "Shift"     , "keyCode": 16, "which": 16, "location": 1 }); break; }
+			case "key_RSHIFT":{ newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "ShiftRight", "key": "Shift"     , "keyCode": 16, "which": 16, "location": 2 }); break; }
 			default:
 				{ break; }
 		}
 
 		// Dispatch the key event.
 		if (newEvent) {
-			emscripten_iframe.contentDocument.dispatchEvent(newEvent);
+			target.dispatchEvent(newEvent);
 		}
 
 	},
+	emuFullscreen : function(){
+		// The Emscripten way will not allow resizing.
+		// emu.vars.innerEmu.Module.requestFullscreen()
+
+		var canvas = emu.vars.dom.view["emscripten_emu_container"]
+
+		// Go to fullscreen.
+		if(!document.fullscreen){
+			if      (canvas.requestFullscreen      ) { canvas.requestFullscreen();       }
+			else if (canvas.webkitRequestFullscreen) { canvas.webkitRequestFullscreen(); }
+			else if (canvas.mozRequestFullScreen   ) { canvas.mozRequestFullScreen();    }
+			else if (canvas.msRequestFullscreen    ) { canvas.msRequestFullscreen();     }
+		}
+
+		// Exit to fullscreen.
+		else{
+			if      (document.exitFullscreen         ) { document.exitFullscreen();       }
+			else if (document.webkitFullscreenElement) { document.webkitFullscreenElement(); }
+			else if (document.mozFullScreenElement   ) { document.mozFullScreenElement();    }
+			else if (document.msFullscreenElement    ) { document.msFullscreenElement();     }
+		}
+	},
+	//
 	addAllListeners: function() {
+		document.addEventListener("fullscreenchange", function(e) {
+			emu.vars.innerEmu.resizeEmuCanvas();
+			emu.funcs.emu_focusing(null, "mouseenter");
+		}, false);
+
+		// Fullscreen mode.
+		emu.vars.dom.view["emuControls_FULLSCREEN"].addEventListener("click"   , emu.funcs.emuFullscreen, false);
+		emu.vars.dom.view["emuCanvas"].addEventListener("dblclick", emu.funcs.emuFullscreen, false);
+
+		emu.vars.dom.view["emu_FilesFromJSON"].addEventListener("click", function() { this.select(); }, false);
+		emu.vars.dom.view["emu_FilesFromJSON_load"].addEventListener("click", function() { emu.funcs.getGameFiles("3"); }, false);
+
+		// Misc views: nav buttons
+		emu.vars.dom.view["emu_misc_navs"].forEach(function(d, i, a) {
+			d.addEventListener("click", function() { emu.funcs.nav.changeMiscView(this.getAttribute("view"), this) }, false);
+		});
+
+
 		// Add the event listeners for the quick nav buttons.
 		var allTitleNavGroups = document.querySelectorAll(".sectionDivs_title_options");
 		allTitleNavGroups.forEach(function(d, i, a) {
@@ -882,18 +928,24 @@ emu.funcs = {
 			});
 		});
 
+		// Handles auto-resizing of the emulator canvas if F2 or F3 is used, which will mess up the screen normally.
+		emu.vars.dom.view["emuCanvas"].addEventListener("keydown", function(e){
+			switch(e.code){
+				// Emulator controls. These will
+				case 'F2'  : { setTimeout(function(){ emu.vars.innerEmu.resizeEmuCanvas(); }, 50); break; }
+				case 'F3'  : { setTimeout(function(){ emu.vars.innerEmu.resizeEmuCanvas(); }, 50); break; }
+				default    : { break; }
+			}
+		});
+
 		// Handle new built-in DB game selection.
 		emu.vars.dom.view.builtInGames_select.addEventListener("change", function() { emu.funcs.getGameFiles("1") }, false);
 
-		// Handle input focus on the emulator iframe. (Delegated)
-		emu.vars.dom.view["emu_misc_gamepads"].addEventListener("mouseenter", function() { this.classList.add("hovered");
-			emu.funcs.emu_iframeFocusing(null, "mouseenter"); }, false);
-		emu.vars.dom.view["emu_misc_gamepads"].addEventListener("mouseleave", function() { this.classList.remove("hovered");
-			emu.funcs.emu_iframeFocusing(null, "mouseleave"); }, false);
-		emu.vars.dom.view["emu_emulator_window"].addEventListener("mouseenter", function() { this.classList.add("hovered");
-			emu.funcs.emu_iframeFocusing(null, "mouseenter"); }, false);
-		emu.vars.dom.view["emu_emulator_window"].addEventListener("mouseleave", function() { this.classList.remove("hovered");
-			emu.funcs.emu_iframeFocusing(null, "mouseleave"); }, false);
+		// Handle input focus on the emulator. (Delegated)
+		emu.vars.dom.view["emu_misc_gamepads"]  .addEventListener("mouseenter", function() { this.classList.add("hovered");    emu.funcs.emu_focusing(null, "mouseenter"); }, false);
+		emu.vars.dom.view["emu_misc_gamepads"]  .addEventListener("mouseleave", function() { this.classList.remove("hovered"); emu.funcs.emu_focusing(null, "mouseleave"); }, false);
+		emu.vars.dom.view["emu_emulator_window"].addEventListener("mouseenter", function() { this.classList.add("hovered");    emu.funcs.emu_focusing(null, "mouseenter"); }, false);
+		emu.vars.dom.view["emu_emulator_window"].addEventListener("mouseleave", function() { this.classList.remove("hovered"); emu.funcs.emu_focusing(null, "mouseleave"); }, false);
 
 		// Hidden file upload button.
 		emu.vars.dom.view["emu_FilesFromUser"].addEventListener("change", emu.funcs.emu_processUserUploads, false);
@@ -901,11 +953,11 @@ emu.funcs = {
 		// Visible upload button.
 		emu.vars.dom.view["emu_FilesFromUser_viewableBtn"].addEventListener("click", emu.funcs.emu_clickUserUpload, false);
 
-		emu.vars.dom.view["emuControls_stop"].addEventListener("click", emu.funcs.stopEmu, false);
+		// Emulator controls (TOP)
+		emu.vars.dom.view["emuControls_stop"]  .addEventListener("click", function(){ emu.funcs.stopEmu(true); }, false);
 		emu.vars.dom.view["emuControls_reload"].addEventListener("click", emu.funcs.loadGame, false);
-		emu.vars.dom.view["emuControls_unload"].addEventListener("click", emu.funcs.emu_resetFull, false);
+		emu.vars.dom.view["emuControls_unload"].addEventListener("click", emu.funcs.emu_unload, false);
 		emu.vars.dom.view["emuControls_rotate"].addEventListener("click", emu.funcs.emu_rotate, false);
-
 		emu.vars.dom.view["emuControls_autopause_btn"].addEventListener("click", function() {
 			// Get a handle on the DOM element.
 			let autopause_chk = emu.vars.dom.view["emuControls_autopause_chk"];
@@ -914,10 +966,11 @@ emu.funcs = {
 			autopause_chk.classList.toggle("enabled");
 
 			// Determine if the emu should be paused or unpaused.
-			if (autopause_chk.classList.contains("enabled")) { emu.funcs.emu_iframeFocusing(null, "mouseenter"); }
-			else { emu.funcs.emu_iframeFocusing(null, "mouseleave"); }
+			if (autopause_chk.classList.contains("enabled")) { emu.funcs.emu_focusing(null, "mouseenter"); }
+			else { emu.funcs.emu_focusing(null, "mouseleave"); }
 		}, false);
 
+		// Emulator controls (BOTTOM)
 		emu.vars.dom.view["emuControls_QUALITY"].addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_F2", null); }, false);
 		emu.vars.dom.view["emuControls_QUALITY"].addEventListener("mouseup", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_F2", null); }, false);
 		emu.vars.dom.view["emuControls_DEBUG"].addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_F3", null); }, false);
@@ -929,157 +982,21 @@ emu.funcs = {
 		emu.vars.dom.view["emuControls_STEP"].addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_F10", null); }, false);
 		emu.vars.dom.view["emuControls_STEP"].addEventListener("mouseup", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_F10", null); }, false);
 
-		// Y
-		emu.vars.dom.view["emuGamepad_1_key_Q"].addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_Q", 1); }, false);
-		emu.vars.dom.view["emuGamepad_1_key_Q"].addEventListener("mouseup", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_Q", 1); }, false);
-		emu.vars.dom.view["emuGamepad_1_key_Q"].addEventListener("mouseleave", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_Q", 1); }, false);
+		// Event listeners for the onscreen gamepad buttons.
+		document.querySelectorAll("g.hover_group").forEach(function(d,i,a){
+			let pad=d.getAttribute("pad");
+			let key=d.getAttribute("name");
 
-		// X
-		emu.vars.dom.view["emuGamepad_1_key_W"].addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_W", 1); }, false);
-		emu.vars.dom.view["emuGamepad_1_key_W"].addEventListener("mouseup", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_W", 1); }, false);
-		emu.vars.dom.view["emuGamepad_1_key_W"].addEventListener("mouseleave", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_W", 1); }, false);
-
-		// B
-		emu.vars.dom.view["emuGamepad_1_key_A"].addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_A", 1); }, false);
-		emu.vars.dom.view["emuGamepad_1_key_A"].addEventListener("mouseup", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_A", 1); }, false);
-		emu.vars.dom.view["emuGamepad_1_key_A"].addEventListener("mouseleave", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_A", 1); }, false);
-
-		// A
-		emu.vars.dom.view["emuGamepad_1_key_S"].addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_S", 1); }, false);
-		emu.vars.dom.view["emuGamepad_1_key_S"].addEventListener("mouseup", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_S", 1); }, false);
-		emu.vars.dom.view["emuGamepad_1_key_S"].addEventListener("mouseleave", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_S", 1); }, false);
-
-		emu.vars.dom.view["emuGamepad_1_key_ENTER"].addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_ENTER", 1); }, false);
-		emu.vars.dom.view["emuGamepad_1_key_ENTER"].addEventListener("mouseup", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_ENTER", 1); }, false);
-		emu.vars.dom.view["emuGamepad_1_key_ENTER"].addEventListener("mouseleave", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_ENTER", 1); }, false);
-
-		emu.vars.dom.view["emuGamepad_1_key_SPACE"].addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_SPACE", 1); }, false);
-		emu.vars.dom.view["emuGamepad_1_key_SPACE"].addEventListener("mouseup", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_SPACE", 1); }, false);
-		emu.vars.dom.view["emuGamepad_1_key_SPACE"].addEventListener("mouseleave", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_SPACE", 1); }, false);
-
-		emu.vars.dom.view["emuGamepad_1_key_UP"].addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_UP", 1); }, false);
-		emu.vars.dom.view["emuGamepad_1_key_UP"].addEventListener("mouseup", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_UP", 1); }, false);
-		emu.vars.dom.view["emuGamepad_1_key_UP"].addEventListener("mouseleave", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_UP", 1); }, false);
-
-		emu.vars.dom.view["emuGamepad_1_key_DOWN"].addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_DOWN", 1); }, false);
-		emu.vars.dom.view["emuGamepad_1_key_DOWN"].addEventListener("mouseup", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_DOWN", 1); }, false);
-		emu.vars.dom.view["emuGamepad_1_key_DOWN"].addEventListener("mouseleave", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_DOWN", 1); }, false);
-
-		emu.vars.dom.view["emuGamepad_1_key_LEFT"].addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_LEFT", 1); }, false);
-		emu.vars.dom.view["emuGamepad_1_key_LEFT"].addEventListener("mouseup", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_LEFT", 1); }, false);
-		emu.vars.dom.view["emuGamepad_1_key_LEFT"].addEventListener("mouseleave", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_LEFT", 1); }, false);
-
-		emu.vars.dom.view["emuGamepad_1_key_RIGHT"].addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_RIGHT", 1); }, false);
-		emu.vars.dom.view["emuGamepad_1_key_RIGHT"].addEventListener("mouseup", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_RIGHT", 1); }, false);
-		emu.vars.dom.view["emuGamepad_1_key_RIGHT"].addEventListener("mouseleave", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_RIGHT", 1); }, false);
-
-		emu.vars.dom.view["emuGamepad_1_key_LSHIFT"].addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_LSHIFT", 1); }, false);
-		emu.vars.dom.view["emuGamepad_1_key_LSHIFT"].addEventListener("mouseup", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_LSHIFT", 1); }, false);
-		emu.vars.dom.view["emuGamepad_1_key_LSHIFT"].addEventListener("mouseleave", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_LSHIFT", 1); }, false);
-
-		emu.vars.dom.view["emuGamepad_1_key_RSHIFT"].addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_RSHIFT", 1); }, false);
-		emu.vars.dom.view["emuGamepad_1_key_RSHIFT"].addEventListener("mouseup", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_RSHIFT", 1); }, false);
-		emu.vars.dom.view["emuGamepad_1_key_RSHIFT"].addEventListener("mouseleave", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_RSHIFT", 1); }, false);
-
-		// Y
-		emu.vars.dom.view["emuGamepad_2_key_Q"].addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_RALT", 2);
-			emu.funcs.emu_sendKeyEvent("keydown", "key_Q", 2); }, false);
-		emu.vars.dom.view["emuGamepad_2_key_Q"].addEventListener("mouseup", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_Q", 2);
-			emu.funcs.emu_sendKeyEvent("keyup", "key_RALT", 2); }, false);
-		emu.vars.dom.view["emuGamepad_2_key_Q"].addEventListener("mouseleave", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_Q", 2);
-			emu.funcs.emu_sendKeyEvent("keyup", "key_RALT", 2); }, false);
-
-		// X
-		emu.vars.dom.view["emuGamepad_2_key_W"].addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_RALT", 2);
-			emu.funcs.emu_sendKeyEvent("keydown", "key_W", 2); }, false);
-		emu.vars.dom.view["emuGamepad_2_key_W"].addEventListener("mouseup", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_W", 2);
-			emu.funcs.emu_sendKeyEvent("keyup", "key_RALT", 2); }, false);
-		emu.vars.dom.view["emuGamepad_2_key_W"].addEventListener("mouseleave", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_W", 2);
-			emu.funcs.emu_sendKeyEvent("keyup", "key_RALT", 2); }, false);
-
-		// B
-		emu.vars.dom.view["emuGamepad_2_key_A"].addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_RALT", 2);
-			emu.funcs.emu_sendKeyEvent("keydown", "key_A", 2); }, false);
-		emu.vars.dom.view["emuGamepad_2_key_A"].addEventListener("mouseup", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_A", 2);
-			emu.funcs.emu_sendKeyEvent("keyup", "key_RALT", 2); }, false);
-		emu.vars.dom.view["emuGamepad_2_key_A"].addEventListener("mouseleave", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_A", 2);
-			emu.funcs.emu_sendKeyEvent("keyup", "key_RALT", 2); }, false);
-
-		// A
-		emu.vars.dom.view["emuGamepad_2_key_S"].addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_RALT", 2);
-			emu.funcs.emu_sendKeyEvent("keydown", "key_S", 2); }, false);
-		emu.vars.dom.view["emuGamepad_2_key_S"].addEventListener("mouseup", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_S", 2);
-			emu.funcs.emu_sendKeyEvent("keyup", "key_RALT", 2); }, false);
-		emu.vars.dom.view["emuGamepad_2_key_S"].addEventListener("mouseleave", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_S", 2);
-			emu.funcs.emu_sendKeyEvent("keyup", "key_RALT", 2); }, false);
-
-		emu.vars.dom.view["emuGamepad_2_key_ENTER"].addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_RALT", 2);
-			emu.funcs.emu_sendKeyEvent("keydown", "key_ENTER", 2); }, false);
-		emu.vars.dom.view["emuGamepad_2_key_ENTER"].addEventListener("mouseup", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_ENTER", 2);
-			emu.funcs.emu_sendKeyEvent("keyup", "key_RALT", 2); }, false);
-		emu.vars.dom.view["emuGamepad_2_key_ENTER"].addEventListener("mouseleave", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_ENTER", 2);
-			emu.funcs.emu_sendKeyEvent("keyup", "key_RALT", 2); }, false);
-
-		emu.vars.dom.view["emuGamepad_2_key_SPACE"].addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_RALT", 2);
-			emu.funcs.emu_sendKeyEvent("keydown", "key_SPACE", 2); }, false);
-		emu.vars.dom.view["emuGamepad_2_key_SPACE"].addEventListener("mouseup", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_SPACE", 2);
-			emu.funcs.emu_sendKeyEvent("keyup", "key_RALT", 2); }, false);
-		emu.vars.dom.view["emuGamepad_2_key_SPACE"].addEventListener("mouseleave", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_SPACE", 2);
-			emu.funcs.emu_sendKeyEvent("keyup", "key_RALT", 2); }, false);
-
-		emu.vars.dom.view["emuGamepad_2_key_UP"].addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_RALT", 2);
-			emu.funcs.emu_sendKeyEvent("keydown", "key_UP", 2); }, false);
-		emu.vars.dom.view["emuGamepad_2_key_UP"].addEventListener("mouseup", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_UP", 2);
-			emu.funcs.emu_sendKeyEvent("keyup", "key_RALT", 2); }, false);
-		emu.vars.dom.view["emuGamepad_2_key_UP"].addEventListener("mouseleave", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_UP", 2);
-			emu.funcs.emu_sendKeyEvent("keyup", "key_RALT", 2); }, false);
-
-		emu.vars.dom.view["emuGamepad_2_key_DOWN"].addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_RALT", 2);
-			emu.funcs.emu_sendKeyEvent("keydown", "key_DOWN", 2); }, false);
-		emu.vars.dom.view["emuGamepad_2_key_DOWN"].addEventListener("mouseup", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_DOWN", 2);
-			emu.funcs.emu_sendKeyEvent("keyup", "key_RALT", 2); }, false);
-		emu.vars.dom.view["emuGamepad_2_key_DOWN"].addEventListener("mouseleave", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_DOWN", 2);
-			emu.funcs.emu_sendKeyEvent("keyup", "key_RALT", 2); }, false);
-
-		emu.vars.dom.view["emuGamepad_2_key_LEFT"].addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_RALT", 2);
-			emu.funcs.emu_sendKeyEvent("keydown", "key_LEFT", 2); }, false);
-		emu.vars.dom.view["emuGamepad_2_key_LEFT"].addEventListener("mouseup", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_LEFT", 2);
-			emu.funcs.emu_sendKeyEvent("keyup", "key_RALT", 2); }, false);
-		emu.vars.dom.view["emuGamepad_2_key_LEFT"].addEventListener("mouseleave", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_LEFT", 2);
-			emu.funcs.emu_sendKeyEvent("keyup", "key_RALT", 2); }, false);
-
-		emu.vars.dom.view["emuGamepad_2_key_RIGHT"].addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_RALT", 2);
-			emu.funcs.emu_sendKeyEvent("keydown", "key_RIGHT", 2); }, false);
-		emu.vars.dom.view["emuGamepad_2_key_RIGHT"].addEventListener("mouseup", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_RIGHT", 2);
-			emu.funcs.emu_sendKeyEvent("keyup", "key_RALT", 2); }, false);
-		emu.vars.dom.view["emuGamepad_2_key_RIGHT"].addEventListener("mouseleave", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_RIGHT", 2);
-			emu.funcs.emu_sendKeyEvent("keyup", "key_RALT", 2); }, false);
-
-		emu.vars.dom.view["emuGamepad_2_key_LSHIFT"].addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_RALT", 2);
-			emu.funcs.emu_sendKeyEvent("keydown", "key_LSHIFT", 2); }, false);
-		emu.vars.dom.view["emuGamepad_2_key_LSHIFT"].addEventListener("mouseup", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_LSHIFT", 2);
-			emu.funcs.emu_sendKeyEvent("keyup", "key_RALT", 2); }, false);
-		emu.vars.dom.view["emuGamepad_2_key_LSHIFT"].addEventListener("mouseleave", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_LSHIFT", 2);
-			emu.funcs.emu_sendKeyEvent("keyup", "key_RALT", 2); }, false);
-
-		emu.vars.dom.view["emuGamepad_2_key_RSHIFT"].addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_RALT", 2);
-			emu.funcs.emu_sendKeyEvent("keydown", "key_RSHIFT", 2); }, false);
-		emu.vars.dom.view["emuGamepad_2_key_RSHIFT"].addEventListener("mouseup", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_RSHIFT", 2);
-			emu.funcs.emu_sendKeyEvent("keyup", "key_RALT", 2); }, false);
-		emu.vars.dom.view["emuGamepad_2_key_RSHIFT"].addEventListener("mouseleave", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_RSHIFT", 2);
-			emu.funcs.emu_sendKeyEvent("keyup", "key_RALT", 2); }, false);
-
-		document.addEventListener("fullscreenchange", function(e) {
-			// console.log(e, this);
-			document.querySelector('#emscripten_iframe').contentWindow.resizeIframe();
-		}, false);
-
-		emu.vars.dom.view["emu_FilesFromJSON"].addEventListener("click", function() { this.select(); }, false);
-		emu.vars.dom.view["emu_FilesFromJSON_load"].addEventListener("click", function() { emu.funcs.getGameFiles("3"); }, false);
-
-		// Misc views: nav buttons
-		emu.vars.dom.view["emu_misc_navs"].forEach(function(d, i, a) {
-			d.addEventListener("click", function() { emu.funcs.nav.changeMiscView(this.getAttribute("view"), this) }, false);
+			if(pad == "1"){
+				d.addEventListener("mousedown" , function() { emu.funcs.emu_sendKeyEvent("keydown", key , 1); }, false);
+				d.addEventListener("mouseleave", function() { emu.funcs.emu_sendKeyEvent("keyup"  , key , 1); }, false);
+				d.addEventListener("mouseup"   , function() { emu.funcs.emu_sendKeyEvent("keyup"  , key , 1); }, false);
+			}
+			else if(d.getAttribute("pad") == "2"){
+				d.addEventListener("mousedown" , function() { emu.funcs.emu_sendKeyEvent("keydown", "key_RALT" , 2); emu.funcs.emu_sendKeyEvent("keydown", key        , 2); }, false);
+				d.addEventListener("mouseleave", function() { emu.funcs.emu_sendKeyEvent("keyup"  , key        , 2); emu.funcs.emu_sendKeyEvent("keyup"  , "key_RALT" , 2); }, false);
+				d.addEventListener("mouseup"   , function() { emu.funcs.emu_sendKeyEvent("keyup"  , key        , 2); emu.funcs.emu_sendKeyEvent("keyup"  , "key_RALT" , 2); }, false);
+			}
 		});
 	},
 
@@ -1088,12 +1005,12 @@ emu.funcs.UAM = {
 	// * Show UAM.
 	enableUAM: function() {
 		// Get values from UAM.
-		emu.vars.originUAM = true;
-		emu.vars.uamwindow = window.top;
+		emu.vars.originUAM      = true;
+		emu.vars.uamwindow      = window.top;
 		emu.vars.uamwindow_objs = emu.vars.uamwindow._debug_displayCustomGlobals(true);
-		emu.vars.user_id = emu.vars.uamwindow.shared.user_id;
+		emu.vars.user_id        = emu.vars.uamwindow.shared.user_id;
 
-		// Unhide UAM.
+		// Unhide UAM DOM.
 		document.querySelectorAll(".uamOnly").forEach(function(d, i, a) {
 			d.classList.remove("unavailableView");
 			d.classList.add("enabled");
@@ -1106,17 +1023,19 @@ emu.funcs.UAM = {
 
 		// Make the container wider. Shrink the emu windows.
 		document.querySelector("html").classList.add("wide");
-		document.querySelector("#emu_emulator").classList.remove("largerEmuWindow");
-		document.querySelector("#emscripten_iframe_container").classList.remove("largerEmuWindow_container");
+		document.querySelector("#emu_emulator").classList.add("largerEmuWindow");
+		emu.vars.dom.view["emuCanvas"].width="640";
+		emu.vars.dom.view["emuCanvas"].height="560";
 	},
 	// * Hide UAM.
 	disableUAM: function() {
 		// Unset the values that came from UAM.
-		emu.vars.originUAM = false;
-		emu.vars.uamwindow = undefined;
+		emu.vars.originUAM      = false;
+		emu.vars.uamwindow      = undefined;
 		emu.vars.uamwindow_objs = undefined;
-		emu.vars.user_id = undefined;
+		emu.vars.user_id        = undefined;
 
+		// Hide UAM DOM.
 		document.querySelectorAll(".uamOnly").forEach(function(d, i, a) {
 			d.classList.add("unavailableView");
 			d.classList.remove("enabled");
@@ -1129,8 +1048,9 @@ emu.funcs.UAM = {
 
 		// Make the container normal width. Enlarge the emu windows.
 		document.querySelector("html").classList.remove("wide");
-		document.querySelector("#emu_emulator").classList.add("largerEmuWindow");
-		document.querySelector("#emscripten_iframe_container").classList.add("largerEmuWindow_container");
+		document.querySelector("#emu_emulator").classList.remove("largerEmuWindow");
+		emu.vars.dom.view["emuCanvas"].width="640";
+		emu.vars.dom.view["emuCanvas"].height="560";
 	},
 	// * UAM setup: Show UAM, set DOM, Listeners, get game list.
 	setupUAM: function() {
@@ -1139,6 +1059,7 @@ emu.funcs.UAM = {
 
 		// Wait for UAM to finish loading... then continue.
 		emu.vars.uamwindow.shared.UAMisReady.then(function() {
+			// Hide the header and the footer then scroll the bodyContainer into view.
 			document.querySelector("#bodyHeader").style.display = "none";
 			document.querySelector("#bodyFooter").style.display = "none";
 			document.getElementById('bodyContainer').scrollIntoView(emu.funcs.nav.scrollIntoView_options);
@@ -1149,16 +1070,15 @@ emu.funcs.UAM = {
 			// Add the UAM event listeners.
 			emu.funcs.UAM.addEventListeners();
 
-			emu.vars.dom.view["emuControls_autopause_chk"].classList.add("enabled");
+			// Set the initial state of the auto-pause checkbox.
+			// emu.vars.dom.view["emuControls_autopause_chk"].classList.add("enabled");
 
-			// Refresh the UAM games list data.
-			// Auto-select the user's default game.
+			// Refresh the UAM games list data and auto-select the user's default game.
 			emu.funcs.UAM.getGamesListUAM();
 
 			// Switch to the main emulator view.
 			emu.funcs.nav.changeView("VIEW");
 		});
-
 	},
 	// * Compiles the selected UAM game.
 	compileGameUAM: function() {
@@ -1224,7 +1144,7 @@ emu.funcs.UAM = {
 				var count_failures = thestring2.split("<br><br><span class='emu_failures' style='" + errorstring + "'> FAILURE! </span> make: *** ").length - 1;
 				var count_errors = thestring2.split("<span class='emu_errors'   style='" + errorstring + "'> ERROR:   </span>").length - 1;
 				var count_warnings = thestring2.split("<span class='emu_warnings' style='" + warningstring + "'> WARNING: </span>").length - 1;
-				output1.innerHTML = `<div style='color:greenyellow;'><pre style="` + preStyle + `">` + thestring2 + `</pre><br>`;
+				output1.innerHTML = "<div style='color:greenyellow;'><pre style=\"" + preStyle + ">" + thestring2 + "</pre><br>";
 
 				// Work with debug output 2
 				var table_from_Obj = function(dat, caption) {
@@ -1441,32 +1361,44 @@ emu.funcs.UAM = {
 
 };
 emu.funcs.downloads = {
-
 };
 emu.funcs.shared = {
+	// Performs eval within the specified context on a string.
+	evalInContext             : function(js, context) {
+		// featureDetection.funcs.evalInContext(data, window);
+		return function() { eval(js) ; }.call(context);
+	} ,
 	// * Display message on the canvas in the top-left corner.
 	textOnCanvas: function(obj) {
-		if (!obj) { obj = {}; }
-		if (obj.canvas == undefined) { obj.canvas = emu.vars.dom.view["emuCanvas"]; }
-		if (obj.font == undefined) { obj.font = "40px monospace"; }
-		if (obj.textAlign == undefined) { obj.textAlign = "left"; }
-		if (obj.backgroundColor == undefined) { obj.backgroundColor = "rgba(255, 0, 0, 0.5)"; }
-		if (obj.fontColor == undefined) { obj.fontColor = "white"; }
-		if (obj.text == undefined) { obj.text = "     "; }
+		// ctx.fillRect(0,0, Math.floor(ctx.measureText(obj.text).width), 48);
+		if (!obj)                             { obj = {}; }
+		if (obj.canvas          == undefined) { obj.canvas          = emu.vars.dom.view["emuCanvas"]; }
+		if (obj.font            == undefined) { obj.font            = "40px monospace"; }
+		if (obj.textAlign       == undefined) { obj.textAlign       = "center"; }
+		if (obj.backgroundColor == undefined) { obj.backgroundColor = "rgba(255, 0, 0, 0.60)"; }
+		if (obj.fontColor       == undefined) { obj.fontColor       = "white"; }
+		if (obj.text            == undefined) { obj.text            = ""; }
+		if (obj.textBaseline    == undefined) { obj.textBaseline    = "middle"; }
 
+		var fontSize = parseInt(obj.font);
 		let ctx = obj.canvas.getContext("2d");
 		ctx.font = obj.font;
 		ctx.textAlign = obj.textAlign;
 
 		// Don't let messages go beyond the canvas.
 		if (obj.text.length > 22) { obj.text = obj.text.substr(0, 22); }
+		obj.text = obj.text.trim();
 
+		var rectX=0;
+		var rectY=(obj.canvas.height/2)-fontSize*1.5;
+		var rectW=Math.floor(obj.canvas.width);
+		var rectH=fontSize*3;
 		ctx.fillStyle = obj.backgroundColor;
-		// ctx.fillRect(0,0, Math.floor(ctx.measureText(obj.text).width), 48);
-		ctx.fillRect(0, 0, Math.floor(obj.canvas.width), 48);
+		ctx.fillRect(rectX, rectY, rectW, rectH);
 
+		ctx.textBaseline=obj.textBaseline;
 		ctx.fillStyle = obj.fontColor;
-		ctx.fillText(obj.text, 0, 40);
+		ctx.fillText(obj.text , rectX+(rectW/2),rectY+(rectH/2));
 	},
 	// * Turns the canvas image to gray-scale.
 	grayTheCanvas: function(canvas) {
@@ -1734,29 +1666,7 @@ emu.funcs.nav = {
 
 	},
 };
-emu.funcs.view = {
-
-};
 emu.funcs.db = {};
-
-emu.fullscreen = {
-	test: function(elem) {
-		var i = document.getElementById("emscripten_iframe_container_outer");
-		// var i = document.getElementById("emscripten_iframe_container");
-		// var i = document.getElementById("emu_emulator");
-
-		// go full-screen
-		if (i.requestFullscreen) { i.requestFullscreen(); }
-		else if (i.webkitRequestFullscreen) { i.webkitRequestFullscreen(); }
-		else if (i.mozRequestFullScreen) { i.mozRequestFullScreen(); }
-		else if (i.msRequestFullscreen) { i.msRequestFullscreen(); }
-
-		// setTimeout(function(){
-		// 	document.querySelector('#emscripten_iframe').contentWindow.resizeIframe();
-		// }, 1000);
-	},
-};
-
 
 window.onload = function() {
 	window.onload = null;
@@ -1768,6 +1678,7 @@ window.onload = function() {
 	var continueApp = function() {
 		// Populate the DOM handle caches.
 		emu.funcs.domHandleCache_populate();
+
 		// Add the event listeners.
 		emu.funcs.addAllListeners();
 
@@ -1775,23 +1686,12 @@ window.onload = function() {
 		emu.funcs.emu_getBuiltInGamelist();
 
 		// Check if this application has been loaded under UAM.
-		var messageText = "<u><b>ONLINE UZEBOX EMULATOR</b></u><br><br>Choose a game.";
 		try {
 			// Loaded via iframe?
 			if (window.self !== window.top) {
-				// IN UAM?
 				// Can the originUAM key be detected?
-				if (window.top.shared.originUAM == true) {
-					console.log("EMULATOR - ORIGIN: UAM");
-
-					// Set up UAM.
-					emu.funcs.UAM.setupUAM();
-
-					messageText = "<u><b>ONLINE UZEBOX EMULATOR</b></u><br><br>Choose a game.<br><br>(<span style='color:yellow;font-size: 90%;'>UAM ENABLED</span>)";
-				}
-				else {
-					emu.funcs.UAM.disableUAM();
-				}
+				if (window.top.shared.originUAM == true) { emu.funcs.UAM.setupUAM(); }
+				else                                     { emu.funcs.UAM.disableUAM(); }
 			}
 			else {
 				emu.funcs.UAM.disableUAM();
@@ -1801,7 +1701,6 @@ window.onload = function() {
 			emu.funcs.UAM.disableUAM();
 		}
 
-		emu.funcs.recreateEmptyIframe();
 		emu.funcs.shared.clearTheCanvas(emu.vars.dom.view["emuCanvas"]);
 		// emu.funcs.shared.grayTheCanvas( emu.vars.dom.view["emuCanvas"] );
 		emu.funcs.shared.textOnCanvas({ "canvas": emu.vars.dom.view["emuCanvas"], "text": " - GAME NOT LOADED - " });
@@ -1813,8 +1712,13 @@ window.onload = function() {
 
 		// Switch to the default view.
 		emu.funcs.nav.changeView("VIEW");
-	};
 
+		// Add the emulation core.
+		var newJs=document.createElement("script");
+		newJs.src = "CUzeBox_emu_core/emu_core.js";
+		document.body.appendChild(newJs);
+
+	};
 
 	// Feature Loader config:
 	featureDetection.config.usePhp = true;

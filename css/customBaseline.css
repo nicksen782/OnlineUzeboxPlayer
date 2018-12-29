@@ -11,7 +11,7 @@ input[type="file"]
 	/*height: 24px;*/
 	width: auto;
 	height: auto;
-	padding: 0px 5px 0px 5px;
+	padding: 2px;
 	font-size: 14px;
 	border: solid 1px gray;
 	border-radius: 5px;

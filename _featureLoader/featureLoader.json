@@ -190,6 +190,16 @@
   "test"        : "if ( !Element.prototype.matches ) { false; } else { true; }",
   "website"     : "https://developer.mozilla.org/en-US/docs/Web/API/Element/matches"
  },
+ "remove"          : {
+  "type"        : "polyfill",
+  "text"        : "",
+  "req"         : true,
+  "have"        : null,
+  "hadNatively" : null,
+  "url"         : "_featureLoader/polyfills/remove.js",
+  "test"        : "if ( !Element.prototype.remove ) { false; } else { true; }",
+  "website"     : ""
+ },
  "requestFullScreen" : {
   "type"        : "polyfill",
   "text"        : "Polyfill for browser prefixes for the fullscreen api. (Supports IE11)",

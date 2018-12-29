@@ -19,10 +19,14 @@
 	<!--<script src="https://code.jquery.com/jquery-1.12.4.js"></script>-->
 	<!--<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>-->
 
+	<!--<script src="https://cdn.polyfill.io/v2/polyfill.min.js"></script>-->
+	<!--<script src="js/ie11polyfill.js"></script>-->
+
 	<script src="_featureLoader/js/featureLoader.js"></script>
 	<script src="js/emu.js"></script>
 	<script src="js/dom.js"></script>
 	<script src="js/crossBrowser_initKeyboardEvent.js"></script>
+	<!--<script src="CUzeBox_emu_core/combinedFiles_emu.js"></script>-->
 	<!--<script src="js/xml2json.min.js"></script>-->
 
 <script>
@@ -61,7 +65,7 @@
 
 			<div class="sectionDivs_title_options">
 				<input type="button" value="FULL SCREEN" onclick="emu.fullscreen.test('#emuCanvas');">
-				<input type="button" value="Resize" onclick="document.querySelector('#emscripten_iframe').contentWindow.resizeIframe();">
+				<input type="button" value="Resize" onclick="emu.vars.innerEmu.resizeEmuCanvas();">
 				<input type="button" value="Reload" onclick="document.location.href = document.location.href;">
 				<input type="button" value="New Window" onclick="window.open(document.location.href);">
 
@@ -103,7 +107,8 @@
 					<tr>
 						<td>JSON</td>
 						<td>
-							<input type="text" id="emu_FilesFromJSON" value="https://www.nicksen782.net/UzeBridge/NICKSEN782/BUBBLEBOBBLE/remoteload.json" placeholder="Enter JSON file URL">
+							<!--<input type="text" id="emu_FilesFromJSON" value="https://www.nicksen782.net/UzeBridge/NICKSEN782/BUBBLEBOBBLE/remoteload.json" placeholder="Enter JSON file URL">-->
+							<input type="text" id="emu_FilesFromJSON" value="https://dev3-nicksen782.c9users.io/non-web/Uzebox/RamTileTest_1/output/remoteload.json" placeholder="Enter JSON file URL">
 							<input type="button" id="emu_FilesFromJSON_load" value="Load">
 						</td>
 					</tr>
@@ -115,9 +120,10 @@
 			<div class="sectionWindow_title">emu_gameFiles</div>
 			<div class="sectionWindow_content">
 				<div id="emu_filesList_div">
-					Loaded game files will appear here.
+					No files are loaded.
 				</div>
-				DOWNLOAD AS .ZIP
+				<div id="emu_filesList_links">
+				</div>
 			</div>
 		</div>
 
@@ -145,18 +151,18 @@
 								id                 ="emu_gamepad1"
 							>
 								<image width="420" height="160" xlink:href="img/CUzeBox_controls_modified.png"></image>
-								<g class="hover_group"> <rect   id="emuGamepad_1_key_LEFT"   x= "64"  y ="70"         width="26" height="21" name="dirLT" ></rect>  </g>
-								<g class="hover_group"> <rect   id="emuGamepad_1_key_UP"     x= "90"  y ="48"         width="26" height="21" name="dirUP" ></rect>  </g>
-								<g class="hover_group"> <rect   id="emuGamepad_1_key_RIGHT"  x= "116" y ="70"         width="26" height="21" name="dirRT" ></rect>  </g>
-								<g class="hover_group"> <rect   id="emuGamepad_1_key_DOWN"   x= "90"  y ="92"         width="26" height="21" name="dirDN" ></rect>  </g>
-								<g class="hover_group"> <rect   id="emuGamepad_1_key_SPACE"  x= "160" y ="77"         width="30" height="30" name="select"></rect>  </g>
-								<g class="hover_group"> <rect   id="emuGamepad_1_key_ENTER"  x= "200" y ="77"         width="30" height="30" name="start" ></rect>  </g>
-								<g class="hover_group"> <rect   id="emuGamepad_1_key_LSHIFT" x= "65"  y ="2"          width="75" height="15" name="sL"    ></rect>  </g>
-								<g class="hover_group"> <rect   id="emuGamepad_1_key_RSHIFT" x= "280" y ="2"          width="75" height="15" name="sR"    ></rect>  </g>
-								<g class="hover_group"> <circle id="emuGamepad_1_key_Q"      cx="353" cy="81"  r="15"                        name="btnA"  ></circle></g>
-								<g class="hover_group"> <circle id="emuGamepad_1_key_W"      cx="316" cy="110" r="15"                        name="btnB"  ></circle></g>
-								<g class="hover_group"> <circle id="emuGamepad_1_key_A"      cx="280" cy="81"  r="15"                        name="btnY"  ></circle></g>
-								<g class="hover_group"> <circle id="emuGamepad_1_key_S"      cx="317" cy="52"  r="15"                        name="btnX"  ></circle></g>
+								<g pad="1" name="key_LEFT"   id="emuGamepad_1_key_LEFT"   class="hover_group"> <rect   x= "64"  y ="70"         width="26" height="21" ></rect>  </g>
+								<g pad="1" name="key_UP"     id="emuGamepad_1_key_UP"     class="hover_group"> <rect   x= "90"  y ="48"         width="26" height="21" ></rect>  </g>
+								<g pad="1" name="key_RIGHT"  id="emuGamepad_1_key_RIGHT"  class="hover_group"> <rect   x= "116" y ="70"         width="26" height="21" ></rect>  </g>
+								<g pad="1" name="key_DOWN"   id="emuGamepad_1_key_DOWN"   class="hover_group"> <rect   x= "90"  y ="92"         width="26" height="21" ></rect>  </g>
+								<g pad="1" name="key_SPACE"  id="emuGamepad_1_key_SPACE"  class="hover_group"> <rect   x= "160" y ="77"         width="30" height="30" ></rect>  </g>
+								<g pad="1" name="key_ENTER"  id="emuGamepad_1_key_ENTER"  class="hover_group"> <rect   x= "200" y ="77"         width="30" height="30" ></rect>  </g>
+								<g pad="1" name="key_LSHIFT" id="emuGamepad_1_key_LSHIFT" class="hover_group"> <rect   x= "65"  y ="2"          width="75" height="15" ></rect>  </g>
+								<g pad="1" name="key_RSHIFT" id="emuGamepad_1_key_RSHIFT" class="hover_group"> <rect   x= "280" y ="2"          width="75" height="15" ></rect>  </g>
+								<g pad="1" name="key_S"      id="emuGamepad_1_key_Q"      class="hover_group"> <circle cx="353" cy="81"  r="15"                        ></circle></g>
+								<g pad="1" name="key_A"      id="emuGamepad_1_key_W"      class="hover_group"> <circle cx="316" cy="110" r="15"                        ></circle></g>
+								<g pad="1" name="key_Q"      id="emuGamepad_1_key_A"      class="hover_group"> <circle cx="280" cy="81"  r="15"                        ></circle></g>
+								<g pad="1" name="key_W"      id="emuGamepad_1_key_S"      class="hover_group"> <circle cx="317" cy="52"  r="15"                        ></circle></g>
 							</svg>
 						</figure>
 					</div>
@@ -173,18 +179,18 @@
 								id                 ="emu_gamepad2"
 							>
 								<image width="420" height="160" xlink:href="img/CUzeBox_controls_modified.png"></image>
-								<g class="hover_group"> <rect   id="emuGamepad_2_key_LEFT"   x ="64"  y ="70"         width="26" height="21" name="dirLT" ></rect>  </g>
-								<g class="hover_group"> <rect   id="emuGamepad_2_key_UP"     x ="90"  y ="48"         width="26" height="21" name="dirUP" ></rect>  </g>
-								<g class="hover_group"> <rect   id="emuGamepad_2_key_RIGHT"  x ="116" y ="70"         width="26" height="21" name="dirRT" ></rect>  </g>
-								<g class="hover_group"> <rect   id="emuGamepad_2_key_DOWN"   x ="90"  y ="92"         width="26" height="21" name="dirDN" ></rect>  </g>
-								<g class="hover_group"> <rect   id="emuGamepad_2_key_SPACE"  x ="160" y ="77"         width="30" height="30" name="select"></rect>  </g>
-								<g class="hover_group"> <rect   id="emuGamepad_2_key_ENTER"  x ="200" y ="77"         width="30" height="30" name="start" ></rect>  </g>
-								<g class="hover_group"> <rect   id="emuGamepad_2_key_LSHIFT" x ="65"  y ="2"          width="75" height="15" name="sL"    ></rect>  </g>
-								<g class="hover_group"> <rect   id="emuGamepad_2_key_RSHIFT" x ="280" y ="2"          width="75" height="15" name="sR"    ></rect>  </g>
-								<g class="hover_group"> <circle id="emuGamepad_2_key_Q"      cx="353" cy="81"  r="15"                        name="btnA"  ></circle></g>
-								<g class="hover_group"> <circle id="emuGamepad_2_key_W"      cx="316" cy="110" r="15"                        name="btnB"  ></circle></g>
-								<g class="hover_group"> <circle id="emuGamepad_2_key_A"      cx="280" cy="81"  r="15"                        name="btnY"  ></circle></g>
-								<g class="hover_group"> <circle id="emuGamepad_2_key_S"      cx="317" cy="52"  r="15"                        name="btnX"  ></circle></g>
+								<g pad="2" name="key_LEFT"   id="emuGamepad_2_key_LEFT"   class="hover_group"> <rect   x ="64"  y ="70"         width="26" height="21" ></rect>  </g>
+								<g pad="2" name="key_UP"     id="emuGamepad_2_key_UP"     class="hover_group"> <rect   x ="90"  y ="48"         width="26" height="21" ></rect>  </g>
+								<g pad="2" name="key_RIGHT"  id="emuGamepad_2_key_RIGHT"  class="hover_group"> <rect   x ="116" y ="70"         width="26" height="21" ></rect>  </g>
+								<g pad="2" name="key_DOWN"   id="emuGamepad_2_key_DOWN"   class="hover_group"> <rect   x ="90"  y ="92"         width="26" height="21" ></rect>  </g>
+								<g pad="2" name="key_SPACE"  id="emuGamepad_2_key_SPACE"  class="hover_group"> <rect   x ="160" y ="77"         width="30" height="30" ></rect>  </g>
+								<g pad="2" name="key_ENTER"  id="emuGamepad_2_key_ENTER"  class="hover_group"> <rect   x ="200" y ="77"         width="30" height="30" ></rect>  </g>
+								<g pad="2" name="key_LSHIFT" id="emuGamepad_2_key_LSHIFT" class="hover_group"> <rect   x ="65"  y ="2"          width="75" height="15" ></rect>  </g>
+								<g pad="2" name="key_RSHIFT" id="emuGamepad_2_key_RSHIFT" class="hover_group"> <rect   x ="280" y ="2"          width="75" height="15" ></rect>  </g>
+								<g pad="2" name="key_S"      id="emuGamepad_2_key_Q"      class="hover_group"> <circle cx="353" cy="81"  r="15"                        ></circle></g>
+								<g pad="2" name="key_A"      id="emuGamepad_2_key_W"      class="hover_group"> <circle cx="316" cy="110" r="15"                        ></circle></g>
+								<g pad="2" name="key_Q"      id="emuGamepad_2_key_A"      class="hover_group"> <circle cx="280" cy="81"  r="15"                        ></circle></g>
+								<g pad="2" name="key_W"      id="emuGamepad_2_key_S"      class="hover_group"> <circle cx="317" cy="52"  r="15"                        ></circle></g>
 							</svg>
 						</figure>
 					</div>
@@ -220,12 +226,11 @@
 		</div>
 
 		<div id="emu_emulator" class="sectionWindow">
-			<div class="sectionWindow_title">Emulator Screen</div>
+			<div class="sectionWindow_title">
+				Emulator Screen
+			</div>
 			<div class="sectionWindow_content">
-				<div id="emu_emuControls2">
-					<!--<label class="emuControls">-->
-					<!--</label>-->
-
+				<div class="emu_emuControls" id="emu_emuControlsTOP">
 					<button class="emuControls checkbox" id="emuControls_autopause_btn">
 						<span id="emuControls_autopause_chk"></span>
 						<span>AUTO-PAUSE</span>
@@ -234,21 +239,23 @@
 					<input type="button" value="STOP" class="emuControls" id="emuControls_stop">
 					<input type="button" value="RELOAD" class="emuControls" id="emuControls_reload">
 					<input type="button" value="UNLOAD" class="emuControls" id="emuControls_unload">
-					<input type="button" value="ROTATE" class="emuControls" id="emuControls_rotate">
+					<input style="display:none;" type="button" value="ROTATE" class="emuControls" id="emuControls_rotate">
 				</div>
 
-				<div id="emscripten_iframe_container_outer">
-					<div id="emscripten_iframe_container">
-						<canvas tabindex="0" id="emuCanvas" width="640" height="560"></canvas>
-						<iframe src="iframe_msg_template.html" frameBorder="0" id="emscripten_iframe"></iframe>
-					</div>
-				</div>
-
+				<div class="emu_emuControls" id="emu_emuControlsBOTTOM">
 					<input type="button" value="F2 QUALITY" class="emuControls" id="emuControls_QUALITY">
 					<input type="button" value="F3 DEBUG"   class="emuControls" id="emuControls_DEBUG">
 					<input type="button" value="F7 FLICKER" class="emuControls" id="emuControls_FLICKER">
 					<input type="button" value="F9 PAUSE"   class="emuControls" id="emuControls_PAUSE">
 					<input type="button" value="F10 STEP"   class="emuControls" id="emuControls_STEP">
+					<input type="button" value="FULLSCREEN" class="emuControls" id="emuControls_FULLSCREEN">
+				</div>
+
+				<div id="emscripten_emu_container_outer">
+					<div id="emscripten_emu_container">
+						<canvas tabindex="0" class="verticalAlign" id="emuCanvas" width="620" height="456"></canvas>
+					</div>
+				</div>
 
 			</div>
 		</div>
@@ -314,7 +321,7 @@
 
 			<div class="sectionDivs_title_options">
 				<input type="button" value="FULL SCREEN" onclick="emu.fullscreen.test('#emuCanvas');">
-				<input type="button" value="Resize" onclick="document.querySelector('#emscripten_iframe').contentWindow.resizeIframe();">
+				<input type="button" value="Resize" onclick="emu.vars.innerEmu.resizeEmuCanvas();">
 				<input type="button" value="Reload" onclick="document.location.href = document.location.href;">
 				<input type="button" value="New Window" onclick="window.open(document.location.href);">
 
@@ -348,7 +355,7 @@
 
 			<div class="sectionDivs_title_options">
 				<input type="button" value="FULL SCREEN" onclick="emu.fullscreen.test('#emuCanvas');">
-				<input type="button" value="Resize" onclick="document.querySelector('#emscripten_iframe').contentWindow.resizeIframe();">
+				<input type="button" value="Resize" onclick="emu.vars.innerEmu.resizeEmuCanvas();">
 				<input type="button" value="Reload" onclick="document.location.href = document.location.href;">
 				<input type="button" value="New Window" onclick="window.open(document.location.href);">
 
@@ -383,7 +390,7 @@
 
 			<div class="sectionDivs_title_options">
 				<input type="button" value="FULL SCREEN" onclick="emu.fullscreen.test('#emuCanvas');">
-				<input type="button" value="Resize" onclick="document.querySelector('#emscripten_iframe').contentWindow.resizeIframe();">
+				<input type="button" value="Resize" onclick="emu.vars.innerEmu.resizeEmuCanvas();">
 				<input type="button" value="Reload" onclick="document.location.href = document.location.href;">
 				<input type="button" value="New Window" onclick="window.open(document.location.href);">
 

@@ -43,6 +43,7 @@ _gitignoredir
 # SKIP THESE FILES #
 _management/
 *-error.txt
+TODO.txt
 
 # MAKE EXECEPTIONS FOR THESE FILES #
 !_sys/eud.db

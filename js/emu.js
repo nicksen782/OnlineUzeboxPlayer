@@ -9,20 +9,20 @@
 
 /*jshint -W069 */
 
-// /* global featureDetection */
-// /* global gc */
-// /* global saveAs */
-// /* global JSZip */
-// /* global X2JS */
-// /* global performance */
+/* global featureDetection */
+/* global gc */
+/* global saveAs */
+/* global JSZip */
+/* global X2JS */
+/* global performance */
 
 // anthonybrown/JSLint Options Descriptions
 // https://gist.github.com/anthonybrown/9526822
 
 "use strict";
 
-var emu = {};
-emu.vars = {
+var emu             = {};
+emu.vars            = {
 	// UAM vars.
 	originUAM      : false     ,
 	uamwindow      : undefined ,
@@ -52,8 +52,8 @@ emu.vars = {
 	gameTitle: "",
 
 	innerEmu : {
-		emulatorIsReady       : false,
-		createDefaultModule   : function(){
+		emulatorIsReady         : false,
+		createDefaultModule     : function(){
 			// Tells Emscripten what DOM element that it should be listening to for keyboard input.
 			this["keyboardListeningElement"] = (function() { return emu.vars.dom.view["emuCanvas"] })();
 
@@ -94,8 +94,17 @@ emu.vars = {
 				// Focus on the emu canvas.
 				function(){
 					setTimeout(function(){
+						// setInterval(function(){ document.querySelectorAll(".hover"); }, 250);
+						// setInterval(function(){ console.log( "HOVERED", document.querySelectorAll(".hovered").length, document.querySelectorAll(".hover") ); }, 1000);
+
 						// Don't pause if the auto-pause checkbox is checked.
-						if (!emu.vars.dom.view["emuControls_autopause_chk"].classList.contains("enabled")) {
+						if (
+							emu.vars.dom.view["emuControls_autopause_chk"].classList.contains("enabled") &&
+							(
+								emu.vars.dom.view["emu_misc_gamepads"]   .classList.contains("hovered") ||
+								emu.vars.dom.view["emu_emulator_window"] .classList.contains("hovered")
+							)
+						) {
 							emu.funcs.emu_focusing(null, "mouseenter");
 						}
 						else{
@@ -129,7 +138,7 @@ emu.vars = {
 				ratio : ratio
 			};
 		},
-		resizeEmuCanvas       : function(){
+		resizeEmuCanvas         : function(){
 			var canvas        = emu.vars.dom.view["emuCanvas"];
 			var Container     = document.querySelector("#emscripten_emu_container");
 			var ContainerDims = Container.getBoundingClientRect();
@@ -138,15 +147,15 @@ emu.vars = {
 			canvas.style.width  = newDims.width  +"px";
 			canvas.style.height = newDims.height +"px";
 		},
-		emuIsReady            : function(){
+		emuIsReady              : function(){
 			emu.vars.innerEmu.emulatorIsReady = true;
 			emu.vars.gameAllowedToLoad        = true;
 			emu.vars.innerEmu.resizeEmuCanvas();
 		},
-		Module                : { },
+		Module                  : { },
 	}
 };
-emu.funcs = {
+emu.funcs           = {
 	emu_rotate: function() {
 		return;
 		// emu_rotate
@@ -265,13 +274,6 @@ emu.funcs = {
 				select.appendChild(frag);
 			};
 
-			// Get handle on select menu DOM.
-			var emu_builtInGames_select1 = emu.vars.dom.view.builtInGames_select;
-			// Clear the options.
-			emu_builtInGames_select1.length = 1;
-			// Clear the optgroups.
-			emu_builtInGames_select1.querySelectorAll('optgroup').forEach(function(d, i, a) { d.remove(); });
-
 			if(typeof res=="string"){ res = JSON.parse(res); } // IE11 Fix:
 
 			// Break the game data apart into separate categories.
@@ -287,20 +289,36 @@ emu.funcs = {
 				{ 'groupTitle': '== ' + emu.vars.emu_statuses[0] + '', 'data': res.data.filter(function(e) { if (e.status == 0) { return true; } }), }, // 'NO CATEGORY'
 			];
 
+			// Get handle on select menu DOM.
+			var emu_builtInGames_select1 = emu.vars.dom.view["builtInGames_select"];
+			// Clear the options.
+			emu_builtInGames_select1.length = 1;
+			// Clear the optgroups.
+			emu_builtInGames_select1.querySelectorAll('optgroup').forEach(function(d, i, a) { d.remove(); });
 			// Add the game data by category.
 			categories.map(function(d, i, a) {
-				if (d.data.length) {
-					addGamesByCategory(d, emu_builtInGames_select1);
-				}
-
+				if (d.data.length) { addGamesByCategory(d, emu_builtInGames_select1); }
 			});
 
+			if(emu.vars.originUAM){
+				// Get handle on select menu DOM.
+				var emu_builtInGames_select2 = emu.vars.dom.db["gameSelect"];
+				// Clear the options.
+				emu_builtInGames_select2.length = 1;
+				// Clear the optgroups.
+				emu_builtInGames_select2.querySelectorAll('optgroup').forEach(function(d, i, a) { d.remove(); });
+				// Add the game data by category.
+				categories.map(function(d, i, a) {
+					if (d.data.length) { addGamesByCategory(d, emu_builtInGames_select2); }
+				});
+			}
 		};
 		var formData = {
 			"o": "emu_getBuiltInGamelist",
 			"_config": { "processor": "emu_p.php" }
 		};
 		var prom1 = emu.funcs.shared.serverRequest(formData).then(resolved, emu.funcs.shared.rejectedPromise);
+		return prom1;
 	},
 	// * Used by the "PLAY" button in the game files list. Starts the specified game.
 	loadGameFromList: function(game) {
@@ -639,6 +657,8 @@ emu.funcs = {
 				});
 			}
 
+			emu.vars.dom.view["emu_FilesFromUser"].value="";
+
 			finishFileLoading(proms, null, true);
 		};
 		var fixUzeHeader          = function(filename, data) {
@@ -902,12 +922,11 @@ emu.funcs = {
 	},
 	//
 	addAllListeners: function() {
+		// Fullscreen mode.
 		document.addEventListener("fullscreenchange", function(e) {
 			emu.vars.innerEmu.resizeEmuCanvas();
 			emu.funcs.emu_focusing(null, "mouseenter");
 		}, false);
-
-		// Fullscreen mode.
 		emu.vars.dom.view["emuControls_FULLSCREEN"].addEventListener("click"   , emu.funcs.emuFullscreen, false);
 		emu.vars.dom.view["emuCanvas"].addEventListener("dblclick", emu.funcs.emuFullscreen, false);
 
@@ -918,7 +937,6 @@ emu.funcs = {
 		emu.vars.dom.view["emu_misc_navs"].forEach(function(d, i, a) {
 			d.addEventListener("click", function() { emu.funcs.nav.changeMiscView(this.getAttribute("view"), this) }, false);
 		});
-
 
 		// Add the event listeners for the quick nav buttons.
 		var allTitleNavGroups = document.querySelectorAll(".sectionDivs_title_options");
@@ -955,6 +973,7 @@ emu.funcs = {
 
 		// Emulator controls (TOP)
 		emu.vars.dom.view["emuControls_stop"]  .addEventListener("click", function(){ emu.funcs.stopEmu(true); }, false);
+		emu.vars.dom.view["emuControls_resize"].addEventListener("click", function(){ emu.vars.innerEmu.resizeEmuCanvas(); }, false);
 		emu.vars.dom.view["emuControls_reload"].addEventListener("click", emu.funcs.loadGame, false);
 		emu.vars.dom.view["emuControls_unload"].addEventListener("click", emu.funcs.emu_unload, false);
 		emu.vars.dom.view["emuControls_rotate"].addEventListener("click", emu.funcs.emu_rotate, false);
@@ -1001,7 +1020,45 @@ emu.funcs = {
 	},
 
 };
-emu.funcs.UAM = {
+emu.funcs.UAM       = {
+	// * Adds the UAM event listeners.
+	addEventListeners: function() {
+		// UAM JSON load.
+		emu.vars.dom.view["emu_FilesFromJSON_UAM"].addEventListener("change", function() {
+			this.select();
+		}, false);
+		emu.vars.dom.view["emu_FilesFromJSON_UAM_load"].addEventListener("click", function() {
+			let uam_gamelist = emu.vars.dom.view["emu_gameSelect_UAM_select"];
+			emu.vars.dom.view["emu_FilesFromJSON_UAM"].value = uam_gamelist.options[uam_gamelist.selectedIndex].getAttribute("remoteload");
+			emu.funcs.getGameFiles("4");
+		}, false);
+
+		// UAM game select menu.
+		emu.vars.dom.view["emu_gameSelect_UAM_select"].addEventListener("change", function() {
+			let uam_gamelist = emu.vars.dom.view["emu_gameSelect_UAM_select"];
+			emu.vars.dom.view["emu_FilesFromJSON_UAM"].value = uam_gamelist.options[uam_gamelist.selectedIndex].getAttribute("remoteload");
+		}, false);
+
+		// UAM compile options.
+		var compileOptions_function = function(e) {
+			// Toggle the enabled class on the "checkbox".
+			let check = this.querySelector(".checkbox");
+			if (check.classList.contains("enabled")) { check.classList.remove("enabled") }
+			else { check.classList.add("enabled") }
+		};
+		var compileOptions = document.querySelectorAll("#emu_view_uam .checkbox_button");
+		compileOptions.forEach(function(d, i, a) {
+			d.addEventListener("click", compileOptions_function, false);
+		});
+
+		// UAM Compile/C2BIN actions.
+		emu.vars.dom.view["emu_compile_UAM"].addEventListener("click", emu.funcs.UAM.compileGameUAM, false);
+		emu.vars.dom.view["emu_c2bin_UAM"].addEventListener("click", emu.funcs.UAM.c2bin_UamGame, false);
+		emu.vars.dom.view["emu_c2bin2_UAM"].addEventListener("click", emu.funcs.UAM.c2bin_UamGame_2, false);
+
+		emu.funcs.db.addEventListeners();
+	},
+
 	// * Show UAM.
 	enableUAM: function() {
 		// Get values from UAM.
@@ -1071,15 +1128,78 @@ emu.funcs.UAM = {
 			emu.funcs.UAM.addEventListeners();
 
 			// Set the initial state of the auto-pause checkbox.
-			// emu.vars.dom.view["emuControls_autopause_chk"].classList.add("enabled");
+			emu.vars.dom.view["emuControls_autopause_chk"].classList.add("enabled");
 
 			// Refresh the UAM games list data and auto-select the user's default game.
 			emu.funcs.UAM.getGamesListUAM();
+
+			// DB: Populate the status select menu with values.
+			emu.funcs.db.gameDb_populateStatusSelectMenu();
 
 			// Switch to the main emulator view.
 			emu.funcs.nav.changeView("VIEW");
 		});
 	},
+
+	// * Queries the UAM database for games that match the user's user_id.
+	getGamesListUAM: function() {
+		// Queries the database for the current user's games.
+
+		// Get the current user's user id.
+		let user_id = emu.vars.user_id;
+		if (!user_id) {
+			console.log("No user_id. Are you logged into UAM?");
+			return;
+		}
+
+		// Request the games list for the user.
+		var formData = {
+			"o": "gameman_manifest_user",
+			"user_id": user_id,
+			"_config": { "processor": "emu_p.php" }
+		};
+		emu.funcs.shared.serverRequest(formData).then(
+			function(res) {
+				// Get handles to the data.
+				let gameList_UAM = res.data;
+				let defaultGame = res.defaultGame;
+
+				// Get handle on DOM select, reset length to 1, modify the first option with the game count..
+				let uam_gamelist = emu.vars.dom.view["emu_gameSelect_UAM_select"];
+				uam_gamelist.options.length = 1;
+				uam_gamelist.options[0].text = gameList_UAM.length + " games";
+				uam_gamelist.options[0].value = "";
+
+				// Variables to use while populating the option data.
+				let option = undefined;
+				let frag = document.createDocumentFragment();
+
+				// Populate the games list select menu.
+				gameList_UAM.map(function(d, i, a) {
+					option = document.createElement("option");
+					option.setAttribute("gameid", d.gameId);
+					option.setAttribute("gamename", d.gameName);
+					option.setAttribute("author_user_id", d.author_user_id);
+					option.setAttribute("UAMdir", d.UAMdir);
+					option.setAttribute("gamedir", d.gamedir);
+					option.setAttribute("remoteload", window.location.origin + "/" + d.gamedir + "/output/remoteload.json");
+					option.value = d.gameId;
+					option.text = d.gameName;
+					frag.appendChild(option);
+				});
+				// Add the fragment to the select.
+				uam_gamelist.appendChild(frag);
+
+				// Auto select the default game.
+				uam_gamelist.value = defaultGame;
+
+				// Load the default games's JSON url.
+				emu.vars.dom.view["emu_FilesFromJSON_UAM"].value = uam_gamelist.options[uam_gamelist.selectedIndex].getAttribute("remoteload");
+			}, emu.funcs.shared.rejectedPromise
+		);
+
+	},
+
 	// * Compiles the selected UAM game.
 	compileGameUAM: function() {
 		// Get the current user's user id.
@@ -1254,6 +1374,7 @@ emu.funcs.UAM = {
 
 	},
 
+
 	// Runs the C2BIN script for the selected UAM game.
 	c2bin_UamGame: function() {
 		console.log("emu_c2bin_UAM");
@@ -1264,110 +1385,10 @@ emu.funcs.UAM = {
 		console.log("emu_c2bin2_UAM");
 	},
 
-	// * Queries the UAM database for games that match the user's user_id.
-	getGamesListUAM: function() {
-		// Queries the database for the current user's games.
-
-		// Get the current user's user id.
-		let user_id = emu.vars.user_id;
-		if (!user_id) {
-			console.log("No user_id. Are you logged into UAM?");
-			return;
-		}
-
-		// Request the games list for the user.
-		var formData = {
-			"o": "gameman_manifest_user",
-			"user_id": user_id,
-			"_config": { "processor": "emu_p.php" }
-		};
-		emu.funcs.shared.serverRequest(formData).then(
-			function(res) {
-				// Get handles to the data.
-				let gameList_UAM = res.data;
-				let defaultGame = res.defaultGame;
-
-				// Get handle on DOM select, reset length to 1, modify the first option with the game count..
-				let uam_gamelist = emu.vars.dom.view["emu_gameSelect_UAM_select"];
-				uam_gamelist.options.length = 1;
-				uam_gamelist.options[0].text = gameList_UAM.length + " games";
-				uam_gamelist.options[0].value = "";
-
-				// Variables to use while populating the option data.
-				let option = undefined;
-				let frag = document.createDocumentFragment();
-
-				// Populate the games list select menu.
-				gameList_UAM.map(function(d, i, a) {
-					option = document.createElement("option");
-					option.setAttribute("gameid", d.gameId);
-					option.setAttribute("gamename", d.gameName);
-					option.setAttribute("author_user_id", d.author_user_id);
-					option.setAttribute("UAMdir", d.UAMdir);
-					option.setAttribute("gamedir", d.gamedir);
-					option.setAttribute("remoteload", window.location.origin + "/" + d.gamedir + "/output/remoteload.json");
-					option.value = d.gameId;
-					option.text = d.gameName;
-					frag.appendChild(option);
-				});
-				// Add the fragment to the select.
-				uam_gamelist.appendChild(frag);
-
-				// Auto select the default game.
-				uam_gamelist.value = defaultGame;
-
-				// Load the default games's JSON url.
-				emu.vars.dom.view["emu_FilesFromJSON_UAM"].value = uam_gamelist.options[uam_gamelist.selectedIndex].getAttribute("remoteload");
-			}, emu.funcs.shared.rejectedPromise
-		);
-
-	},
-
-	// * Adds the UAM event listeners.
-	addEventListeners: function() {
-		// UAM JSON load.
-		emu.vars.dom.view["emu_FilesFromJSON_UAM"].addEventListener("change", function() {
-			this.select();
-		}, false);
-		emu.vars.dom.view["emu_FilesFromJSON_UAM_load"].addEventListener("click", function() {
-			let uam_gamelist = emu.vars.dom.view["emu_gameSelect_UAM_select"];
-			emu.vars.dom.view["emu_FilesFromJSON_UAM"].value = uam_gamelist.options[uam_gamelist.selectedIndex].getAttribute("remoteload");
-			emu.funcs.getGameFiles("4");
-		}, false);
-
-		// UAM game select menu.
-		emu.vars.dom.view["emu_gameSelect_UAM_select"].addEventListener("change", function() {
-			let uam_gamelist = emu.vars.dom.view["emu_gameSelect_UAM_select"];
-			emu.vars.dom.view["emu_FilesFromJSON_UAM"].value = uam_gamelist.options[uam_gamelist.selectedIndex].getAttribute("remoteload");
-		}, false);
-
-		// UAM compile options.
-		var compileOptions_function = function(e) {
-			// Toggle the enabled class on the "checkbox".
-			let check = this.querySelector(".checkbox");
-			if (check.classList.contains("enabled")) { check.classList.remove("enabled") }
-			else { check.classList.add("enabled") }
-		};
-		var compileOptions = document.querySelectorAll("#emu_view_uam .checkbox_button");
-		compileOptions.forEach(function(d, i, a) {
-			d.addEventListener("click", compileOptions_function, false);
-		});
-
-		// UAM Compile/C2BIN actions.
-		emu.vars.dom.view["emu_compile_UAM"].addEventListener("click", emu.funcs.UAM.compileGameUAM, false);
-		emu.vars.dom.view["emu_c2bin_UAM"].addEventListener("click", emu.funcs.UAM.c2bin_UamGame, false);
-		emu.vars.dom.view["emu_c2bin2_UAM"].addEventListener("click", emu.funcs.UAM.c2bin_UamGame_2, false);
-	}
-
 };
 emu.funcs.downloads = {
 };
-emu.funcs.shared = {
-	// Performs eval within the specified context on a string.
-	evalInContext             : function(js, context) {
-		// featureDetection.funcs.evalInContext(data, window);
-		return function() { eval(js) ; }.call(context);
-	} ,
+emu.funcs.shared    = {
 	// * Display message on the canvas in the top-left corner.
 	textOnCanvas: function(obj) {
 		// ctx.fillRect(0,0, Math.floor(ctx.measureText(obj.text).width), 48);
@@ -1430,7 +1451,6 @@ emu.funcs.shared = {
 		ctx.fillStyle = "#000000";
 		ctx.fillRect(0, 0, canvas.width, canvas.height);
 	},
-
 	// * Make an AJAX request.
 	serverRequest: function(formData) {
 		// Make sure that a ._config key exists and that it has values.
@@ -1513,9 +1533,9 @@ emu.funcs.shared = {
 
 			// Are there files included?
 			if (formData._config.hasFiles) {
-				console.log("Uploading this many files:", formData._config.filesHandle.files.length);
+				// console.log("Uploading this many files:", formData._config.filesHandle.files.length);
 				for (var i = 0; i < formData._config.filesHandle.files.length; i++) {
-					console.log("On file " + (i + 1) + " of " + formData._config.filesHandle.files.length, "(" + formData._config.filesHandle.files[i].name + ")");
+					// console.log("On file " + (i + 1) + " of " + formData._config.filesHandle.files.length, "(" + formData._config.filesHandle.files[i].name + ")");
 					fd.append(formData._config.filesHandle.files[i].name, formData._config.filesHandle.files[i]);
 				}
 			}
@@ -1608,7 +1628,7 @@ emu.funcs.shared = {
 		canvas.getContext("2d").msImageSmoothingEnabled = false; //
 	}
 };
-emu.funcs.nav = {
+emu.funcs.nav       = {
 	// * Options for Element.scrollIntoView.
 	scrollIntoView_options: {
 		behavior: "smooth", // "auto", "instant", or "smooth".         Defaults to "auto".
@@ -1621,10 +1641,10 @@ emu.funcs.nav = {
 		var allSectionDivs = document.querySelectorAll(".sectionDivs");
 		var bodyContainer = document.querySelector("#bodyContainer");
 
-		var emu_view = document.querySelector("#emu_view");
+		var emu_view   = document.querySelector("#emu_view");
 		var emu_debug1 = document.querySelector("#emu_debug1");
 		var emu_debug2 = document.querySelector("#emu_debug2");
-		var emu_db = document.querySelector("#emu_db");
+		var emu_db     = document.querySelector("#emu_db");
 
 		bodyContainer.scrollIntoView(emu.funcs.nav.scrollIntoView_options);
 
@@ -1666,7 +1686,433 @@ emu.funcs.nav = {
 
 	},
 };
-emu.funcs.db = {};
+
+emu.funcs.db  = {
+// emu.funcs.emu_getBuiltInGamelist();
+	// * Adds the UAM DB event listeners.
+	addEventListeners: function() {
+		//
+		emu.vars.dom.db["gameSelect"].addEventListener("change", function() {
+			emu.funcs.db.getData_oneGame();
+		}, false);
+		//
+		emu.vars.dom.db["gameSelect_load"].addEventListener("click", function() {
+			emu.funcs.db.getData_oneGame();
+		}, false);
+
+		// Hidden file upload button.
+		emu.vars.dom.db["db_builtInGames_fileUpload"].addEventListener("change", function() {
+			emu.funcs.db.gameDb_addFiles();
+		}, false);
+
+		// Visible upload button.
+		emu.vars.dom.db["db_builtInGames_fileUpload_visible"].addEventListener("click", function() {
+			if( emu.vars.dom.db['gameSelect'].value ){
+				// Clear the files.
+				emu.vars.dom.db['db_builtInGames_fileUpload'].value='';
+				// Click the upload button.
+				emu.vars.dom.db['db_builtInGames_fileUpload'].click();
+			}
+			else{
+				emu.funcs.db.clearAllDisplayedGameData();
+				alert('ERROR. You have not selected a game.');
+			}
+		}, false);
+
+		// Update the data for the loaded game.
+		emu.vars.dom.db["gameSelect_update"].addEventListener("click", function() {
+			emu.funcs.db.gameDb_updateGameData();
+		}, false);
+
+		//
+		emu.vars.dom.db["gameSelect_create"].addEventListener("click", function() {
+			emu.funcs.db.gameDb_newGame();
+		}, false);
+
+		//
+		emu.vars.dom.db["gameSelect_delete"].addEventListener("click", function() {
+			emu.funcs.db.gameDb_deleteGame();
+		}, false);
+	},
+
+	// Puts the emu_status values into the select menu for "status".
+	gameDb_populateStatusSelectMenu : function(){
+		var option = undefined;
+		var select = emu.vars.dom.db["dataField_status"];
+		select.length=0;
+		var frag = document.createDocumentFragment();
+
+		for(var i=0; i<emu.vars.emu_statuses.length; i++){
+			option = document.createElement('option');
+			option.value = i;
+			option.text = emu.vars.emu_statuses[i] + " (Status:"+i+")";
+			frag.appendChild(option);
+		}
+		select.appendChild(frag);
+	} ,
+	// * Retrieves the data and file list for the specified game in the built-in games database.
+	getData_oneGame                 : function(){
+		var select = emu.vars.dom.db["gameSelect"];
+
+		if(! select.value){
+			// emu.gameDb.clearAllDisplayedGameData();
+			alert      ("No game selected.");
+			console.log("No game selected.");
+			return;
+		}
+
+		// Get the game id.
+		var gameid=select.value;
+
+		// Request the game data from the server.
+		var formData = {
+			"o"      : "getData_oneGame",
+			"gameid" : gameid,
+			"_config": { "processor": "emu_p.php" }
+		};
+
+		emu.funcs.shared.serverRequest(formData).then(
+			function(res){
+				// Populate the data fields.
+				emu.vars.dom.db["dataField_title"]       .value = res.data.gameData.title       ;
+				emu.vars.dom.db["dataField_authors"]     .value = res.data.gameData.authors     ;
+				emu.vars.dom.db["dataField_status"]      .value = res.data.gameData.status      ;
+				emu.vars.dom.db["dataField_addedBy"]     .value = res.data.gameData.added_by    ;
+				emu.vars.dom.db["dataField_gameid"]      .value = res.data.gameData.id          ;
+				emu.vars.dom.db["dataField_gameDir"]     .value = res.data.gameData.gamedir     ;
+				emu.vars.dom.db["dataField_whenAdded"]   .value = res.data.gameData.when_added   ;
+				emu.vars.dom.db["dataField_gameFile"]    .value = res.data.gameData.gamefile    ;
+				emu.vars.dom.db["dataField_gameFiles"]   .value = res.data.gameData.gamefiles   ;
+				emu.vars.dom.db["dataField_description"] .value = res.data.gameData.description ;
+
+				// Update the displayed filelist.
+				emu.funcs.db.gameDb_updateFilelist(res.data);
+
+				// Update the displayed game links.
+				// emu.funcs.db.gameDb_createLinks();
+
+			}
+			,emu.funcs.shared.rejectedPromise
+		);
+
+
+	},
+	// * Displays the file list returned for the game data and game directory contents.
+	gameDb_updateFilelist           : function(data){
+		var files_div1 = emu.vars.dom.db["db_files_included"];
+		var files_div2 = emu.vars.dom.db["db_files_allInDir"];
+		var gameId     = emu.vars.dom.db["gameSelect"].value;
+		var gamefiles  = data.gameData.gamefiles  ;
+		var dirfiles   = data.gameFiles;
+
+		var newHTML ="";
+		var newHTML1="";
+		var newHTML2="";
+		var chk_isGamefile;
+		var chk_isMainGamefile;
+
+		newHTML  += "";
+		newHTML1 += "<table class='table1'>" + "<caption>Executable Game Files</caption><tr><th>Filename</th><th>Include</th><th>Core game file</th><th>Delete</th></tr>";
+		newHTML2 += "<table class='table1'>" + "<caption>Support Game Files</caption><tr><th>Filename</th><th>Include</th><th>--</th>            <th>Delete</th></tr>";
+
+		for(var i=0; i<dirfiles.length; i++){
+			chk_isGamefile     = gamefiles.indexOf( dirfiles[i] ) == -1 ? '' : 'checked' ;
+			chk_isMainGamefile = dirfiles[i].trim() == data.gameData.gamefile.trim() ? 'checked' : '';
+
+			var filenameFull      = dirfiles[i] ;
+			var ext = (filenameFull.substr(-4, 4)).toLowerCase() ;
+			var isExecFile = (ext == ".uze" || ext == ".hex") ? 1 : 0;
+
+			var displayedFilename = "" ;
+
+			if(filenameFull.length>25){ displayedFilename = filenameFull.substr(0, 15) + "..." + filenameFull.substr(-10, 10); }
+			else                      { displayedFilename = filenameFull; }
+
+			var radio_html     = "<td><label><div style='text-align: center;'> <input onchange='emu.funcs.db.gameDb_updateMainGamefile();'  type='radio'    filename='"+dirfiles[i]+"' "+chk_isMainGamefile+" name='emu_mainGamefileGroup'> </div></label></td>" + "";
+			var non_radio_html = "<td></td>";
+
+			newHTML =
+				"<tr>" +
+					"<td title='"+filenameFull+"'>"+displayedFilename+"</td>" +
+					"<td><label><div style='text-align: center;'> <input onchange='emu.funcs.db.gameDb_updateGamefilesText();' type='checkbox' filename='"+dirfiles[i]+"' "+chk_isGamefile+    "> </div></label></td>" +
+					""+(isExecFile ? radio_html : non_radio_html) +
+					"<td>       <div style='text-align: center;'> <input type='button' value='DELETE' onclick='emu.funcs.db.gameDb_deleteFile("+gameId+", \""+dirfiles[i]+"\")'></div></td>" +
+				"</tr>";
+			"";
+
+			if  (isExecFile){ newHTML1+=newHTML; }
+			else            { newHTML2+=newHTML; }
+		}
+
+		newHTML1 += "</table>";
+		newHTML2 += "</table>";
+
+		files_div1.innerHTML = newHTML1 ;
+		files_div2.innerHTML = newHTML2 ;
+	} ,
+	// * Uploads the displayed value for the included game files.
+	gameDb_updateGamefilesText      : function(){
+		var input_gamefiles = emu.vars.dom.db["dataField_gameFiles"];
+		var fs1 = emu.vars.dom.db["db_files_included"].id;
+		var fs2 = emu.vars.dom.db["db_files_allInDir"].id;
+
+		var checkboxes  = document.querySelectorAll(
+			"#"+fs1+" [type='checkbox' ], #"+fs2+" [type='checkbox' ]"
+		);
+
+		input_gamefiles.value="";
+
+		var gamefiles=[];
+		for(var i=0; i<checkboxes.length; i++){
+			if(checkboxes[i].checked){ gamefiles.push( checkboxes[i].getAttribute('filename') ); }
+		}
+
+		input_gamefiles.value = JSON.stringify(gamefiles);
+	} ,
+	// * Uploads the displayed value for the core game file.
+	gameDb_updateMainGamefile       : function(){
+		var mainGamefile     = document.querySelector("[name='emu_mainGamefileGroup']:checked").getAttribute('filename');
+		var input_gamefile   = emu.vars.dom.db["dataField_gameFile"];
+		input_gamefile.value = mainGamefile;
+	} ,
+	// * Reset all displayed game data.
+	clearAllDisplayedGameData       : function(){
+		// Clear all displayed game data.
+		emu.vars.dom.db["dataField_title"]      .value="";
+		emu.vars.dom.db["dataField_authors"]    .value="";
+		emu.vars.dom.db["dataField_status"]     .value="";
+		emu.vars.dom.db["dataField_addedBy"]    .value="";
+		emu.vars.dom.db["dataField_gameid"]     .value="";
+		emu.vars.dom.db["dataField_gameDir"]    .value="";
+		emu.vars.dom.db["dataField_whenAdded"]  .value="";
+		emu.vars.dom.db["dataField_gameFile"]   .value="";
+		emu.vars.dom.db["dataField_gameFiles"]  .value="";
+		emu.vars.dom.db["dataField_description"].value="";
+		emu.vars.dom.db["db_files_included"].innerHTML="--";
+		emu.vars.dom.db["db_files_allInDir"].innerHTML="--";
+		emu.vars.dom.db["db_builtInGames_fileUpload"].value="";
+	} ,
+	// * Handles the upload of new game files.
+	gameDb_addFiles                 : function(){
+		var select = emu.vars.dom.db["gameSelect"];
+		if(! select.value){ console.log("No game selected."); return; }
+		var gameid = select.value;
+
+		var files = emu.vars.dom.db["db_builtInGames_fileUpload"];
+		// How many files?
+		var filesText = "";
+		for(var i=0; i<files.files.length; i++){
+			filesText += "FILE: " + files.files[i].name + ", BYTES: " + files.files[i].size + "\n" ;
+		}
+
+		// Confirm the upload.
+		var confirmed = confirm(
+			"You are about to upload the following "+files.files.length+" files to the game directory:\n\n" +
+			filesText + "" +
+			"\n" +
+			"Continue?" +
+			""
+		);
+
+		if(!confirmed){
+			console.log("User has cancelled the file upload.");
+			files.value="";
+			return;
+		}
+
+		// Request the game data from the server.
+		var formData = {
+			"o"      : "gameDb_addFiles",
+			"gameid" : gameid,
+			"_config": {
+				"filesHandle": files,
+				"hasFiles"   : true,
+				"processor"  : "emu_p.php"
+			}
+		};
+
+		emu.funcs.shared.serverRequest(formData).then(
+			function(res){
+				files.value="";
+
+				// Update the displayed filelist. Indicate NOT to update the game data, only the game file list.
+				emu.funcs.db.gameDb_updateFilelist(res);
+			}
+			,emu.funcs.shared.rejectedPromise
+		);
+
+	} ,
+	// * Deletes the specified file from the game's directory.
+	gameDb_deleteFile               : function(gameid, filename){
+		var select = emu.vars.dom.db["gameSelect"];
+		if(! select.value){ console.log("No game selected."); return; }
+		var gameid = select.value;
+
+		// Confirm the deletion.
+		if(
+			!confirm(
+				"You are about to delete the following "+1+" files:\n\n" +
+				filename + "\n\n" + "Continue?"
+			)
+		){
+			console.log("User has cancelled the file delete.");
+			return;
+		}
+		// Confirm again.
+		if(! confirm("Are you certain?") ){
+			console.log("User has cancelled the file delete.");
+			return;
+		}
+
+		// Request the game data from the server.
+		var formData = {
+			"o"        : "gameDb_deleteFile",
+			"gameid"   : gameid,
+			"filename" : filename,
+			"_config"  : { "processor"  : "emu_p.php" }
+		};
+
+		emu.funcs.shared.serverRequest(formData).then(
+			function(res){
+				// Update the displayed filelist. Indicate NOT to update the game data, only the game file list.
+				emu.funcs.db.gameDb_updateFilelist(res);
+			}
+			,emu.funcs.shared.rejectedPromise
+		);
+	},
+	// * Updates the game data in the database with the data displayed on the form.
+	gameDb_updateGameData           : function(){
+		if(! emu.vars.dom.db["gameSelect"].value){ console.log("No game selected."); return; }
+
+		var obj = {
+			'title'       : emu.vars.dom.db["dataField_title"]      .value ,
+			'authors'     : emu.vars.dom.db["dataField_authors"]    .value ,
+			'gamefile'    : emu.vars.dom.db["dataField_gameFile"]   .value ,
+			'status'      : emu.vars.dom.db["dataField_status"]     .value ,
+			'added_by'    : emu.vars.dom.db["dataField_addedBy"]    .value ,
+			'id'          : emu.vars.dom.db["dataField_gameid"]     .value ,
+			'gamedir'     : emu.vars.dom.db["dataField_gameDir"]    .value ,
+			'when_added'  : emu.vars.dom.db["dataField_whenAdded"]  .value ,
+			'description' : emu.vars.dom.db["dataField_description"].value ,
+			'gamefiles'   : emu.vars.dom.db["dataField_gameFiles"]  .value ,
+		};
+
+		// Request the game data from the server.
+		var formData = {
+			"o"      : "gameDb_updateGameData",
+			"gameid" : obj.id,
+			"data"   : JSON.stringify(obj),
+			"_config": { "processor": "emu_p.php" }
+		};
+
+		emu.funcs.shared.serverRequest(formData).then(
+			function(res){
+				// Record the current values for the select menus.
+				let value1 = emu.vars.dom.db["gameSelect"].value;
+				let value2 = emu.vars.dom.view["builtInGames_select"].value;
+
+				// Refresh both game lists.
+				emu.funcs.emu_getBuiltInGamelist().then(function(){
+					// Set the previously set values for the select menus.
+					emu.vars.dom.db["gameSelect"].value            = value1;
+					emu.vars.dom.view["builtInGames_select"].value = value2;
+
+					// Refresh the selected game's data.
+					emu.funcs.db.getData_oneGame();
+				});
+			}
+			,emu.funcs.shared.rejectedPromise
+		);
+
+	} ,
+
+	gameDb_newGame : function(){
+		// gameDb_newGame
+		var title = prompt("Choose a title for the new game entry.\n\nYou can fill the rest of the values later.", "");
+
+		if     (!title){
+			console.log("Action cancelled.");
+			alert      ("Action cancelled.");
+			return;
+		}
+		else if(title==""){
+			console.log("You did not choose a title");
+			alert("You did not choose a title");
+			return;
+		}
+
+		// var gamedir = title.replace(/\W/g, '_');
+
+		// Request the game data from the server.
+		var formData = {
+			"o"       : "gameDb_newGame",
+			"title"   : title,
+			// "gamedir" : gamedir,
+			"_config" : { "processor": "emu_p.php" }
+		};
+
+		emu.funcs.shared.serverRequest(formData).then(
+			function(res){
+				// Refresh both game lists.
+				emu.funcs.emu_getBuiltInGamelist().then(function(){
+					// Set to the new game.
+					emu.vars.dom.db["gameSelect"].value = res.newGameId;
+
+					// Refresh the selected game's data.
+					emu.funcs.db.getData_oneGame();
+				});
+
+			}
+			,emu.funcs.shared.rejectedPromise
+		);
+
+	},
+
+	gameDb_deleteGame               : function(){
+		var select = emu.vars.dom.db["gameSelect"];
+		if(! emu.vars.dom.db["gameSelect"].value){ console.log("No game selected."); return; }
+		var gameid = select.value;
+
+		var gameTitle = emu.vars.dom.db["dataField_title"].value;
+		var gameDir   = emu.vars.dom.db["dataField_gameDir"].value;
+
+		if( !confirm(
+				"You are about to delete the following game and ALL files within it:\n\n" +
+				"Game directory: " + gameDir   + "\n" +
+				"Game title: "     + gameTitle + "\n" +
+				"Game id: "        + gameid    + "\n" +
+				"\n" +
+				"Continue?")
+		){
+			console.log("User has cancelled the game delete.");
+			return;
+		}
+		else{
+			if(!confirm("Are you VERY certain?")){
+				console.log("User has cancelled the game delete.");
+				return;
+			}
+		}
+
+		// Request the game data from the server.
+		var formData = {
+			"o"       : "gameDb_deleteGame",
+			"gameid"   : gameid,
+			// "gamedir" : gamedir,
+			"_config" : { "processor": "emu_p.php" }
+		};
+
+		emu.funcs.shared.serverRequest(formData).then(
+			function(res){
+				// Clear the displayed data for the deleted game.
+				emu.funcs.db.clearAllDisplayedGameData();
+				// Reload the built-in game lists.
+				emu.funcs.emu_getBuiltInGamelist()();
+			}
+			,emu.funcs.shared.rejectedPromise
+		);
+	}
+};
 
 window.onload = function() {
 	window.onload = null;
@@ -1676,47 +2122,56 @@ window.onload = function() {
 	console.log("****************************************");
 
 	var continueApp = function() {
-		// Populate the DOM handle caches.
-		emu.funcs.domHandleCache_populate();
+		// Add the emulation core before continuing.
+		new Promise(function(resolve,reject){
+			var newJs=document.createElement("script");
+			newJs.onload = function(){ resolve(); };
+			newJs.src = "CUzeBox_emu_core/emu_core.js";
+			document.body.appendChild(newJs);
+		}).then( function(){
+			// Populate the DOM handle caches.
+			emu.funcs.domHandleCache_populate();
 
-		// Add the event listeners.
-		emu.funcs.addAllListeners();
+			// Add the event listeners.
+			emu.funcs.addAllListeners();
 
-		// Get the build-in games list.
-		emu.funcs.emu_getBuiltInGamelist();
+			// Get the build-in games list.
+			emu.funcs.emu_getBuiltInGamelist();
 
-		// Check if this application has been loaded under UAM.
-		try {
-			// Loaded via iframe?
-			if (window.self !== window.top) {
-				// Can the originUAM key be detected?
-				if (window.top.shared.originUAM == true) { emu.funcs.UAM.setupUAM(); }
-				else                                     { emu.funcs.UAM.disableUAM(); }
+			// Check if this application has been loaded under UAM.
+			try {
+				// Loaded via iframe?
+				if (window.self !== window.top) {
+					// Can the originUAM key be detected?
+					if (window.top.shared.originUAM == true) { emu.funcs.UAM.setupUAM(); }
+					else                                     { emu.funcs.UAM.disableUAM(); }
+				}
+				else {
+					emu.funcs.UAM.disableUAM();
+				}
 			}
-			else {
+			catch (e) {
 				emu.funcs.UAM.disableUAM();
 			}
-		}
-		catch (e) {
-			emu.funcs.UAM.disableUAM();
-		}
 
-		emu.funcs.shared.clearTheCanvas(emu.vars.dom.view["emuCanvas"]);
-		// emu.funcs.shared.grayTheCanvas( emu.vars.dom.view["emuCanvas"] );
-		emu.funcs.shared.textOnCanvas({ "canvas": emu.vars.dom.view["emuCanvas"], "text": " - GAME NOT LOADED - " });
+			emu.funcs.shared.clearTheCanvas(emu.vars.dom.view["emuCanvas"]);
+			emu.funcs.shared.textOnCanvas({ "canvas": emu.vars.dom.view["emuCanvas"], "text": " - GAME NOT LOADED - " });
 
-		// Adjust the canvas output.
-		document.querySelectorAll('canvas').forEach(function(d, i) {
-			emu.funcs.shared.setpixelated(d);
+			// Adjust the canvas output.
+			document.querySelectorAll('canvas').forEach(function(d, i) {
+				emu.funcs.shared.setpixelated(d);
+			});
+
+			// Switch to the default view.
+			emu.funcs.nav.changeView("VIEW");
+
+			setTimeout(function(){
+				if(emu.vars.originUAM){
+					// emu.funcs.nav.changeView("DB");
+				}
+			}, 500);
+
 		});
-
-		// Switch to the default view.
-		emu.funcs.nav.changeView("VIEW");
-
-		// Add the emulation core.
-		var newJs=document.createElement("script");
-		newJs.src = "CUzeBox_emu_core/emu_core.js";
-		document.body.appendChild(newJs);
 
 	};
 

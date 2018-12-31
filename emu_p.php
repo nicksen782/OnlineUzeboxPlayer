@@ -14,11 +14,10 @@ ini_set("display_errors", 1);
 define('TIMEZONE', 'America/Detroit');
 date_default_timezone_set(TIMEZONE);
 
-$_appdir  = getcwd().'/'                     ;
-// $_db_file = $_appdir."sys_files/UAM5.sqlite" ;
-$_db_file = $_appdir."../sys_files/UAM5.db" ;
-$_emu_db_file = $_appdir."_sys/eud.db" ;
-$_db      = $_db_file                        ;
+$_appdir      = getcwd().'/'                    ;
+$_db_file     = $_appdir."../sys_files/UAM5.db" ;
+$_emu_db_file = $_appdir."_sys/eud.db"          ;
+$_db          = $_db_file                       ;
 
 $dev=0;
 if ( strpos($_SERVER['SERVER_NAME'], "-nicksen782.c9users.io") !== false ) { $dev=1; }
@@ -68,16 +67,24 @@ function API_REQUEST( $api, $type ){
 	// $o_values["delete_database"] = [ "p"=>( ( $admin ) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
 	// $o_values["gameman_manifest_all"]      = [ "p"=>( ( $loggedIn && $admin) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
 
-	// EMULATOR FUNCTIONS (NON-UAM)
-	$o_values["emu_getBuiltInGamelist"]      = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
-	$o_values["emu_returnJSON_byGameId"]      = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
+	// EMULATOR FUNCTIONS - VIEW (NON-UAM)
+	$o_values["emu_getBuiltInGamelist"]  = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
+	$o_values["emu_returnJSON_byGameId"] = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
 
-	// EMULATOR FUNCTIONS (UAM)
-	$o_values["gameman_manifest_user"]                 = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
-	$o_values["c2bin_UamGame"]                         = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
-	$o_values["compile_UamGame"]                       = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
-	$o_values["c2bin_UamGame_2"]                       = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
-	$o_values["getGamesAndXmlFilepathsViaUserId"]      = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
+	// EMULATOR FUNCTIONS - VIEW (UAM)
+	$o_values["gameman_manifest_user"] = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
+	$o_values["c2bin_UamGame"]         = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
+	$o_values["compile_UamGame"]       = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
+	$o_values["c2bin_UamGame_2"]       = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
+	// $o_values["getGamesAndXmlFilepathsViaUserId"]      = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
+
+	// EMULATOR FUNCTIONS - GAMES DB (UAM)
+	$o_values["getData_oneGame"]       = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
+	$o_values["gameDb_addFiles"]       = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
+	$o_values["gameDb_deleteFile"]     = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
+	$o_values["gameDb_updateGameData"] = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
+	$o_values["gameDb_newGame"]        = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
+	$o_values["gameDb_deleteGame"]     = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
 
 	// DETERMINE IF THE API IS AVAILABLE TO THE USER.
 

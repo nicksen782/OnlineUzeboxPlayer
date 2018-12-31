@@ -3,6 +3,7 @@ if(!$securityLoadedFrom_indexp){ exit(); };
 // UAM FUNCTIONS
 // if(!$securityLoadedFrom_indexp){ exit(); };
 
+// FINISHED
 function gameman_manifest_user(){
 	// $author_user_id = $_SESSION['user_id'];
 	// $user_id        = $_SESSION['user_id'];
@@ -50,45 +51,6 @@ ORDER BY last_update DESC
 	) );
 
 	// audit_API_newRecord( $_SESSION['user_id'], $_SESSION['o_api'], $_SESSION['via_type'], 1, '' );
-}
-function c2bin_UamGame(){
-	// We should have a game id. Use it to get the record for the game and then grab the UAM dir.
-	$gameId         = $_POST['gameId'];
-	$author_user_id = $_SESSION['user_id'];
-
-	global $_appdir;
-	global $_db;
-	$dbhandle = new sqlite3_DB_PDO__UAM5($_db) or exit("cannot open the database");
-	$s_SQL1  ="
-SELECT
-	  UAMdir
-	, gamedir
-FROM games_manifest
-WHERE
-	gameId         = :gameId
-	AND
-	author_user_id = :author_user_id
-	;";
-	$prp1    = $dbhandle->prepare($s_SQL1);
-	$dbhandle->bind(':gameId'         , $gameId         ) ;
-	$dbhandle->bind(':author_user_id' , $author_user_id ) ;
-	$retval1 = $dbhandle->execute();
-	$results1= $dbhandle->statement->fetchAll(PDO::FETCH_ASSOC) ;
-
-	// Get the path.
-	$path = $_SERVER['DOCUMENT_ROOT'].'/'.$results1[0]['UAMdir'].'/'.'C2BIN' ;
-	if( ! file_exists( $path ) ) { $error="Compile path does not exist.";     }
-	else                         { chdir( $path  ); }
-
-	$results = shell_exec("./c2bin_runit.sh 2>&1");
-
-	echo json_encode(array(
-		'data'    => $results1 ,
-		'success' => true      ,
-		'results' => $results  ,
-	) );
-
-	// audit_API_newRecord( $_SESSION['user_id'], $_SESSION['o_api'], $_SESSION['via_type'], 1, $gameId );
 }
 function compile_UamGame(){
 	// We should have a game id. Use it to get the record for the game and then grab the gamedir.
@@ -305,6 +267,474 @@ WHERE
 	) );
 
 }
+
+function getData_oneGame(){
+	global $_appdir;
+	// global $_db;
+	$dbhandle = new sqlite3_DB_PDO__UAM5($_appdir.'_sys/eud.db') or exit("cannot open the database");
+	$gameid = intval($_POST['gameid']);
+	$s_SQL1   =
+'
+SELECT
+	  id
+	, title
+	, status
+	, authors
+	, when_added
+	, description
+	, added_by
+	, gamedir
+	, gamefile
+	, gamefiles
+FROM gamelist
+WHERE id = :gameid
+ORDER BY "title" ASC
+;';
+	$prp1     = $dbhandle->prepare($s_SQL1);
+	$dbhandle->bind(':gameid' , $gameid ) ;
+	$retval1  = $dbhandle->execute();
+	$results1 = $dbhandle->statement->fetchAll(PDO::FETCH_ASSOC) ;
+	$thisGame = $results1[0];
+
+	// Now, get the file names from the game's directory.
+	$directory = $thisGame["gamedir"];
+	$gameId    = $thisGame["id"];
+	$title     = $thisGame["gameName"];
+
+	// Scan the dir. Get the file names.
+	$scanned_directory = array_values(
+		array_diff(
+			// scandir($_SERVER["DOCUMENT_ROOT"] . "/" . $directory
+			scandir($_appdir . "/" . $directory
+		)
+		, array('..', '.', '.git')
+		)
+	);
+
+	$fileList=[];
+
+	for($ii=0; $ii<sizeof($scanned_directory); $ii++){
+		// Don't include dirs.
+		if( ! is_dir($_SERVER["DOCUMENT_ROOT"] . "/" . $directory.'/'.$scanned_directory[$ii]) ){
+			array_push($fileList, $scanned_directory[$ii] );
+		}
+	}
+
+	echo json_encode(array(
+		'data'    => [
+			"gameData"  => $thisGame,
+			"gameFiles" => $fileList,
+		] ,
+		'success' => true      ,
+	) );
+
+	// audit_API_newRecord( $_SESSION['user_id'], $_SESSION['o_api'], $_SESSION['via_type'], 1, '' );
+}
+
+function gameDb_addFiles(){
+	$gameid = intval($_POST['gameid']);
+
+	global $_appdir;
+	global $emu_dir;
+	$dbhandle = new sqlite3_DB_PDO__UAM5($_appdir.'_sys/eud.db') or exit("cannot open the database");
+	$s_SQL1   =
+"
+SELECT
+	  id
+	, title
+	, authors
+	, status
+	, description
+	, when_added
+	, added_by
+	, gamedir
+	, gamefile
+	, gamefiles
+FROM gamelist
+WHERE id = :gameid
+;";
+	$prp1     = $dbhandle->prepare($s_SQL1);
+	$dbhandle->bind(':gameid' , $gameid ) ;
+	$retval1  = $dbhandle->execute();
+	$results1 = $dbhandle->statement->fetchAll(PDO::FETCH_ASSOC) ;
+	$thisGame = $results1[0];
+
+	$directory = $emu_dir . $thisGame['gamedir'];
+
+	$targetpath=$directory."";
+
+	foreach($_FILES as $key => $value) {
+		$moved[$key] = move_uploaded_file(
+			$_FILES[$key]['tmp_name'],
+			$targetpath . "" . basename($_FILES[$key]['name'])
+		);
+	}
+
+	// Get the game data and files. (Use output buffering.)
+	ob_start();
+	// This part likely is never going to be necessary but I wanted to make it clear that the function requires this value in POST and that it is populated.
+	$_POST['gameid'] = $gameid;
+	getData_oneGame();
+	$gameData = json_decode( ob_get_contents(), true);
+	ob_end_clean() ;
+
+	echo json_encode(array(
+		'data'        => array()   ,
+		'success'     => true      ,
+		'gameData'    => $gameData["data"]["gameData"] ,
+		'gameFiles'   => $gameData["data"]["gameFiles"] ,
+	) );
+}
+function gameDb_deleteFile(){
+	$gameid   = intval($_POST['gameid']);
+	$filename = $_POST['filename'];
+
+	global $_appdir;
+	global $emu_dir;
+	$dbhandle = new sqlite3_DB_PDO__UAM5($_appdir.'_sys/eud.db') or exit("cannot open the database");
+	$s_SQL1   =
+"
+SELECT
+	  id
+	, title
+	, authors
+	, status
+	, description
+	, when_added
+	, added_by
+	, gamedir
+	, gamefile
+	, gamefiles
+FROM gamelist
+WHERE id = :gameid
+;";
+
+	$prp1     = $dbhandle->prepare($s_SQL1);
+	$dbhandle->bind(':gameid' , $gameid ) ;
+	$retval1  = $dbhandle->execute();
+	$results1 = $dbhandle->statement->fetchAll(PDO::FETCH_ASSOC) ;
+	$thisGame = $results1[0];
+
+	// Generate the full path.
+	$directory = $emu_dir . $thisGame['gamedir'];
+
+	// Generate the full path and filename.
+	$target=$directory.basename($filename);
+
+	// Delete the file.
+	unlink($target);
+
+	// Get the game data and files. (Use output buffering.)
+	ob_start();
+	// This part likely is never going to be necessary but I wanted to make it clear that the function requires this value in POST and that it is populated.
+	$_POST['gameid'] = $gameid;
+	getData_oneGame();
+	$gameData = json_decode( ob_get_contents(), true);
+	ob_end_clean() ;
+
+	echo json_encode(array(
+		'data'     => array()           ,
+		'success'  => true              ,
+		'gameData' => $gameData["data"]["gameData"] ,
+		'gameFiles' => $gameData["data"]["gameFiles"] ,
+	) );
+
+}
+function gameDb_updateGameData(){
+	// JSON decode the newData
+	$title   = $_POST['title']   ;
+	$gamedir = $_POST['gamedir'] ;
+
+	global $_appdir;
+	global $_db;
+	$dbhandle = new sqlite3_DB_PDO__UAM5($_appdir.'_sys/eud.db') or exit("cannot open the database");
+	$s_SQL1  =
+"
+UPDATE 'gamelist'
+SET
+	  title       = :title
+	, authors     = :authors
+	, description = :description
+	, when_added  = :when_added
+	, added_by    = :added_by
+	, gamedir     = :gamedir
+	, gamefile    = :gamefile
+	, status      = :status
+	, gamefiles   = :gamefiles
+WHERE id = :gameid
+;
+";
+	$prp1    = $dbhandle->prepare($s_SQL1);
+
+	$dbhandle->bind(':title'       , $title              ) ;
+	$dbhandle->bind(':authors'     , ""                  ) ;
+	$dbhandle->bind(':description' , ""                  ) ;
+	$dbhandle->bind(':when_added'  , $data['when_added'] ) ;
+	$dbhandle->bind(':added_by'    , ""                  ) ;
+	$dbhandle->bind(':gamedir'     , $gamedir            ) ;
+	$dbhandle->bind(':gamefile'    , ""                  ) ;
+	$dbhandle->bind(':status'      , 0                   ) ;
+	$dbhandle->bind(':gamefiles'   , []                  ) ;
+	$dbhandle->bind(':gameid'      , $gameid             ) ;
+
+	$retval1 = $dbhandle->execute();
+
+	echo json_encode(array(
+		'data'    => $retval1 ,
+		'data2'   => $data    ,
+		'success' => true     ,
+		'$_POST'  => $_POST   ,
+	) );
+}
+function gameDb_newGame(){
+	global $_appdir;
+	global $_db;
+	global $emu_dir;
+	$dbhandle = new sqlite3_DB_PDO__UAM5($_appdir.'_sys/eud.db') or exit("cannot open the database");
+
+// Create an entry for the game. Get the new game id.
+	$s_SQL1  =
+"
+INSERT INTO gamelist(
+	  title
+	, authors
+	, when_added
+	, added_by
+	, status
+	, description
+	, gamefile
+	, gamefiles
+)
+VALUES(
+      :title
+	, :authors
+	, CURRENT_TIMESTAMP
+	, :added_by
+	, :status
+	, :description
+	, :gamefile
+	, :gamefiles
+)
+;
+";
+	$prp1    = $dbhandle->prepare($s_SQL1);
+
+	$dbhandle->bind(':title'       , $_POST["title"]    ) ;
+	$dbhandle->bind(':authors'     , ""                  ) ;
+	$dbhandle->bind(':added_by'    , "Game DB Manager2b" ) ;
+	$dbhandle->bind(':status'      , 0                   ) ;
+	$dbhandle->bind(':description' , ""                  ) ;
+	$dbhandle->bind(':gamefile'    , ""                  ) ;
+	$dbhandle->bind(':gamefiles'   , '[]'                ) ;
+	$retval1   = $dbhandle->execute();
+	$newGameId = $dbhandle->dbh->lastInsertId();
+
+	$gamedir = 'games/' . $newGameId . "_" . (preg_replace('/\W/', "_", $_POST["title"])) . "" ;
+
+	// Create the new game dir for the game.
+	if($retval1){
+		// Make the new game dir.
+		// Generate the new game dir from the game title.
+		$directory = $emu_dir . $gamedir;
+		if( ! file_exists($directory) ){
+			@mkdir($directory."", 0755);
+			$lastError = error_get_last();
+		}
+		else{
+			@mkdir(
+				$directory .
+				"--" .
+				str_pad(rand(0, 1000), 4, "0", STR_PAD_LEFT) .
+				""
+			, 0755);
+			$lastError = error_get_last();
+		}
+	}
+
+	// Update the new game record with the new game dir.
+$s_SQL1  =
+"
+UPDATE gamelist
+	SET gamedir = :gamedir
+WHERE id = :gameid;
+";
+	$prp1    = $dbhandle->prepare($s_SQL1);
+	$dbhandle->bind(":gameid" , $newGameId ) ;
+	$dbhandle->bind(":gamedir" , $gamedir . "/" ) ;
+	$retval2 = $dbhandle->execute();
+
+	echo json_encode(array(
+		'data'      => $retval1   ,
+		'success'   => true       ,
+		'newGameId' => $newGameId ,
+		'_retval1'   => $retval1   ,
+		'_retval2'   => $retval2   ,
+		'_lastError' => $lastError,
+		'_gamedir'   => $gamedir,
+		'_newGameId' => $newGameId,
+		'_directory' => $directory,
+		'_emu_dir'   => $emu_dir,
+	) );
+
+}
+
+// UNFINISHED
+function gameDb_deleteGame(){
+	$gameid   = intval($_POST['gameid']);
+
+	global $_appdir;
+	global $emu_dir;
+	$dbhandle = new sqlite3_DB_PDO__UAM5($_appdir.'_sys/eud.db') or exit("cannot open the database");
+	$s_SQL1   =
+"
+SELECT gamedir
+FROM gamelist
+WHERE id = :gameid
+;";
+
+	$prp1     = $dbhandle->prepare($s_SQL1);
+	$dbhandle->bind(':gameid' , $gameid ) ;
+	$retval1  = $dbhandle->execute();
+	$results1 = $dbhandle->statement->fetchAll(PDO::FETCH_ASSOC) ;
+
+	// If the game record was not detected then abort!
+	if(!sizeof($results1)){
+		echo json_encode(array(
+			'data'    => []  ,
+			'success' => false ,
+		));
+		exit();
+	}
+	$thisGame = $results1[0];
+
+	$directory         = $emu_dir . $thisGame['gamedir'];
+	$filelist          = array();
+	$filelist_fullPath = array();
+	$targetDir         = $directory;
+	$absPathToGameDir  = realpath($targetDir) ;
+
+	// Now get a list of the files that are within the game's directory.
+	$scanned_directory = array_values(array_diff(scandir($directory), array('..', '.', '.git')));
+
+	// Gather only the file names.
+	for($i=0; $i<sizeof($scanned_directory); $i++){
+		if( ! is_dir($directory.'/'.$scanned_directory[$i]) ){ array_unshift($filelist, $scanned_directory[$i] ); }
+		if( ! is_dir($directory.'/'.$scanned_directory[$i]) ){ array_unshift($filelist_fullPath, $absPathToGameDir.'/'.$scanned_directory[$i] ); }
+	}
+
+	// Delete all the found files in the game dir.
+	$success_fileDeletions   = false ;
+	$success_gameDirDeletion = false ;
+	$success                 = false ;
+
+	// MAKE VERY SURE THAT WE HAVE A GAMES FILE PATH!
+	if( strpos($absPathToGameDir, "/games/")  != -1 )  {
+		// Delete the files within the game directory.
+		for($i=0; $i<sizeof($filelist_fullPath); $i++){
+			// Delete a file from the list.
+			if( file_exists($filelist_fullPath[$i]) ){
+				// unlink( $filelist_fullPath[$i] ) ;
+				$success_fileDeletions=true;
+			}
+			else {
+				$success_fileDeletions=false;
+				break;
+			}
+
+		}
+
+		if($success_fileDeletions){
+			// Delete the now-empty game directory.
+			if(
+				file_exists($absPathToGameDir)
+				&& is_dir($absPathToGameDir)
+			){
+				// rmdir( $absPathToGameDir );
+				$success_gameDirDeletion=true;
+			}
+			else{
+				$success_gameDirDeletion=false;
+			}
+		}
+
+		// Determine current success.
+		if( $success_fileDeletions && $success_gameDirDeletion ) {
+			// Now remove the game's entry in the game DB.
+			$s_SQL2   = " DELETE FROM gamelist WHERE id = :gameId ;";
+			$prp2     = $dbhandle->prepare($s_SQL2);
+			$dbhandle->bind(':gameid' , $gameid ) ;
+			$retval2  = $dbhandle->execute();
+
+			if($retval2) { $success = true ; }
+			else         { $success = false; }
+		}
+	}
+	else{
+		$success=false;
+	}
+
+	echo json_encode(array(
+		'data'    => array()  ,
+		'success' => $success ,
+
+		// DEBUG
+		'$_POST'                   => $_POST                                     ,
+		'$success_fileDeletions'   => $success_fileDeletions                     ,
+		'$success_gameDirDeletion' => $success_gameDirDeletion                   ,
+		'$targetDir'               => $targetDir                                 ,
+		'$filelist'                => $filelist                                  ,
+		'$filelist_fullPath'       => $filelist_fullPath                         ,
+		'$thisGame'                => $thisGame                                  ,
+		'$scanned_directory'       => $scanned_directory                         ,
+		'absPathToGameDir'         => $absPathToGameDir                          ,
+		'test1'                    => strpos($absPathToGameDir, "/games/") != -1 ,
+		'test2'                    => is_dir($absPathToGameDir) ,
+		'test3'                    => is_dir($absPathToGameDir.'/') ,
+	) );
+
+
+}
+
+
+function c2bin_UamGame(){
+	// We should have a game id. Use it to get the record for the game and then grab the UAM dir.
+	$gameId         = $_POST['gameId'];
+	$author_user_id = $_SESSION['user_id'];
+
+	global $_appdir;
+	global $_db;
+	$dbhandle = new sqlite3_DB_PDO__UAM5($_db) or exit("cannot open the database");
+	$s_SQL1  ="
+SELECT
+	  UAMdir
+	, gamedir
+FROM games_manifest
+WHERE
+	gameId         = :gameId
+	AND
+	author_user_id = :author_user_id
+	;";
+	$prp1    = $dbhandle->prepare($s_SQL1);
+	$dbhandle->bind(':gameId'         , $gameId         ) ;
+	$dbhandle->bind(':author_user_id' , $author_user_id ) ;
+	$retval1 = $dbhandle->execute();
+	$results1= $dbhandle->statement->fetchAll(PDO::FETCH_ASSOC) ;
+
+	// Get the path.
+	$path = $_SERVER['DOCUMENT_ROOT'].'/'.$results1[0]['UAMdir'].'/'.'C2BIN' ;
+	if( ! file_exists( $path ) ) { $error="Compile path does not exist.";     }
+	else                         { chdir( $path  ); }
+
+	$results = shell_exec("./c2bin_runit.sh 2>&1");
+
+	echo json_encode(array(
+		'data'    => $results1 ,
+		'success' => true      ,
+		'results' => $results  ,
+	) );
+
+	// audit_API_newRecord( $_SESSION['user_id'], $_SESSION['o_api'], $_SESSION['via_type'], 1, $gameId );
+}
 function c2bin_UamGame_2(){
 	echo json_encode(array(
 		'data'         => []     ,
@@ -419,7 +849,7 @@ function c2bin_UamGame_2(){
 
 
 
-
+// TESTING
 function getGamesAndXmlFilepathsViaUserId(){
 	$author_user_id = $_POST["user_id"];
 

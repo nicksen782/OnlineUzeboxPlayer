@@ -64,8 +64,6 @@
 			</div>
 
 			<div class="sectionDivs_title_options">
-				<input type="button" value="FULL SCREEN" onclick="emu.fullscreen.test('#emuCanvas');">
-				<input type="button" value="Resize" onclick="emu.vars.innerEmu.resizeEmuCanvas();">
 				<input type="button" value="Reload" onclick="document.location.href = document.location.href;">
 				<input type="button" value="New Window" onclick="window.open(document.location.href);">
 
@@ -117,7 +115,7 @@
 		</div>
 
 		<div id="emu_gameFiles" class="sectionWindow">
-			<div class="sectionWindow_title">emu_gameFiles</div>
+			<div class="sectionWindow_title">Game Files</div>
 			<div class="sectionWindow_content">
 				<div id="emu_filesList_div">
 					No files are loaded.
@@ -235,8 +233,8 @@
 						<span id="emuControls_autopause_chk"></span>
 						<span>AUTO-PAUSE</span>
 					</button>
-
-					<input type="button" value="STOP" class="emuControls" id="emuControls_stop">
+					<input type="button" value="Resize" class="emuControls" id="emuControls_resize">
+					<input type="button" value="STOP"   class="emuControls" id="emuControls_stop">
 					<input type="button" value="RELOAD" class="emuControls" id="emuControls_reload">
 					<input type="button" value="UNLOAD" class="emuControls" id="emuControls_unload">
 					<input style="display:none;" type="button" value="ROTATE" class="emuControls" id="emuControls_rotate">
@@ -320,8 +318,8 @@
 			</div>
 
 			<div class="sectionDivs_title_options">
-				<input type="button" value="FULL SCREEN" onclick="emu.fullscreen.test('#emuCanvas');">
-				<input type="button" value="Resize" onclick="emu.vars.innerEmu.resizeEmuCanvas();">
+
+
 				<input type="button" value="Reload" onclick="document.location.href = document.location.href;">
 				<input type="button" value="New Window" onclick="window.open(document.location.href);">
 
@@ -354,8 +352,6 @@
 			</div>
 
 			<div class="sectionDivs_title_options">
-				<input type="button" value="FULL SCREEN" onclick="emu.fullscreen.test('#emuCanvas');">
-				<input type="button" value="Resize" onclick="emu.vars.innerEmu.resizeEmuCanvas();">
 				<input type="button" value="Reload" onclick="document.location.href = document.location.href;">
 				<input type="button" value="New Window" onclick="window.open(document.location.href);">
 
@@ -389,8 +385,6 @@
 			</div>
 
 			<div class="sectionDivs_title_options">
-				<input type="button" value="FULL SCREEN" onclick="emu.fullscreen.test('#emuCanvas');">
-				<input type="button" value="Resize" onclick="emu.vars.innerEmu.resizeEmuCanvas();">
 				<input type="button" value="Reload" onclick="document.location.href = document.location.href;">
 				<input type="button" value="New Window" onclick="window.open(document.location.href);">
 
@@ -403,23 +397,59 @@
 		</div>
 
 		<div id="emu_db_gameChoice"   class="sectionWindow uamOnly enabled">
-			<div class="sectionWindow_title">emu_db_gameChoice</div>
+			<div class="sectionWindow_title">Game Select</div>
 			<div class="sectionWindow_content">
+				<select id="db_gameSelect" class="myButton" >
+					<option value="">Choose a game</option>
+				</select>
+				<input type="button" class="myButton" id="db_gameSelect_load"   value="Re-load selected game data">
 			</div>
 		</div>
 		<div id="emu_db_gameMetadata" class="sectionWindow uamOnly enabled">
-			<div class="sectionWindow_title">emu_db_gameMetadata</div>
+			<div class="sectionWindow_title">Game Data</div>
 			<div class="sectionWindow_content">
+				<table class="table1">
+					<tr> <td>Title</td>      <td> <input type="text" id="db_dataField_title"    value=""> </td> </tr>
+					<tr> <td>Authors</td>    <td> <input type="text" id="db_dataField_authors"  value=""> </td> </tr>
+					<tr> <td>Status</td>     <td> <select class="myButton"  id="db_dataField_status"><option value="0"></option></select> </td> </tr>
+					<tr> <td>Added By</td>   <td> <input type="text" id="db_dataField_addedBy"   readonly value=""> </td> </tr>
+					<tr> <td>Game Id</td>    <td> <input type="text" id="db_dataField_gameid"    readonly value=""> </td> </tr>
+					<tr> <td>Game Dir</td>   <td> <input type="text" id="db_dataField_gameDir"   readonly value=""> </td> </tr>
+					<tr> <td>When Added</td> <td> <input type="text" id="db_dataField_whenAdded" readonly value=""> </td> </tr>
+					<tr> <td>Game File</td>  <td> <input type="text" id="db_dataField_gameFile"  readonly value=""> </td> </tr>
+					<tr> <td>Game Files</td> <td> <input type="text" id="db_dataField_gameFiles" readonly value=""> </td> </tr>
+				</table>
+				<textarea id="db_dataField_description"></textarea>
 			</div>
 		</div>
 		<div id="emu_db_files"        class="sectionWindow uamOnly enabled">
-			<div class="sectionWindow_title">emu_db_files</div>
+			<div class="sectionWindow_title">GAME FILES</div>
 			<div class="sectionWindow_content">
+				<!--These are the files that the database says this game has. Additionally, a list of all files in the game directory.-->
+				<!--Upload a game file with this button.-->
+
+				<div id="emu_db_files_included">
+					<!--emu_db_files_included-->
+				</div>
+				<div id="emu_db_files_allInDir">
+					<!--emu_db_files_allInDir-->
+				</div>
+				<div id="emu_db_files_uploadDiv">
+					<input type="file" id="db_builtInGames_fileUpload" multiple="">
+					<input type="button" id="db_builtInGames_fileUpload_visible" value="Add files">
+				</div>
 			</div>
 		</div>
-		<div id="emu_db_upload"       class="sectionWindow uamOnly enabled">
-			<div class="sectionWindow_title">emu_db_upload</div>
+		<div id="emu_db_options"       class="sectionWindow uamOnly enabled">
+			<div class="sectionWindow_title">OPTIONS</div>
 			<div class="sectionWindow_content">
+			<table class="table1">
+					<caption>Options</caption>
+					<tr> <td> <input type="button" class="myButton" id="db_gameSelect_update" value="Update selected game"> </td> </tr>
+					<tr> <td> <input type="button" class="myButton" id="db_gameSelect_create" value="Create new game"> </td> </tr>
+					<tr> <td> <input type="button" class="myButton" id="db_gameSelect_delete" value="Delete selected game"> </td> </tr>
+				</table>
+
 			</div>
 		</div>
 

@@ -100,7 +100,10 @@ html {
 	font-size: 16px;
 }
 html.wide  {width: 1180px;}
-
+html{
+  -webkit-transition: width 0.5s, height 0.5s; /* For Safari 3.1 to 6.0 */
+  transition: width 0.5s, height 0.5s;
+}
 body {
 	position: relative;
 	background-color: #213a4e;
@@ -141,7 +144,7 @@ body {
 	border-radius: 5px;
 	background-color: #aec4e0;
 	background-color: #6b7a8c;
-	display:none;
+	/*display:none;*/
 }
 .sectionDivs.active{
 	display:block;
@@ -226,8 +229,8 @@ body {
 #emu_view{height: 600px;}
 #emu_gameSelector    {left: 5px;top: 40px;width: 320px;height: 110px;z-index: 100;}
 #emu_gameFiles       {width: 320px;height: 130px;position: absolute;top: 160px;left: 5px;z-index: 18;padding: 0px;border-radius: 5px;overflow: hidden;}
-#emu_onscreenGamepads{width: 320px;height: 285px;position: absolute;top: 300px;left: 5px;z-index: 18;}
-#emu_emulator        {left: 335px;top: 40px;width: 580px;/* z-index: 101; */height: 545px;/* height: auto; */overflow: hidden;/* padding: 0px; *//* margin: 0px; */background-color: #346cda;/* background-color: black; *//* position: absolute; */}
+#emu_onscreenGamepads{width: 320px;height: 290px;position: absolute;top: 300px;left: 5px;z-index: 18;}
+#emu_emulator        {left: 335px;top: 40px;width: 580px;/* z-index: 101; */height: 550px;/* height: auto; */overflow: hidden;/* padding: 0px; *//* margin: 0px; */background-color: #346cda;/* background-color: black; *//* position: absolute; */}
 #emu_emulator .sectionWindow_content{/* background-color: #22205c; *//* padding:0px; *//* margin: 0 auto; */position: relative;top: 0px;left: 0px;}
 
 #emu_view_uam{
@@ -536,6 +539,9 @@ svg#emu_gamepad1, svg#emu_gamepad2 {
 .hover_group:active {
     fill: rgba(0, 255, 255, 0.75);
 }
+.hover_group.active {
+    fill: rgba(0, 255, 255, 0.75);
+}
 #emu_onscreenGamepads_1{
 	width: 380px;
 	height: 165px;
@@ -637,6 +643,11 @@ canvas#emuCanvas {
     margin: auto;
     text-align: center;
     display: block;
+    border: 0px none;
+    background-color: black;
+}
+canvas#emuCanvas:focus {
+    outline: 0px dashed red;
 }
 
 #emu_misc_nav{
@@ -666,7 +677,7 @@ canvas#emuCanvas {
 .emu_misc_view{
 	display:none;
 	width: 310px;
-	height: 225px;
+	height: 230px;
 	background-color: #dddddd;
 }
 .emu_misc_view.active{
@@ -691,8 +702,9 @@ canvas#emuCanvas {
 .hyperlink1{
 	cursor:pointer;
 	text-decoration:underline;
-	color:blue;
+	color: black;
 	text-decoration-color: blue;
+	background-color: rgba(226, 226, 226, 0.4);
 }
 .hyperlink1:hover{
 	/*font-weight:bold;*/
@@ -729,10 +741,6 @@ div#emscripten_emu_container_outer {
   position: relative;
   top: 50%;
   transform: translateY(-50%);
-}
-
-canvas#emuCanvas:focus {
-    outline: 0px dashed red;
 }
 
 .fullWidthAndHeight{
@@ -833,4 +841,80 @@ input#db_builtInGames_fileUpload_visible {
 
 select#db_gameSelect {
     width: 300px;
+}
+
+.uamOnly.hidden{
+	display:none;
+}
+
+.navOptions.uamOnly.active{
+	background-color:yellow !important;
+}
+.debugButtons.uamOnly.enabled{
+	display:inline-block !important;
+	/*display:inline-block ;*/
+}
+
+
+
+#coresetting {
+    font-size: 10px;
+    position: absolute;
+    right: 5px;
+    top: 5px;
+    display: block;
+}
+#CUzeBox_flags{
+	width: 250px;
+	/* height: 150px; */
+	position:fixed;
+	top: 10px;
+	left: 10px;
+	background-color: #85a3e0;
+	padding: 10px;
+	border-radius: 10px;
+	display:none;
+}
+.activated{
+	background-color: #a9fffd !important;
+	font-size:90%           !important;
+}
+
+#gamepadIcon:hover{
+	background-color: rgba(0, 242, 255, 0.5);
+}
+#gamepadIcon:active{
+	background-color: rgba(0, 101, 255, 0.5);
+}
+#gamepadIcon{
+	position:absolute;
+	top: -25px;
+	right: 5px;
+	width: 50px;
+	height: 20px;
+	background-color: rgba(0, 1, 255, 0.25);
+	border-radius: 10px;
+	padding: 1px;
+}
+#gamepadIcon .gamepadIcon{
+	width: 100%;
+	height: 20px;
+}
+.gamepadicon1{
+	background-image: url(../img/CUzeBox_controls_modified.png);
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+	cursor:pointer;
+}
+
+#gamepadConfig{
+	width: 250px;
+	/* height: 150px; */
+	position:fixed;
+	top: 10px;
+	left: 10px;
+	background-color: #85a3e0;
+	padding: 10px;
+	border-radius: 10px;
+	/*display:none;*/
 }

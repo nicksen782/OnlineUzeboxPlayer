@@ -8,6 +8,15 @@
 
 emu.funcs.domHandleCache_populate = function(){
 	emu.vars.dom.view = {};
+	emu.vars.dom.views = {};
+
+	// VIEWS:
+	emu.vars.dom.views["view_VIEW"  ] = document.querySelector("#emu_view");
+	emu.vars.dom.views["view_DEBUG1"] = document.querySelector("#emu_debug1");
+	emu.vars.dom.views["view_DEBUG2"] = document.querySelector("#emu_debug2");
+	emu.vars.dom.views["view_DB"    ] = document.querySelector("#emu_db");
+
+
 
 	// emu_filesList_div
 	emu.vars.dom.view["emu_filesList_div"]  = document.querySelector("#emu_filesList_div");

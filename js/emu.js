@@ -15,6 +15,7 @@
 /* global JSZip */
 /* global X2JS */
 /* global performance */
+/* global getQueryStringAsObj */
 
 // anthonybrown/JSLint Options Descriptions
 // https://gist.github.com/anthonybrown/9526822
@@ -53,6 +54,12 @@ emu.vars            = {
 
 	innerEmu : {
 		emulatorIsReady         : false,
+		startEmuAfterUserInput  : false,
+		startAfterMouseMove : function(){
+			emu.vars.dom.view["emuCanvas"].removeEventListener("mousemove", emu.vars.innerEmu.startAfterMouseMove, false);
+			emu.vars.innerEmu.startEmuAfterUserInput=false;
+			emu.funcs.loadGame();
+		} ,
 		createDefaultModule     : function(){
 			// Tells Emscripten what DOM element that it should be listening to for keyboard input.
 			this["keyboardListeningElement"] = (function() { return emu.vars.dom.view["emuCanvas"] })();
@@ -155,6 +162,197 @@ emu.vars            = {
 		Module                  : { },
 	}
 };
+emu.gamepads        = {
+	connecthandler    : function(e){
+		console.log("connecthandler:", e);
+	},
+	disconnecthandler : function(e){
+		console.log("disconnecthandler:", e);
+	},
+	scangamepads      : function(){
+		// console.log("scangamepads");
+
+		// Get the gamepad info. There are many different ways. Use the first one that returns data.
+		var gamepads = navigator.getGamepads
+			? navigator.getGamepads()
+			: (navigator.webkitGetGamepads
+				? navigator.webkitGetGamepads()
+				: [])
+		;
+
+		for (var i = 0; i < gamepads.length; i++) {
+			if (gamepads[i]) {
+				// Do we not have an instance of this gamepad already?
+				if (!(gamepads[i].index in emu.gamepads.controllers)) {
+					// Add the gamepad.
+					// emu.gamepads.addgamepad(gamepads[i]);
+					// emu.gamepads.controllers[gamepads[i].index] = gamepads[i];
+					emu.gamepads.controllers[gamepads[i].index]               = gamepads[i] ;
+					emu.gamepads.controllers[gamepads[i].index].btnPrev       = 0;
+					emu.gamepads.controllers[gamepads[i].index].btnHeld       = 0;
+					emu.gamepads.controllers[gamepads[i].index].btnPressed    = 0;
+					emu.gamepads.controllers[gamepads[i].index].btnReleased   = 0;
+					emu.gamepads.controllers[gamepads[i].index].lastTimestamp = JSON.parse(JSON.stringify(gamepads[i].timestamp));
+				}
+			}
+		}
+
+		// All gamepads are added. Now do something with them.
+		emu.gamepads.handleGamepadInput();
+	},
+	handleGamepadInput : function(){
+		// Is there a gamepad assigned to player 1? If not then assign the first gamepad.
+		// Is there a gamepad assigned to player 2? If not then assign the second gamepad, if there is one.
+		// 8Bitdo SNES30 GamePad (Vendor: 2820 Product: 0009)
+
+		// if(typeof emu.gamepads.controllers.length == "undefined"){
+		// 	console.log("that weird bug!");
+		// 	let temp=emu.gamepads.controllers;
+
+		// 	emu.gamepads.controllers = [ emu.gamepads.controllers ];
+		// }
+
+		if( emu.vars.innerEmu.emulatorIsReady == false ) {
+			// console.log("handleGamepadInput: The emu is not ready.");
+			return;
+		}
+
+		for(var i=0; i<emu.gamepads.controllers.length; i+=1){
+			let thisPad = emu.gamepads.controllers[i];
+			let buttons = thisPad.buttons;
+			let axes = thisPad.axes;
+
+			if(thisPad.id == "8Bitdo SNES30 GamePad (Vendor: 2820 Product: 0009)"){
+				// Only allow a keypress every 60 intervals.
+				if( (thisPad.timestamp - thisPad.lastTimestamp > 20) && thisPad.timestamp > 0 ){
+					thisPad.lastTimestamp = JSON.parse(JSON.stringify(thisPad.timestamp));
+
+					// for(var ii=0; ii<buttons.length; ii+=1){
+					// 	if(buttons[ii].pressed) { console.log("button pressed: ", ii); }
+					// }
+					// console.clear();
+					// for(var ii=0; ii<axes.length; ii+=1){
+					// 	console.log("axe pressed: ", ii, "::::", axes[ii]);
+					// }
+					// console.log("\n");
+
+					// Gamepad #1
+					// let btnPrev1     = game.btnHeld1;
+					// let btnHeld1     = joypad1_status_lo;
+					// let btnPressed1  = game.btnHeld1 & (game.btnHeld1 ^ game.btnPrev1);
+					// let btnReleased1 = game.btnPrev1 & (game.btnHeld1 ^ game.btnPrev1);
+
+					// B,A,Y,X
+					if(buttons[1].pressed ){ emu.funcs.emu_sendKeyEvent("keydown", "key_A"      , 1); } else{ emu.funcs.emu_sendKeyEvent("keyup", "key_A"      , 1); }
+					if(buttons[0].pressed ){ emu.funcs.emu_sendKeyEvent("keydown", "key_S"      , 1); } else{ emu.funcs.emu_sendKeyEvent("keyup", "key_S"      , 1); }
+					if(buttons[4].pressed ){ emu.funcs.emu_sendKeyEvent("keydown", "key_Q"      , 1); } else{ emu.funcs.emu_sendKeyEvent("keyup", "key_Q"      , 1); }
+					if(buttons[3].pressed ){ emu.funcs.emu_sendKeyEvent("keydown", "key_W"      , 1); } else{ emu.funcs.emu_sendKeyEvent("keyup", "key_W"      , 1); }
+
+					// lShoulder, rShoulder
+					if(buttons[6].pressed ){ emu.funcs.emu_sendKeyEvent("keydown", "key_LSHIFT" , 1); } else{ emu.funcs.emu_sendKeyEvent("keyup", "key_LSHIFT" , 1); }
+					if(buttons[7].pressed ){ emu.funcs.emu_sendKeyEvent("keydown", "key_RSHIFT" , 1); } else{ emu.funcs.emu_sendKeyEvent("keyup", "key_RSHIFT" , 1); }
+
+					// UNUSED
+					// if(buttons[6].pressed ){ emu.funcs.emu_sendKeyEvent("keydown", ""           , 1); } else{ emu.funcs.emu_sendKeyEvent("keyup", ""           , 1); }
+					// if(buttons[7].pressed ){ emu.funcs.emu_sendKeyEvent("keydown", ""           , 1); } else{ emu.funcs.emu_sendKeyEvent("keyup", ""           , 1); }
+
+					// select, start
+					if(buttons[10].pressed ){ emu.funcs.emu_sendKeyEvent("keydown", "key_SPACE"  , 1); } else{ emu.funcs.emu_sendKeyEvent("keyup", "key_SPACE"  , 1); }
+					if(buttons[11].pressed ){ emu.funcs.emu_sendKeyEvent("keydown", "key_ENTER"  , 1); } else{ emu.funcs.emu_sendKeyEvent("keyup", "key_ENTER"  , 1); }
+
+					// UNUSED
+					// if(buttons[10].pressed){ emu.funcs.emu_sendKeyEvent("keydown", ""           , 1); } else{ emu.funcs.emu_sendKeyEvent("keyup", ""           , 1); }
+					// if(buttons[11].pressed){ emu.funcs.emu_sendKeyEvent("keydown", ""           , 1); } else{ emu.funcs.emu_sendKeyEvent("keyup", ""           , 1); }
+
+					// up, down, left, right
+					if(axes[1] == -1){ emu.funcs.emu_sendKeyEvent("keydown", "key_UP"     , 1); } else{ emu.funcs.emu_sendKeyEvent("keyup", "key_UP"     , 1); }
+					if(axes[1] ==  1){ emu.funcs.emu_sendKeyEvent("keydown", "key_DOWN"   , 1); } else{ emu.funcs.emu_sendKeyEvent("keyup", "key_DOWN"   , 1); }
+					if(axes[0] == -1){ emu.funcs.emu_sendKeyEvent("keydown", "key_LEFT"   , 1); } else{ emu.funcs.emu_sendKeyEvent("keyup", "key_LEFT"   , 1); }
+					if(axes[0] ==  1){ emu.funcs.emu_sendKeyEvent("keydown", "key_RIGHT"  , 1); } else{ emu.funcs.emu_sendKeyEvent("keyup", "key_RIGHT"  , 1); }
+
+				}
+				else{
+					// console.log(
+					// 	"\nSkipping...",
+					// 	"\n diff         :", thisPad.timestamp - thisPad.lastTimestamp,
+					// 	"\n timestamp    :", thisPad.timestamp,
+					// 	"\n lastTimestamp:", thisPad.lastTimestamp
+					// );
+				}
+
+			}
+			// else if(thisPad.id == ""){
+			// }
+		}
+
+		// document.querySelectorAll("g.hover_group").forEach(function(d,i,a){
+		// 	let pad=d.getAttribute("pad");
+		// 	let key=d.getAttribute("name");
+
+		// 	if(pad == "1"){
+		// 		d.addEventListener("mousedown" , function() { emu.funcs.emu_sendKeyEvent("keydown", key , 1); }, false);
+		// 		d.addEventListener("mouseleave", function() { emu.funcs.emu_sendKeyEvent("keyup"  , key , 1); }, false);
+		// 		d.addEventListener("mouseup"   , function() { emu.funcs.emu_sendKeyEvent("keyup"  , key , 1); }, false);
+		// 	}
+		// 	else if(d.getAttribute("pad") == "2"){
+		// 		d.addEventListener("mousedown" , function() { emu.funcs.emu_sendKeyEvent("keydown", "key_RALT" , 2); emu.funcs.emu_sendKeyEvent("keydown", key        , 2); }, false);
+		// 		d.addEventListener("mouseleave", function() { emu.funcs.emu_sendKeyEvent("keyup"  , key        , 2); emu.funcs.emu_sendKeyEvent("keyup"  , "key_RALT" , 2); }, false);
+		// 		d.addEventListener("mouseup"   , function() { emu.funcs.emu_sendKeyEvent("keyup"  , key        , 2); emu.funcs.emu_sendKeyEvent("keyup"  , "key_RALT" , 2); }, false);
+		// 	}
+		// });
+
+	},
+
+	haveEvents            : [],
+	controllers           : [],
+	rAF                   : undefined,
+	gamepadPollIntervalId : undefined,
+
+	enabled : false,
+
+	deInit : function(){
+		emu.gamepads.enabled=true;
+		emu.gamepads.init();
+	},
+	init : function(){
+		emu.gamepads.haveEvents = 'GamepadEvent' in window;
+		emu.gamepads.controllers = [];
+		emu.gamepads.rAF = window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.requestAnimationFrame;
+		emu.gamepads.gamepadPollIntervalId = undefined;
+
+		let initialize=undefined;
+		if(emu.gamepads.enabled==true){ initialize=false; }
+		else{ initialize=true; }
+
+		if     (initialize==true){
+			// For Firefox, when a gamepad appears there is an event for it.
+			if (emu.gamepadshaveEvents) {
+				window.addEventListener("gamepadconnected"   , emu.gamepads.connecthandler);
+				window.addEventListener("gamepaddisconnected", emu.gamepads.disconnecthandler);
+			}
+			// For Chrome you need to poll.
+			else {
+				emu.gamepads.gamepadPollIntervalId = setInterval(emu.gamepads.scangamepads, 25);
+			}
+			emu.gamepads.enabled=true;
+			console.log("Gamepad input has been ENABLED!");
+		}
+		else if(initialize==false){
+			// For Firefox, when a gamepad appears there is an event for it.
+			if (emu.gamepadshaveEvents) {
+				window.removeEventListener("gamepadconnected"   , emu.gamepads.connecthandler);
+				window.removeEventListener("gamepaddisconnected", emu.gamepads.disconnecthandler);
+			}
+			// For Chrome you need to poll.
+			else {
+				clearInterval(emu.gamepads.gamepadPollIntervalId);
+			}
+			emu.gamepads.enabled=false;
+			console.log("Gamepad input has been disabled!");
+		}
+
+	},
+};
 emu.funcs           = {
 	emu_rotate: function() {
 		return;
@@ -182,12 +380,23 @@ emu.funcs           = {
 		if (emu.vars.gameFiles.length) {
 			emu.funcs.shared.grayTheCanvas(emu.vars.dom.view["emuCanvas"]);
 			if(showStoppedText){
+				emu.funcs.shared.resetCanvasDimensions();
 				emu.funcs.shared.textOnCanvas({ "canvas": emu.vars.dom.view["emuCanvas"], "text": " - STOPPED - " });
 			}
 
 			// Abort the current emulator instance?
 			if(emu.vars.innerEmu.Module.abort) {
-				try{ emu.vars.innerEmu.Module.abort(); } catch(e){ }
+				try{
+					// De-initialize the gamepad polling if it is enabled.
+					if(emu.gamepads.enabled==true){
+						emu.gamepads.deInit();
+					}
+					// Abort the Emscripten module.
+					emu.vars.innerEmu.Module.abort();
+				} catch(e){
+					// The abort always throws and exception so it always catches. This is expected.
+					// console.log("A failure occurred at stopEmu:", e);
+				}
 			}
 			// Clear Module.
 			emu.vars.innerEmu.Module = null;
@@ -209,6 +418,7 @@ emu.funcs           = {
 
 		// Clear last image from the canvas.
 		emu.funcs.shared.clearTheCanvas(emu.vars.dom.view["emuCanvas"]);
+		emu.funcs.shared.resetCanvasDimensions();
 
 		// Reset.
 		emu.vars.gameFiles = [];
@@ -226,6 +436,7 @@ emu.funcs           = {
 		emu.funcs.shared.clearTheCanvas(emu.vars.dom.view["emuCanvas"]);
 
 		// Indicate that there is not a game loaded.
+		emu.funcs.shared.resetCanvasDimensions();
 		emu.funcs.shared.textOnCanvas({ "canvas": emu.vars.dom.view["emuCanvas"], "text": " - GAME NOT LOADED - " });
 
 		// Reset.
@@ -392,9 +603,9 @@ emu.funcs           = {
 
 		// Allow the game load?
 		if (methodType == 1 && emu_builtInGames_select1.value == "") { console.log("method #1: no value."); return; }
-		if (methodType == 2 && !userFiles.files.length) { console.log("method #2: no value."); return; }
-		if (methodType == 3 && jsonInput.value == "") { console.log("method #3: no value."); return; }
-		if (methodType == 4 && jsonInputUAM.value == "") { console.log("method #4: no value."); return; }
+		if (methodType == 2 && !userFiles.files.length)              { console.log("method #2: no value."); return; }
+		if (methodType == 3 && jsonInput.value == "")                { console.log("method #3: no value."); return; }
+		if (methodType == 4 && jsonInputUAM.value == "")             { console.log("method #4: no value."); return; }
 
 		var addFileListToDisplay  = function() {
 			// let doNotCreateLinks = true;
@@ -764,6 +975,14 @@ emu.funcs           = {
 			return;
 		}
 
+		// Prevent a game from autoloading when using querystring unless the user has clicked the canvas.
+		if(emu.vars.innerEmu.startEmuAfterUserInput){
+			emu.funcs.shared.clearTheCanvas(emu.vars.dom.view["emuCanvas"]);
+			emu.funcs.shared.textOnCanvas({ "canvas": emu.vars.dom.view["emuCanvas"], "text": "- MOUSE HERE TO START -" });
+			emu.vars.dom.view["emuCanvas"].addEventListener("mousemove", emu.vars.innerEmu.startAfterMouseMove, false);
+			return;
+		}
+
 		// Start new Emscripen instance by modifying Module.arguments and then running the Emscritpen module function.
 		emu.funcs.stopEmu(false);
 
@@ -814,6 +1033,8 @@ emu.funcs           = {
 				emu.funcs.shared.grayTheCanvas(emu.vars.dom.view["emuCanvas"]);
 				emu.funcs.shared.textOnCanvas({ "canvas": emu.vars.dom.view["emuCanvas"], "text": " - PAUSED - " });
 			}
+
+			displayCUzeBox_flags();
 		}
 		else{
 			// console.log(
@@ -863,10 +1084,14 @@ emu.funcs           = {
 			}
 			case "key_F3"  : {
 				newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "F3", "key": "F3", "keyCode": 114, "which": 114, "location": 0 });
+				setTimeout(function(){ emu.vars.innerEmu.resizeEmuCanvas(); }, 200);
+				break;
+			}
+			case "key_F4":    {
+				newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "F4", "key": "F4", "keyCode": 115, "which": 115, "location": 0 });
 				setTimeout(function(){ emu.vars.innerEmu.resizeEmuCanvas(); }, 100);
 				break;
 			}
-			case "key_F4":    { newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "F4", "key": "F4", "keyCode": 115, "which": 115, "location": 0 }); break; }
 			case "key_F5":    { newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "F5", "key": "F5", "keyCode": 116, "which": 116, "location": 0 }); break; }
 			case "key_F6":    { newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "F6", "key": "F6", "keyCode": 117, "which": 117, "location": 0 }); break; }
 			case "key_F7":    { newEvent = window.crossBrowser_initKeyboardEvent(type, { "charCode": 0, "code": "F7", "key": "F7", "keyCode": 118, "which": 118, "location": 0 }); break; }
@@ -898,6 +1123,78 @@ emu.funcs           = {
 		}
 
 	},
+	//
+	showPressedKey : function(){
+		// A bit of delay is required otherwise the displayed gamepad states will not update properly.
+
+		if( emu.vars.innerEmu.emulatorIsReady == false ) {
+			console.log("1 showPressedKey: The emu is not ready.");
+			return;
+		}
+
+		setTimeout(function(){
+			if( emu.vars.innerEmu.emulatorIsReady == false ) {
+				console.log("2 showPressedKey: The emu is not ready.");
+				return;
+			}
+
+			let p1_state   = ~ emu.vars.innerEmu.Module._NRA_returnController(0) ;
+			let p2_state   = ~ emu.vars.innerEmu.Module._NRA_returnController(1) ;
+
+			let p1_key_UP     = document.querySelector("#emuGamepad_1_key_UP");
+			let p1_key_DOWN   = document.querySelector("#emuGamepad_1_key_DOWN");
+			let p1_key_LEFT   = document.querySelector("#emuGamepad_1_key_LEFT");
+			let p1_key_RIGHT  = document.querySelector("#emuGamepad_1_key_RIGHT");
+			let p1_key_SPACE  = document.querySelector("#emuGamepad_1_key_SPACE");
+			let p1_key_ENTER  = document.querySelector("#emuGamepad_1_key_ENTER");
+			let p1_key_LSHIFT = document.querySelector("#emuGamepad_1_key_LSHIFT");
+			let p1_key_RSHIFT = document.querySelector("#emuGamepad_1_key_RSHIFT");
+			let p1_key_Q      = document.querySelector("#emuGamepad_1_key_Q");
+			let p1_key_W      = document.querySelector("#emuGamepad_1_key_W");
+			let p1_key_A      = document.querySelector("#emuGamepad_1_key_A");
+			let p1_key_S      = document.querySelector("#emuGamepad_1_key_S");
+
+			if( (p1_state) & (1<<0)  ? 1 : 0 ){p1_key_A     .classList.add("active");} else{p1_key_A     .classList.remove("active");} // CU_CTR_SNES_M_B
+			if( (p1_state) & (1<<1)  ? 1 : 0 ){p1_key_Q     .classList.add("active");} else{p1_key_Q     .classList.remove("active");} // CU_CTR_SNES_M_Y
+			if( (p1_state) & (1<<2)  ? 1 : 0 ){p1_key_SPACE .classList.add("active");} else{p1_key_SPACE .classList.remove("active");} // CU_CTR_SNES_M_SELECT
+			if( (p1_state) & (1<<3)  ? 1 : 0 ){p1_key_ENTER .classList.add("active");} else{p1_key_ENTER .classList.remove("active");} // CU_CTR_SNES_M_START
+			if( (p1_state) & (1<<4)  ? 1 : 0 ){p1_key_UP    .classList.add("active");} else{p1_key_UP    .classList.remove("active");} // CU_CTR_SNES_M_UP
+			if( (p1_state) & (1<<5)  ? 1 : 0 ){p1_key_DOWN  .classList.add("active");} else{p1_key_DOWN  .classList.remove("active");} // CU_CTR_SNES_M_DOWN
+			if( (p1_state) & (1<<6)  ? 1 : 0 ){p1_key_LEFT  .classList.add("active");} else{p1_key_LEFT  .classList.remove("active");} // CU_CTR_SNES_M_LEFT
+			if( (p1_state) & (1<<7)  ? 1 : 0 ){p1_key_RIGHT .classList.add("active");} else{p1_key_RIGHT .classList.remove("active");} // CU_CTR_SNES_M_RIGHT
+			if( (p1_state) & (1<<8)  ? 1 : 0 ){p1_key_S     .classList.add("active");} else{p1_key_S     .classList.remove("active");} // CU_CTR_SNES_M_A
+			if( (p1_state) & (1<<9)  ? 1 : 0 ){p1_key_W     .classList.add("active");} else{p1_key_W     .classList.remove("active");} // CU_CTR_SNES_M_X
+			if( (p1_state) & (1<<10) ? 1 : 0 ){p1_key_LSHIFT.classList.add("active");} else{p1_key_LSHIFT.classList.remove("active");} // CU_CTR_SNES_M_LSH
+			if( (p1_state) & (1<<11) ? 1 : 0 ){p1_key_RSHIFT.classList.add("active");} else{p1_key_RSHIFT.classList.remove("active");} // CU_CTR_SNES_M_RSH
+
+			let p2_key_UP     = document.querySelector("#emuGamepad_2_key_UP");
+			let p2_key_DOWN   = document.querySelector("#emuGamepad_2_key_DOWN");
+			let p2_key_LEFT   = document.querySelector("#emuGamepad_2_key_LEFT");
+			let p2_key_RIGHT  = document.querySelector("#emuGamepad_2_key_RIGHT");
+			let p2_key_SPACE  = document.querySelector("#emuGamepad_2_key_SPACE");
+			let p2_key_ENTER  = document.querySelector("#emuGamepad_2_key_ENTER");
+			let p2_key_LSHIFT = document.querySelector("#emuGamepad_2_key_LSHIFT");
+			let p2_key_RSHIFT = document.querySelector("#emuGamepad_2_key_RSHIFT");
+			let p2_key_Q      = document.querySelector("#emuGamepad_2_key_Q");
+			let p2_key_W      = document.querySelector("#emuGamepad_2_key_W");
+			let p2_key_A      = document.querySelector("#emuGamepad_2_key_A");
+			let p2_key_S      = document.querySelector("#emuGamepad_2_key_S");
+
+			if( (p2_state) & (1<<0)  ? 1 : 0 ){p2_key_A     .classList.add("active");} else{p2_key_A     .classList.remove("active");} // CU_CTR_SNES_M_B
+			if( (p2_state) & (1<<1)  ? 1 : 0 ){p2_key_Q     .classList.add("active");} else{p2_key_Q     .classList.remove("active");} // CU_CTR_SNES_M_Y
+			if( (p2_state) & (1<<2)  ? 1 : 0 ){p2_key_SPACE .classList.add("active");} else{p2_key_SPACE .classList.remove("active");} // CU_CTR_SNES_M_SELECT
+			if( (p2_state) & (1<<3)  ? 1 : 0 ){p2_key_ENTER .classList.add("active");} else{p2_key_ENTER .classList.remove("active");} // CU_CTR_SNES_M_START
+			if( (p2_state) & (1<<4)  ? 1 : 0 ){p2_key_UP    .classList.add("active");} else{p2_key_UP    .classList.remove("active");} // CU_CTR_SNES_M_UP
+			if( (p2_state) & (1<<5)  ? 1 : 0 ){p2_key_DOWN  .classList.add("active");} else{p2_key_DOWN  .classList.remove("active");} // CU_CTR_SNES_M_DOWN
+			if( (p2_state) & (1<<6)  ? 1 : 0 ){p2_key_LEFT  .classList.add("active");} else{p2_key_LEFT  .classList.remove("active");} // CU_CTR_SNES_M_LEFT
+			if( (p2_state) & (1<<7)  ? 1 : 0 ){p2_key_RIGHT .classList.add("active");} else{p2_key_RIGHT .classList.remove("active");} // CU_CTR_SNES_M_RIGHT
+			if( (p2_state) & (1<<8)  ? 1 : 0 ){p2_key_S     .classList.add("active");} else{p2_key_S     .classList.remove("active");} // CU_CTR_SNES_M_A
+			if( (p2_state) & (1<<9)  ? 1 : 0 ){p2_key_W     .classList.add("active");} else{p2_key_W     .classList.remove("active");} // CU_CTR_SNES_M_X
+			if( (p2_state) & (1<<10) ? 1 : 0 ){p2_key_LSHIFT.classList.add("active");} else{p2_key_LSHIFT.classList.remove("active");} // CU_CTR_SNES_M_LSH
+			if( (p2_state) & (1<<11) ? 1 : 0 ){p2_key_RSHIFT.classList.add("active");} else{p2_key_RSHIFT.classList.remove("active");} // CU_CTR_SNES_M_RSH
+		}, 25);
+	},
+
 	emuFullscreen : function(){
 		// The Emscripten way will not allow resizing.
 		// emu.vars.innerEmu.Module.requestFullscreen()
@@ -920,7 +1217,8 @@ emu.funcs           = {
 			else if (document.msFullscreenElement    ) { document.msFullscreenElement();     }
 		}
 	},
-	//
+
+	//EMSCRIPTEN_KEEPALIVE
 	addAllListeners: function() {
 		// Fullscreen mode.
 		document.addEventListener("fullscreenchange", function(e) {
@@ -948,11 +1246,19 @@ emu.funcs           = {
 
 		// Handles auto-resizing of the emulator canvas if F2 or F3 is used, which will mess up the screen normally.
 		emu.vars.dom.view["emuCanvas"].addEventListener("keydown", function(e){
+			if(emu.vars.innerEmu.emulatorIsReady){
+				emu.funcs.showPressedKey();
+			}
 			switch(e.code){
 				// Emulator controls. These will
 				case 'F2'  : { setTimeout(function(){ emu.vars.innerEmu.resizeEmuCanvas(); }, 50); break; }
 				case 'F3'  : { setTimeout(function(){ emu.vars.innerEmu.resizeEmuCanvas(); }, 50); break; }
 				default    : { break; }
+			}
+		});
+		emu.vars.dom.view["emuCanvas"].addEventListener("keyup", function(e){
+			if(emu.vars.innerEmu.emulatorIsReady){
+				emu.funcs.showPressedKey();
 			}
 		});
 
@@ -990,16 +1296,16 @@ emu.funcs           = {
 		}, false);
 
 		// Emulator controls (BOTTOM)
-		emu.vars.dom.view["emuControls_QUALITY"].addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_F2", null); }, false);
-		emu.vars.dom.view["emuControls_QUALITY"].addEventListener("mouseup", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_F2", null); }, false);
-		emu.vars.dom.view["emuControls_DEBUG"].addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_F3", null); }, false);
-		emu.vars.dom.view["emuControls_DEBUG"].addEventListener("mouseup", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_F3", null); }, false);
-		emu.vars.dom.view["emuControls_FLICKER"].addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_F7", null); }, false);
-		emu.vars.dom.view["emuControls_FLICKER"].addEventListener("mouseup", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_F7", null); }, false);
-		emu.vars.dom.view["emuControls_PAUSE"].addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_F9", null); }, false);
-		emu.vars.dom.view["emuControls_PAUSE"].addEventListener("mouseup", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_F9", null); }, false);
-		emu.vars.dom.view["emuControls_STEP"].addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_F10", null); }, false);
-		emu.vars.dom.view["emuControls_STEP"].addEventListener("mouseup", function() { emu.funcs.emu_sendKeyEvent("keyup", "key_F10", null); }, false);
+		emu.vars.dom.view["emuControls_QUALITY"].addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_F2" , null); displayCUzeBox_flags(); }, false);
+		emu.vars.dom.view["emuControls_QUALITY"].addEventListener("mouseup"  , function() { emu.funcs.emu_sendKeyEvent("keyup"  , "key_F2" , null); displayCUzeBox_flags(); }, false);
+		emu.vars.dom.view["emuControls_DEBUG"]  .addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_F3" , null); displayCUzeBox_flags(); }, false);
+		emu.vars.dom.view["emuControls_DEBUG"]  .addEventListener("mouseup"  , function() { emu.funcs.emu_sendKeyEvent("keyup"  , "key_F3" , null); displayCUzeBox_flags(); }, false);
+		emu.vars.dom.view["emuControls_FLICKER"].addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_F7" , null); displayCUzeBox_flags(); }, false);
+		emu.vars.dom.view["emuControls_FLICKER"].addEventListener("mouseup"  , function() { emu.funcs.emu_sendKeyEvent("keyup"  , "key_F7" , null); displayCUzeBox_flags(); }, false);
+		emu.vars.dom.view["emuControls_PAUSE"]  .addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_F9" , null); displayCUzeBox_flags(); }, false);
+		emu.vars.dom.view["emuControls_PAUSE"]  .addEventListener("mouseup"  , function() { emu.funcs.emu_sendKeyEvent("keyup"  , "key_F9" , null); displayCUzeBox_flags(); }, false);
+		emu.vars.dom.view["emuControls_STEP"]   .addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_F10", null); displayCUzeBox_flags(); }, false);
+		emu.vars.dom.view["emuControls_STEP"]   .addEventListener("mouseup"  , function() { emu.funcs.emu_sendKeyEvent("keyup"  , "key_F10", null); displayCUzeBox_flags(); }, false);
 
 		// Event listeners for the onscreen gamepad buttons.
 		document.querySelectorAll("g.hover_group").forEach(function(d,i,a){
@@ -1081,8 +1387,8 @@ emu.funcs.UAM       = {
 		// Make the container wider. Shrink the emu windows.
 		document.querySelector("html").classList.add("wide");
 		document.querySelector("#emu_emulator").classList.add("largerEmuWindow");
-		emu.vars.dom.view["emuCanvas"].width="640";
-		emu.vars.dom.view["emuCanvas"].height="560";
+		// emu.vars.dom.view["emuCanvas"].width="640";
+		// emu.vars.dom.view["emuCanvas"].height="560";
 	},
 	// * Hide UAM.
 	disableUAM: function() {
@@ -1106,8 +1412,8 @@ emu.funcs.UAM       = {
 		// Make the container normal width. Enlarge the emu windows.
 		document.querySelector("html").classList.remove("wide");
 		document.querySelector("#emu_emulator").classList.remove("largerEmuWindow");
-		emu.vars.dom.view["emuCanvas"].width="640";
-		emu.vars.dom.view["emuCanvas"].height="560";
+		// emu.vars.dom.view["emuCanvas"].width="640";
+		// emu.vars.dom.view["emuCanvas"].height="560";
 	},
 	// * UAM setup: Show UAM, set DOM, Listeners, get game list.
 	setupUAM: function() {
@@ -1138,6 +1444,9 @@ emu.funcs.UAM       = {
 
 			// Switch to the main emulator view.
 			emu.funcs.nav.changeView("VIEW");
+
+			// Put a default value for user JSON.
+			// emu.vars.dom.view["emu_FilesFromJSON"].value = "https://dev3-nicksen782.c9users.io/non-web/Uzebox/RamTileTest_1/output/remoteload.json";
 		});
 	},
 
@@ -1389,12 +1698,25 @@ emu.funcs.UAM       = {
 emu.funcs.downloads = {
 };
 emu.funcs.shared    = {
+	// * Sets the canvas dimensions back to default.
+	resetCanvasDimensions : function(){
+		emu.vars.dom.view["emuCanvas"].width="310";
+		emu.vars.dom.view["emuCanvas"].height="228";
+	},
 	// * Display message on the canvas in the top-left corner.
 	textOnCanvas: function(obj) {
 		// ctx.fillRect(0,0, Math.floor(ctx.measureText(obj.text).width), 48);
 		if (!obj)                             { obj = {}; }
 		if (obj.canvas          == undefined) { obj.canvas          = emu.vars.dom.view["emuCanvas"]; }
-		if (obj.font            == undefined) { obj.font            = "40px monospace"; }
+		if (obj.font            == undefined) {
+			// Set to the smaller font size if this is the smaller canvas.
+			if(
+				obj.canvas.width >=310 && obj.canvas.width <=320 &&
+				obj.canvas.height >=228 && obj.canvas.height <=280
+			) { obj.font            = "20px monospace"; }
+			// It is the bigger one. Use the larger font size.
+			else { obj.font         = "40px monospace"; }
+		}
 		if (obj.textAlign       == undefined) { obj.textAlign       = "center"; }
 		if (obj.backgroundColor == undefined) { obj.backgroundColor = "rgba(255, 0, 0, 0.60)"; }
 		if (obj.fontColor       == undefined) { obj.fontColor       = "white"; }
@@ -1407,7 +1729,7 @@ emu.funcs.shared    = {
 		ctx.textAlign = obj.textAlign;
 
 		// Don't let messages go beyond the canvas.
-		if (obj.text.length > 22) { obj.text = obj.text.substr(0, 22); }
+		if (obj.text.length > 23) { obj.text = obj.text.substr(0, 23); }
 		obj.text = obj.text.trim();
 
 		var rectX=0;
@@ -1641,10 +1963,15 @@ emu.funcs.nav       = {
 		var allSectionDivs = document.querySelectorAll(".sectionDivs");
 		var bodyContainer = document.querySelector("#bodyContainer");
 
-		var emu_view   = document.querySelector("#emu_view");
-		var emu_debug1 = document.querySelector("#emu_debug1");
-		var emu_debug2 = document.querySelector("#emu_debug2");
-		var emu_db     = document.querySelector("#emu_db");
+		var emu_view   = emu.vars.dom.views["view_VIEW"  ] ;
+		var emu_debug1 = emu.vars.dom.views["view_DEBUG1"] ;
+		var emu_debug2 = emu.vars.dom.views["view_DEBUG2"] ;
+		var emu_db     = emu.vars.dom.views["view_DB"    ] ;
+
+		var emu_view_nav   = document.querySelectorAll('.navOptions[newview="VIEW"]');
+		var emu_debug1_nav = document.querySelectorAll('.navOptions[newview="DEBUG1"]');
+		var emu_debug2_nav = document.querySelectorAll('.navOptions[newview="DEBUG2"]');
+		var emu_db_nav     = document.querySelectorAll('.navOptions[newview="DB"]');
 
 		bodyContainer.scrollIntoView(emu.funcs.nav.scrollIntoView_options);
 
@@ -1654,18 +1981,50 @@ emu.funcs.nav       = {
 				d.classList.add("hidden");
 			});
 		}
+		var hideNavs = function() {
+			emu_view_nav  .forEach(function(d,i,a){ d.classList.remove("active"); });
+			emu_debug1_nav.forEach(function(d,i,a){ d.classList.remove("active"); });
+			emu_debug2_nav.forEach(function(d,i,a){ d.classList.remove("active"); });
+			emu_db_nav    .forEach(function(d,i,a){ d.classList.remove("active"); });
+		}
 
 		switch (newview) {
-			case "VIEW":
-				{ hideSections();emu_view.classList.add("active");emu_view.classList.remove("hidden"); break; }
-			case "DEBUG1":
-				{ hideSections();emu_debug1.classList.add("active");emu_debug1.classList.remove("hidden"); break; }
-			case "DEBUG2":
-				{ hideSections();emu_debug2.classList.add("active");emu_debug2.classList.remove("hidden"); break; }
-			case "DB":
-				{ hideSections();emu_db.classList.add("active");emu_db.classList.remove("hidden"); break; }
-			default:
-				{ break; }
+			case "VIEW":{
+				hideSections();
+				hideNavs();
+				emu_view.classList.add   ("active");
+				emu_view.classList.remove("hidden");
+				emu_view_nav.forEach(function(d,i,a){ d.classList.add   ("active"); });
+				break;
+			}
+			case "DEBUG1":{
+				hideSections();
+				hideNavs();
+				emu_debug1.classList.add   ("active");
+				emu_debug1.classList.remove("hidden");
+				emu_debug1_nav.forEach(function(d,i,a){ d.classList.add   ("active"); });
+				break;
+			}
+			case "DEBUG2":{
+				hideSections();
+				hideNavs();
+				emu_debug2.classList.add   ("active");
+				emu_debug2.classList.remove("hidden");
+				emu_debug2_nav.forEach(function(d,i,a){ d.classList.add   ("active"); });
+				break;
+			}
+			case "DB":{
+				hideSections();
+				hideNavs();
+				emu_db.classList.add   ("active");
+				emu_db.classList.remove("hidden");
+				emu_db_nav.forEach(function(d,i,a){ d.classList.add   ("active"); });
+				break;
+			}
+			default:{
+				console.log("Invalid choice for newview");
+				break;
+			}
 		};
 	},
 	// * Changes the misc nav views.
@@ -2114,6 +2473,88 @@ emu.funcs.db  = {
 	}
 };
 
+function displayCUzeBox_flags(){
+setTimeout(function(){
+	var div = document.querySelector("#CUzeBox_flags");
+
+	var flags = emu.vars.innerEmu.Module._guicore_getflags();
+
+	let GUICORE_SMALL      = emu.vars.innerEmu.Module._NRA_returnFlags(3) ? true : false;
+	let GUICORE_GAMEONLY   = emu.vars.innerEmu.Module._NRA_returnFlags(4) ? true : false;
+	let main_fmerge        = emu.vars.innerEmu.Module._NRA_returnFlags(5) ? true : false;
+	let main_ispause       = emu.vars.innerEmu.Module._NRA_returnFlags(6) ? true : false;
+	let main_isadvfr       = emu.vars.innerEmu.Module._NRA_returnFlags(7) ? true : false;
+	// let GUICORE_NOVSYNC    = emu.vars.innerEmu.Module._NRA_returnFlags(2) ;
+	// let GUICORE_FULLSCREEN = emu.vars.innerEmu.Module._NRA_returnFlags(1) ;
+
+	if(!GUICORE_SMALL    ) { emu.vars.dom.view["emuControls_QUALITY"].classList.add   ('activated'); }
+	else                   { emu.vars.dom.view["emuControls_QUALITY"].classList.remove('activated'); }
+	if(!GUICORE_GAMEONLY ) { emu.vars.dom.view["emuControls_DEBUG"]  .classList.add   ('activated'); }
+	else                   { emu.vars.dom.view["emuControls_DEBUG"]  .classList.remove('activated'); }
+	if(main_fmerge       ) { emu.vars.dom.view["emuControls_FLICKER"].classList.add   ('activated'); }
+	else                   { emu.vars.dom.view["emuControls_FLICKER"].classList.remove('activated'); }
+	if(main_ispause      ) { emu.vars.dom.view["emuControls_PAUSE"]  .classList.add   ('activated'); }
+	else                   { emu.vars.dom.view["emuControls_PAUSE"]  .classList.remove('activated'); }
+	if(main_isadvfr      ) { emu.vars.dom.view["emuControls_STEP"]   .classList.add   ('activated'); }
+	else                   { emu.vars.dom.view["emuControls_STEP"]   .classList.remove('activated'); }
+
+	var newHTML = "";
+	newHTML+='<table class="table1">';
+	newHTML+='	<tr> <td>GUICORE_SMALL   </td><td>'+GUICORE_SMALL+'</td> </tr>';
+	newHTML+='	<tr> <td>GUICORE_GAMEONLY</td><td>'+GUICORE_GAMEONLY+'</td> </tr>';
+	newHTML+='	<tr> <td>main_fmerge     </td><td>'+main_fmerge+'</td> </tr>';
+	newHTML+='	<tr> <td>main_ispause    </td><td>'+main_ispause+'</td> </tr>';
+	newHTML+='	<tr> <td>main_isadvfr    </td><td>'+main_isadvfr+'</td> </tr>';
+	newHTML+='	<tr> <td>flags           </td><td>'+(flags)+'</td> </tr>';
+	newHTML+='</table>';
+	div.innerHTML=newHTML;
+
+},5);
+
+};
+
+function toggleCore(){
+	// Get a copy of the queryString data.
+	let qs=getQueryStringAsObj();
+
+	var newCore ="";
+	var coreKeyFound=false;
+
+	var newHref = window.location.href.split("?")[0] ;
+
+	switch(emu.vars.core){
+		case "WASM"  : { newCore ="ASMJS"; break; }
+		case "ASMJS" : { newCore ="WASM" ; break; }
+		default      : { newCore = emu.vars.core; break; }
+	}
+
+	Object.keys(qs).map(function(objectKey, index) {
+		if(index==0){ newHref+="?"; }
+		else{ newHref+="&"; }
+
+		if(objectKey=="core") {
+			coreKeyFound=true;
+			newHref+="core" + "=" + newCore ;
+		}
+		else{
+			newHref+=objectKey + "=" + qs[objectKey] ;
+		}
+	});
+
+	// If "core" was not on the query string then make sure it is there.
+	if(!coreKeyFound){
+		// Were there other keys on the querystring?
+		if( Object.keys(getQueryStringAsObj()).length ) { newHref+="&"; }
+		// No? Put the "?".
+		else{ newHref+="?"; }
+
+		newHref+="core" + "=" + newCore ;
+	}
+
+	// Do the redirect.
+	window.location.href=newHref;
+}
+
 window.onload = function() {
 	window.onload = null;
 
@@ -2124,19 +2565,54 @@ window.onload = function() {
 	var continueApp = function() {
 		// Add the emulation core before continuing.
 		new Promise(function(resolve,reject){
+			let qs=getQueryStringAsObj();
+			let core="";
+			let browserHasWebAssembly = (typeof WebAssembly == "object" && typeof WebAssembly.instantiate == "function");
+
+			if      (qs["core"]=="WASM") { core="WASM";  }
+			else if (qs["core"]=="ASMJS"){ core="ASMJS";  }
+
+			// Was core specified on the query string?
+			if(core){
+				// Was core "WASM" and is Web Assembly available?
+				if(core=="WASM" && (browserHasWebAssembly) ){ core="WASM"; }
+				// Was core "ASMJS" or is Web Assembly NOT available?
+				else if(core=="ASMJS"){ core="ASMJS"; }
+			}
+
+			// No? Can we use Web Assembly?
+			else if( (browserHasWebAssembly) ){ core="WASM"; }
+			// No? Then use ASM.js
+			else{ core="ASMJS"; }
+
+			emu.vars.core = core;
 			var newJs=document.createElement("script");
 			newJs.onload = function(){ resolve(); };
-			newJs.src = "CUzeBox_emu_core/emu_core.js";
+
+			// Load the Web Assemby version?
+			if(core=="WASM"){
+				console.log("Using Web Assembly");
+				document.querySelector("#coresetting #coresetting_text").innerHTML="Using Web Assembly ";
+				document.querySelector("#coresetting #coresetting_toggle").classList.remove("hidden");
+				newJs.src = "CUzeBox_emu_core/emu_core_WASM.js";
+			}
+			// Load the ASMJS version instead.
+			else{
+				console.log("Using asm.js");
+				document.querySelector("#coresetting #coresetting_text").innerHTML="Using ASM.js ";
+				document.querySelector("#coresetting #coresetting_toggle").classList.remove("hidden");
+				newJs.src = "CUzeBox_emu_core/emu_core_ASMJS.js";
+			}
+
+			// Append the new script element.
 			document.body.appendChild(newJs);
+
 		}).then( function(){
 			// Populate the DOM handle caches.
 			emu.funcs.domHandleCache_populate();
 
 			// Add the event listeners.
 			emu.funcs.addAllListeners();
-
-			// Get the build-in games list.
-			emu.funcs.emu_getBuiltInGamelist();
 
 			// Check if this application has been loaded under UAM.
 			try {
@@ -2150,40 +2626,64 @@ window.onload = function() {
 					emu.funcs.UAM.disableUAM();
 				}
 			}
-			catch (e) {
-				emu.funcs.UAM.disableUAM();
+			catch (e) { emu.funcs.UAM.disableUAM(); }
+
+			// Put a default value for user JSON.
+			if(window.location.host=="dev3-nicksen782.c9users.io"){
+				emu.vars.dom.view["emu_FilesFromJSON"].value = "https://dev3-nicksen782.c9users.io/non-web/Uzebox/RamTileTest_1/output/remoteload.json";
 			}
 
-			emu.funcs.shared.clearTheCanvas(emu.vars.dom.view["emuCanvas"]);
-			emu.funcs.shared.textOnCanvas({ "canvas": emu.vars.dom.view["emuCanvas"], "text": " - GAME NOT LOADED - " });
+			// Get the build-in games list.
+			emu.funcs.emu_getBuiltInGamelist().then(
+				function(){
+					emu.funcs.shared.clearTheCanvas(emu.vars.dom.view["emuCanvas"]);
+					emu.funcs.shared.textOnCanvas({ "canvas": emu.vars.dom.view["emuCanvas"], "text": " - GAME NOT LOADED - " });
 
-			// Adjust the canvas output.
-			document.querySelectorAll('canvas').forEach(function(d, i) {
-				emu.funcs.shared.setpixelated(d);
-			});
+					// Adjust the canvas output.
+					document.querySelectorAll('canvas').forEach(function(d, i) {
+						emu.funcs.shared.setpixelated(d);
+					});
 
-			// Switch to the default view.
-			emu.funcs.nav.changeView("VIEW");
+					// Switch to the default view.
+					emu.funcs.nav.changeView("VIEW");
 
-			setTimeout(function(){
-				if(emu.vars.originUAM){
-					// emu.funcs.nav.changeView("DB");
+					if(!emu.vars.originUAM){
+						// Look for settings provided via query string.
+						let qs=getQueryStringAsObj();
+
+						if     (qs["gameid"]){
+							// Select this game in the menu
+							emu.vars.innerEmu.startEmuAfterUserInput = true;
+							emu.vars.dom.view["builtInGames_select"].value=qs["gameid"];
+							emu.funcs.getGameFiles(1);
+						}
+						else if(qs["url"]){
+							emu.vars.innerEmu.startEmuAfterUserInput = true;
+							emu.vars.dom.view["emu_FilesFromJSON"].value = qs["url"];
+							emu.funcs.getGameFiles(3);
+						}
+
+					}
+					else{
+						// emu.funcs.nav.changeView("DB");
+					}
 				}
-			}, 500);
+			);
 
 		});
 
 	};
 
 	// Feature Loader config:
-	featureDetection.config.usePhp = true;
-	featureDetection.config.useAsync = true;
-	featureDetection.config.includeText = false; // Using false makes the database download smaller.
+	featureDetection.config.usePhp         = true;
+	featureDetection.config.useAsync       = true;
+	featureDetection.config.includeText    = false; // Using false makes the database download smaller.
 	featureDetection.config.includeWebsite = false; // Using false makes the database download smaller.
+
 	// Load these libraries also:
 	featureDetection.config.userReqs = [
 		// "X2JS"    ,
-		// "JSZip"    ,
+		"getQueryStringAsObj"    ,
 		// "FileSaver",
 	];
 	// Feature detect/replace.

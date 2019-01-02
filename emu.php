@@ -56,22 +56,34 @@
 </div>
 
 <div id="bodyContainer">
-
 	<div id="emu_view"   class="sectionDivs">
+		<div id="CUzeBox_flags">
+			<!--/* Request full screen GUI */-->
+			<!--#define GUICORE_FULLSCREEN 0x0001U-->
+			<!--/* Disable sticking to display refresh rate */-->
+			<!--#define GUICORE_NOVSYNC    0x0002U-->
+			<!--/* Use a small screen (320 x 270 instead of 640 x 560) */-->
+			<!--#define GUICORE_SMALL      0x0004U-->
+			<!--/* Display only the game region */-->
+			<!--#define GUICORE_GAMEONLY   0x0008U-->
+		</div>
+		<div id="gamepadConfig">
+		</div>
+
 		<div class="sectionDivs_title">
 			<div class="sectionDivs_title_text">
 				ONLINE UZEBOX EMULATOR
 			</div>
 
 			<div class="sectionDivs_title_options">
-				<input type="button" value="Reload" onclick="document.location.href = document.location.href;">
-				<input type="button" value="New Window" onclick="window.open(document.location.href);">
+				<input type="button" class="debugButtons uamOnly hidden" value="Reload"     onclick="document.location.href = document.location.href;">
+				<input type="button" class="debugButtons uamOnly hidden" value="New Window" onclick="window.open(document.location.href);">
 
-				<div class="navOptions"         newview="TOP">TOP</div>
-				<div class="navOptions uamOnly" newview="VIEW">VIEW</div>
-				<div class="navOptions uamOnly" newview="DEBUG1">DEBUG1</div>
-				<div class="navOptions uamOnly" newview="DEBUG2">DEBUG2</div>
-				<div class="navOptions uamOnly" newview="DB">DB</div>
+				<div class="navOptions uamOnly hidden" newview="TOP"   >TOP</div>
+				<div class="navOptions uamOnly hidden" newview="VIEW"  >VIEW</div>
+				<div class="navOptions uamOnly hidden" newview="DEBUG1">DEBUG1</div>
+				<div class="navOptions uamOnly hidden" newview="DEBUG2">DEBUG2</div>
+				<div class="navOptions uamOnly hidden" newview="DB"    >DB</div>
 			</div>
 		</div>
 
@@ -106,7 +118,8 @@
 						<td>JSON</td>
 						<td>
 							<!--<input type="text" id="emu_FilesFromJSON" value="https://www.nicksen782.net/UzeBridge/NICKSEN782/BUBBLEBOBBLE/remoteload.json" placeholder="Enter JSON file URL">-->
-							<input type="text" id="emu_FilesFromJSON" value="https://dev3-nicksen782.c9users.io/non-web/Uzebox/RamTileTest_1/output/remoteload.json" placeholder="Enter JSON file URL">
+							<!--<input type="text" id="emu_FilesFromJSON" value="https://dev3-nicksen782.c9users.io/non-web/Uzebox/RamTileTest_1/output/remoteload.json" placeholder="Enter JSON file URL">-->
+							<input type="text" id="emu_FilesFromJSON" value="" placeholder="Paste JSON file URL">
 							<input type="button" id="emu_FilesFromJSON_load" value="Load">
 						</td>
 					</tr>
@@ -137,6 +150,9 @@
 
 				<div class="emu_misc_view noSelect active" id="emu_misc_gamepads" draggable="false">
 
+					<div id="gamepadIcon" onclick="emu.gamepads.init();">
+						<div class="gamepadIcon gamepadicon1" title="Click to configure your gamepad!"></div>
+					</div>
 					<div id="emu_onscreenGamepads_1" draggable="false">
 						<figure>
 							<svg
@@ -226,6 +242,10 @@
 		<div id="emu_emulator" class="sectionWindow">
 			<div class="sectionWindow_title">
 				Emulator Screen
+				<div id="coresetting">
+					<span id="coresetting_text"></span>
+					<span id="coresetting_toggle" class="hyperlink1 hidden" onclick="toggleCore();">(Toggle core)</span>
+				</div>
 			</div>
 			<div class="sectionWindow_content">
 				<div class="emu_emuControls" id="emu_emuControlsTOP">
@@ -251,15 +271,16 @@
 
 				<div id="emscripten_emu_container_outer">
 					<div id="emscripten_emu_container">
-						<canvas tabindex="0" class="verticalAlign" id="emuCanvas" width="620" height="456"></canvas>
+						<!--<canvas tabindex="0" class="verticalAlign" id="emuCanvas" width="620" height="456"></canvas>-->
+						<canvas tabindex="0" class="verticalAlign" id="emuCanvas" width="310" height="228"></canvas>
 					</div>
 				</div>
 
 			</div>
 		</div>
 
-		<div id="emu_view_uam" class="uamOnly enabled">
-			<div id="emu_gameSelector_uam" class="sectionWindow uamOnly enabled">
+		<div id="emu_view_uam" class="uamOnly">
+			<div id="emu_gameSelector_uam" class="sectionWindow uamOnly">
 				<div class="sectionWindow_title">Game Selection (UAM)</div>
 				<div class="sectionWindow_content">
 					<table class="table1">
@@ -293,14 +314,14 @@
 				</div>
 			</div>
 
-			<div id="emu_miniOutput1_uam" class="sectionWindow uamOnly enabled">
+			<div id="emu_miniOutput1_uam" class="sectionWindow uamOnly">
 				<div class="sectionWindow_title">Compile Output (last)</div>
 				<div class="sectionWindow_content">
 					<div id="emu_latestCompile" class="dataHolder EMULATOR_protected_Controls"><pre style="overflow: hidden;"></pre></div>
 				</div>
 			</div>
 
-			<div id="emu_miniOutput2_uam" class="sectionWindow uamOnly enabled">
+			<div id="emu_miniOutput2_uam" class="sectionWindow uamOnly">
 				<div class="sectionWindow_title">Compile Output (previous)</div>
 				<div class="sectionWindow_content">
 					<div id="emu_previousCompile" class="dataHolder EMULATOR_protected_Controls"><pre style="overflow: hidden;"></pre></div>
@@ -310,28 +331,22 @@
 		</div>
 
 	</div>
-
-	<div id="emu_debug1" class="sectionDivs">
+	<div id="emu_debug1" class="sectionDivs uamOnly hidden">
 		<div class="sectionDivs_title">
 			<div class="sectionDivs_title_text">
 				DEBUG PANEL #1
 			</div>
 
 			<div class="sectionDivs_title_options">
-
-
-				<input type="button" value="Reload" onclick="document.location.href = document.location.href;">
-				<input type="button" value="New Window" onclick="window.open(document.location.href);">
-
-				<div class="navOptions"         newview="TOP">TOP</div>
-				<div class="navOptions uamOnly" newview="VIEW">VIEW</div>
-				<div class="navOptions uamOnly" newview="DEBUG1">DEBUG1</div>
-				<div class="navOptions uamOnly" newview="DEBUG2">DEBUG2</div>
-				<div class="navOptions uamOnly" newview="DB">DB</div>
+				<div class="navOptions uamOnly hidden" newview="TOP"   >TOP</div>
+				<div class="navOptions uamOnly hidden" newview="VIEW"  >VIEW</div>
+				<div class="navOptions uamOnly hidden" newview="DEBUG1">DEBUG1</div>
+				<div class="navOptions uamOnly hidden" newview="DEBUG2">DEBUG2</div>
+				<div class="navOptions uamOnly hidden" newview="DB"    >DB</div>
 			</div>
 		</div>
 
-		<div id="emu_debug1_output1" class="sectionWindow uamOnly enabled">
+		<div id="emu_debug1_output1" class="sectionWindow uamOnly">
 			<div class="sectionWindow_title">
 				Full Compile Output
 					<input type="button" onclick="document.querySelector('#emu_compile_UAM').click();" value="COMPILE">
@@ -344,26 +359,22 @@
 		</div>
 
 	</div>
-
-	<div id="emu_debug2" class="sectionDivs">
+	<div id="emu_debug2" class="sectionDivs uamOnly hidden">
 		<div class="sectionDivs_title">
 			<div class="sectionDivs_title_text">
 				DEBUG PANEL #2
 			</div>
 
 			<div class="sectionDivs_title_options">
-				<input type="button" value="Reload" onclick="document.location.href = document.location.href;">
-				<input type="button" value="New Window" onclick="window.open(document.location.href);">
-
-				<div class="navOptions"         newview="TOP">TOP</div>
-				<div class="navOptions uamOnly" newview="VIEW">VIEW</div>
-				<div class="navOptions uamOnly" newview="DEBUG1">DEBUG1</div>
-				<div class="navOptions uamOnly" newview="DEBUG2">DEBUG2</div>
-				<div class="navOptions uamOnly" newview="DB">DB</div>
+				<div class="navOptions uamOnly hidden" newview="TOP"   >TOP</div>
+				<div class="navOptions uamOnly hidden" newview="VIEW"  >VIEW</div>
+				<div class="navOptions uamOnly hidden" newview="DEBUG1">DEBUG1</div>
+				<div class="navOptions uamOnly hidden" newview="DEBUG2">DEBUG2</div>
+				<div class="navOptions uamOnly hidden" newview="DB"    >DB</div>
 			</div>
 		</div>
 
-		<div id="emu_debug2_output1" class="sectionWindow uamOnly enabled">
+		<div id="emu_debug2_output1" class="sectionWindow uamOnly">
 			<div class="sectionWindow_title">
 				DEBUG #2
 				<input type="button" onclick="document.querySelector('#emu_compile_UAM').click();" value="COMPILE">
@@ -377,26 +388,25 @@
 		</div>
 
 	</div>
-
-	<div id="emu_db"     class="sectionDivs">
+	<div id="emu_db"     class="sectionDivs uamOnly hidden">
 		<div class="sectionDivs_title">
 			<div class="sectionDivs_title_text">
 				DATABASE EDITOR
 			</div>
 
 			<div class="sectionDivs_title_options">
-				<input type="button" value="Reload" onclick="document.location.href = document.location.href;">
-				<input type="button" value="New Window" onclick="window.open(document.location.href);">
+				<input type="button" class="debugButtons uamOnly hidden" value="Reload"     onclick="document.location.href = document.location.href;">
+				<input type="button" class="debugButtons uamOnly hidden" value="New Window" onclick="window.open(document.location.href);">
 
-				<div class="navOptions"         newview="TOP">TOP</div>
-				<div class="navOptions uamOnly" newview="VIEW">VIEW</div>
-				<div class="navOptions uamOnly" newview="DEBUG1">DEBUG1</div>
-				<div class="navOptions uamOnly" newview="DEBUG2">DEBUG2</div>
-				<div class="navOptions uamOnly" newview="DB">DB</div>
+				<div class="navOptions uamOnly hidden" newview="TOP"   >TOP</div>
+				<div class="navOptions uamOnly hidden" newview="VIEW"  >VIEW</div>
+				<div class="navOptions uamOnly hidden" newview="DEBUG1">DEBUG1</div>
+				<div class="navOptions uamOnly hidden" newview="DEBUG2">DEBUG2</div>
+				<div class="navOptions uamOnly hidden" newview="DB"    >DB</div>
 			</div>
 		</div>
 
-		<div id="emu_db_gameChoice"   class="sectionWindow uamOnly enabled">
+		<div id="emu_db_gameChoice"   class="sectionWindow uamOnly">
 			<div class="sectionWindow_title">Game Select</div>
 			<div class="sectionWindow_content">
 				<select id="db_gameSelect" class="myButton" >
@@ -405,7 +415,7 @@
 				<input type="button" class="myButton" id="db_gameSelect_load"   value="Re-load selected game data">
 			</div>
 		</div>
-		<div id="emu_db_gameMetadata" class="sectionWindow uamOnly enabled">
+		<div id="emu_db_gameMetadata" class="sectionWindow uamOnly">
 			<div class="sectionWindow_title">Game Data</div>
 			<div class="sectionWindow_content">
 				<table class="table1">
@@ -422,7 +432,7 @@
 				<textarea id="db_dataField_description"></textarea>
 			</div>
 		</div>
-		<div id="emu_db_files"        class="sectionWindow uamOnly enabled">
+		<div id="emu_db_files"        class="sectionWindow uamOnly">
 			<div class="sectionWindow_title">GAME FILES</div>
 			<div class="sectionWindow_content">
 				<!--These are the files that the database says this game has. Additionally, a list of all files in the game directory.-->
@@ -440,7 +450,7 @@
 				</div>
 			</div>
 		</div>
-		<div id="emu_db_options"       class="sectionWindow uamOnly enabled">
+		<div id="emu_db_options"      class="sectionWindow uamOnly">
 			<div class="sectionWindow_title">OPTIONS</div>
 			<div class="sectionWindow_content">
 			<table class="table1">
@@ -454,9 +464,8 @@
 		</div>
 
 	</div>
-
-
 </div>
+
 <div id="bodyFooter">
 UAM5 (2018) Nickolas Andersen (nicksen782)
 	<table id="paletteViewTable">

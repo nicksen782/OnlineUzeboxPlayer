@@ -71,7 +71,7 @@ input[readonly]
 /*Used color palettes*/
 
 /*DEBUG: Color palette viewer*/
-#paletteViewTable   {display: inline-block;}
+#paletteViewTable   {/* display: inline-block; */display: none;/* visibility: hidden; */}
 #paletteViewTable td{padding: 1px;}
 #paletteViewTable td div.notVisible{
 	visibility:hidden;

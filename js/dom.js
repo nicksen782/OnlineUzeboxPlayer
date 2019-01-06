@@ -7,16 +7,36 @@
 /* global emu */
 
 emu.funcs.domHandleCache_populate = function(){
-	emu.vars.dom.view = {};
 	emu.vars.dom.views = {};
+	emu.vars.dom.view = {};
+	emu.vars.dom.gamepad = {};
+
+	emu.vars.dom.gamepad["openBtn" ]                  = document.querySelector("#gamepadConfig_openBtn");
+	emu.vars.dom.gamepad["closeBtn"]                  = document.querySelector("#gamepadConfig_closeBtn");
+
+	emu.vars.dom.gamepad["gamepadConfigDiv"]          = document.querySelector("#gamepadConfigDiv");
+	emu.vars.dom.gamepad["gamepadConfigDiv_mappings_P1"] = document.querySelector("#gamepadConfigDiv_mappings_P1");
+	emu.vars.dom.gamepad["gamepadConfigDiv_mappings_P2"] = document.querySelector("#gamepadConfigDiv_mappings_P2");
+	emu.vars.dom.gamepad["gp_cfg_setBtns"]            = document.querySelectorAll(".gp_cfg_set");
+
+	emu.vars.dom.gamepad["gp1_status"]                = document.querySelector("#emu_gamepadConfig_P1_status");
+	emu.vars.dom.gamepad["gp2_status"]                = document.querySelector("#emu_gamepadConfig_P2_status");
+	emu.vars.dom.gamepad["gp1_setAll"]                = document.querySelector("#gp1_setAll");
+	emu.vars.dom.gamepad["gp2_setAll"]                = document.querySelector("#gp2_setAll");
+
+	emu.vars.dom.gamepad["saveChanges"]    = document.querySelector("#gpmap_saveChanges");
+	emu.vars.dom.gamepad["download"]       = document.querySelector("#gpmap_download_maps");
+	emu.vars.dom.gamepad["upload"]         = document.querySelector("#gpmap_upload_maps");
+
+
+	// emu.vars.dom.gamepad[""  ] = document.querySelector("#");
+	// emu.vars.dom.gamepad[""  ] = document.querySelector("#");
 
 	// VIEWS:
 	emu.vars.dom.views["view_VIEW"  ] = document.querySelector("#emu_view");
 	emu.vars.dom.views["view_DEBUG1"] = document.querySelector("#emu_debug1");
 	emu.vars.dom.views["view_DEBUG2"] = document.querySelector("#emu_debug2");
 	emu.vars.dom.views["view_DB"    ] = document.querySelector("#emu_db");
-
-
 
 	// emu_filesList_div
 	emu.vars.dom.view["emu_filesList_div"]  = document.querySelector("#emu_filesList_div");
@@ -96,10 +116,8 @@ emu.funcs.domHandleCache_populate_UAM = function(){
 		emu.vars.dom.view["emu_latestCompile"]   = document.querySelector("#emu_latestCompile");
 		emu.vars.dom.view["emu_previousCompile"] = document.querySelector("#emu_previousCompile");
 
-
 		// UAM DOM: DEBUG1
 		emu.vars.dom.debug1["output"] = document.querySelector("#emu_debug1_output1 .output");
-
 
 		// UAM DOM: DEBUG2
 		emu.vars.dom.debug2["output"] = document.querySelector("#emu_debug2_output1 .output");
@@ -130,9 +148,6 @@ emu.funcs.domHandleCache_populate_UAM = function(){
 		emu.vars.dom.db["db_builtInGames_fileUpload"]         = document.querySelector("#db_builtInGames_fileUpload");
 		// Visible upload button.
 		emu.vars.dom.db["db_builtInGames_fileUpload_visible"] = document.querySelector("#db_builtInGames_fileUpload_visible");
-
-		// emu.vars.dom.db["XXXX"] = document.querySelector("#XXXX");
-		// emu.vars.dom.db["XXXX"] = document.querySelector("#XXXX");
 
 	}
 }

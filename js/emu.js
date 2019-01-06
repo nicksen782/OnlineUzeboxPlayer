@@ -16,50 +16,72 @@
 /* global X2JS */
 /* global performance */
 /* global getQueryStringAsObj */
+/* global localStorage */
 
 // anthonybrown/JSLint Options Descriptions
 // https://gist.github.com/anthonybrown/9526822
 
 "use strict";
 
+// shim layer with setTimeout fallback
+if(typeof window.requestAnimationFrame == "undefined"){
+	window.requestAnimFrame = (function(){
+		return window.requestAnimationFrame ||
+		window.webkitRequestAnimationFrame  ||
+		window.mozRequestAnimationFrame     ||
+		function( callback ){ window.setTimeout(callback, 1000 / 60); };
+	})();
+}
+if(typeof window.cancelAnimationFrame == "undefined"){
+	window.cancelAnimationFrame = (function(){
+		return window.mozCancelAnimationFrame ||
+		window.webkitCancelAnimationFrame     ||
+		window.cancelAnimationFrame           ||
+		function( callback ){ window.setTimeout(callback, 1000 / 60); };
+	})();
+}
+
 var emu             = {};
 emu.vars            = {
-	// UAM vars.
+	// * UAM vars.
 	originUAM      : false     ,
 	uamwindow      : undefined ,
-	uamwindow_objs : undefined ,
-	user_id        : undefined ,
 	UAMisReady     : undefined ,
+	user_id        : undefined ,
 
-	// Holds the DOM cache.
+	// * Holds the DOM cache.
 	dom: {},
 
-	// Holds the category values for the built-in games.
+	// * Holds the category values for the built-in games.
 	emu_statuses: [
 		'NO CATEGORY', // 0
-		'Demo', // 1
-		'WIP', // 2
-		'Complete', // 3
-		'UCC2013', // 4
-		'UCC2014', // 5
-		'UCC2016', // 6
-		'UCC2018', // 7
-		'RESERVED', // 8
+		'Demo'       , // 1
+		'WIP'        , // 2
+		'Complete'   , // 3
+		'UCC2013'    , // 4
+		'UCC2014'    , // 5
+		'UCC2016'    , // 6
+		'UCC2018'    , // 7
+		'RESERVED'   , // 8
 	],
 
-	//
+	// * Holds the data and binary for each loaded game file and the file to start CUzeBox with.
 	gameFiles: [],
 	gameFile : "",
-	gameTitle: "",
 
+	// * Object that contains the flags/functions for the Emscripten instance.
 	innerEmu : {
+		// * Indicates if the Emscripten instance has finished loading.
 		emulatorIsReady         : false,
+		// * Indicates that the Emscripten instance should not load until some user input (mousemove on the emu canvas.)
 		startEmuAfterUserInput  : false,
+		// * Allows the Emscripten instance to start.
 		startAfterMouseMove : function(){
 			emu.vars.dom.view["emuCanvas"].removeEventListener("mousemove", emu.vars.innerEmu.startAfterMouseMove, false);
 			emu.vars.innerEmu.startEmuAfterUserInput=false;
 			emu.funcs.loadGame();
 		} ,
+		// * Used as a template to create a new Emscripten module.
 		createDefaultModule     : function(){
 			// Tells Emscripten what DOM element that it should be listening to for keyboard input.
 			this["keyboardListeningElement"] = (function() { return emu.vars.dom.view["emuCanvas"] })();
@@ -79,16 +101,56 @@ emu.vars            = {
 
 			// Load the files from the files list.
 			this["preRun"]    = [ function(){
+
 				var GameFiles        = emu.vars.gameFiles;
 				var FilesDownloading = emu.vars.gameFilesDownloading;
+
+				// Filter any unpopulated records.
+
+				// Load the CUzeBox eeprom.bin from localStorage to a file in Emscripten?
+				let eeprombin = localStorage.getItem("EMU_eeprom.bin");
+				if(eeprombin!=null){
+					eeprombin = eeprombin.split(",");
+					eeprombin = emu.funcs.shared.arrayToArrayBuffer(eeprombin);
+					let eeprombin_view = new Uint8Array( eeprombin );
+					let deleteIncludedEEPROMBIN = false;
+					let IncludedEEPROMBIN_index = undefined;
+					emu.vars.gameFiles.forEach(function(d,i,a){
+						if(d.name=="eeprom.bin") {
+							deleteIncludedEEPROMBIN=true;
+							IncludedEEPROMBIN_index=i;
+						}
+					});
+
+					console.log("Loaded eeprom.bin from localStorage.");
+
+					// Was an eeprom.bin file part of the gamefiles? We can't have duplicates. Delete the old file.
+					if(deleteIncludedEEPROMBIN==true || IncludedEEPROMBIN_index !=undefined){
+						delete emu.vars.gameFiles[IncludedEEPROMBIN_index];
+					}
+
+					emu.vars.gameFiles.push({
+						"name"    :"eeprom.bin",
+						"data"    :eeprombin_view,
+						"filesize":eeprombin_view.length,
+					});
+
+					emu.vars.gameFiles = emu.vars.gameFiles.filter(Boolean);
+
+				}
 
 				if(   FilesDownloading ) { throw new Error('GAME IS STILL LOADING     : FilesDownloading : ' + FilesDownloading); }
 				if( ! GameFiles.length ) { throw new Error('NO FILES HAVE BEEN LOADED : GameFiles. Length: ' + GameFiles.length); }
 
 				GameFiles.map(function(d,i,a){
 					try     { emu.vars.innerEmu.Module["FS"].createPreloadedFile('/', d.name , d.data , true, true); }
-					catch(e){ console.log("Error loading file!", d.name, e); }
+					catch(e){
+						console.log("Error loading file!", d.name, e);
+						alert      ("Error loading file!", d.name, e);
+					}
 				});
+
+
 			}];
 
 			// Do this after initialization but before main() is called.
@@ -136,6 +198,7 @@ emu.vars            = {
 				console.error(text);
 			};
 		},
+		// * Used by resizeEmuCanvas to determine the new width/height/aspect ratio when resizing the emu canvas.
 		calculateAspectRatioFit : function(srcWidth, srcHeight, maxWidth, maxHeight) {
 			// https://stackoverflow.com/a/14731922
 			var ratio = Math.min(maxWidth / srcWidth, maxHeight / srcHeight);
@@ -145,6 +208,7 @@ emu.vars            = {
 				ratio : ratio
 			};
 		},
+		// * Resizes the emu canvas to fit in its container.
 		resizeEmuCanvas         : function(){
 			var canvas        = emu.vars.dom.view["emuCanvas"];
 			var Container     = document.querySelector("#emscripten_emu_container");
@@ -154,6 +218,7 @@ emu.vars            = {
 			canvas.style.width  = newDims.width  +"px";
 			canvas.style.height = newDims.height +"px";
 		},
+		// * Runs after the Emscripten instance is fully loaded. Sets flags, resizes the emu canvas.
 		emuIsReady              : function(){
 			emu.vars.innerEmu.emulatorIsReady = true;
 			emu.vars.gameAllowedToLoad        = true;
@@ -163,197 +228,1025 @@ emu.vars            = {
 	}
 };
 emu.gamepads        = {
-	connecthandler    : function(e){
-		console.log("connecthandler:", e);
-	},
-	disconnecthandler : function(e){
-		console.log("disconnecthandler:", e);
-	},
-	scangamepads      : function(){
-		// console.log("scangamepads");
+	// unmappedGamepads   : 0,
 
-		// Get the gamepad info. There are many different ways. Use the first one that returns data.
-		var gamepads = navigator.getGamepads
-			? navigator.getGamepads()
-			: (navigator.webkitGetGamepads
-				? navigator.webkitGetGamepads()
-				: [])
-		;
+	// CONFIG GAME PAD BUTTON MAPPING FUNCTIONS/VARIABLES.
+	mapping_newGamepads     : [],    // Holds the temporarly gamepad maps while in the gamepad config.
+	prev_pollState          : false, // Flag for the the previous main gamepad poll state.
+	prev_emuAutoPauseSetting: false, // Flag for the previous emulator auto-pause setting.
+	gamepadMapPolling       : false, // Flag to indicate the basic gamepad polling is active.
+	autoSet_buttonsToAssign : [],    // Holds the remaining buttons for autoset.
+	lastAssignedButton      : "",    // Holds the last user assigned button. This prevents the next button from automatically being assigned the previous button.
+	// * Starts the map all for a gamepad.
+	mapAllButtons        : function(e){
+		let onlyDeactivate=false;
 
-		for (var i = 0; i < gamepads.length; i++) {
-			if (gamepads[i]) {
-				// Do we not have an instance of this gamepad already?
-				if (!(gamepads[i].index in emu.gamepads.controllers)) {
-					// Add the gamepad.
-					// emu.gamepads.addgamepad(gamepads[i]);
-					// emu.gamepads.controllers[gamepads[i].index] = gamepads[i];
-					emu.gamepads.controllers[gamepads[i].index]               = gamepads[i] ;
-					emu.gamepads.controllers[gamepads[i].index].btnPrev       = 0;
-					emu.gamepads.controllers[gamepads[i].index].btnHeld       = 0;
-					emu.gamepads.controllers[gamepads[i].index].btnPressed    = 0;
-					emu.gamepads.controllers[gamepads[i].index].btnReleased   = 0;
-					emu.gamepads.controllers[gamepads[i].index].lastTimestamp = JSON.parse(JSON.stringify(gamepads[i].timestamp));
-				}
-			}
-		}
+		if(this.classList.contains("active")){ onlyDeactivate=true; }
 
-		// All gamepads are added. Now do something with them.
-		emu.gamepads.handleGamepadInput();
-	},
-	handleGamepadInput : function(){
-		// Is there a gamepad assigned to player 1? If not then assign the first gamepad.
-		// Is there a gamepad assigned to player 2? If not then assign the second gamepad, if there is one.
-		// 8Bitdo SNES30 GamePad (Vendor: 2820 Product: 0009)
+		// Deactivate all setAll buttons.
+		document.querySelectorAll(".gp_setAll").forEach(function(d,i,a){
+			d.classList.remove("active");
+		});
 
-		// if(typeof emu.gamepads.controllers.length == "undefined"){
-		// 	console.log("that weird bug!");
-		// 	let temp=emu.gamepads.controllers;
+		// Clear any old buttonsToAssign.
+		emu.gamepads.autoSet_buttonsToAssign=[];
 
-		// 	emu.gamepads.controllers = [ emu.gamepads.controllers ];
-		// }
+		// Deactivate any set buttons that are active.
+		emu.gamepads.deActivateSetButtons();
 
-		if( emu.vars.innerEmu.emulatorIsReady == false ) {
-			// console.log("handleGamepadInput: The emu is not ready.");
+		if(onlyDeactivate==true){
 			return;
 		}
 
-		for(var i=0; i<emu.gamepads.controllers.length; i+=1){
-			let thisPad = emu.gamepads.controllers[i];
-			let buttons = thisPad.buttons;
-			let axes = thisPad.axes;
+		// Activate THIS setAll button.
+		this.classList.add("active");
 
-			if(thisPad.id == "8Bitdo SNES30 GamePad (Vendor: 2820 Product: 0009)"){
-				// Only allow a keypress every 60 intervals.
-				if( (thisPad.timestamp - thisPad.lastTimestamp > 20) && thisPad.timestamp > 0 ){
-					thisPad.lastTimestamp = JSON.parse(JSON.stringify(thisPad.timestamp));
+		// Determine which group of set buttons we are working with.
+		let tables = this.closest(".sectionWindow").querySelectorAll(".gamepadMappingTable");
+		let setButtons=[];
+		if(this.id=="gp1_setAll"){
+			setButtons=tables[0].querySelectorAll(".gp_cfg_set");
+		}
+		else if(this.id=="gp2_setAll"){
+			setButtons=tables[0].querySelectorAll(".gp_cfg_set");
+		}
 
-					// for(var ii=0; ii<buttons.length; ii+=1){
-					// 	if(buttons[ii].pressed) { console.log("button pressed: ", ii); }
-					// }
-					// console.clear();
-					// for(var ii=0; ii<axes.length; ii+=1){
-					// 	console.log("axe pressed: ", ii, "::::", axes[ii]);
-					// }
-					// console.log("\n");
+		// Set the queue for the autoset buttons. Create array (not object.)
+		setButtons.forEach(function(d,i,a){
+			emu.gamepads.autoSet_buttonsToAssign.push(d);
+		} );
+		if(emu.gamepads.autoSet_buttonsToAssign.length){
+			emu.gamepads.autoSet_buttonsToAssign[0].classList.add("activeBtnMap");
+		}
 
-					// Gamepad #1
-					// let btnPrev1     = game.btnHeld1;
-					// let btnHeld1     = joypad1_status_lo;
-					// let btnPressed1  = game.btnHeld1 & (game.btnHeld1 ^ game.btnPrev1);
-					// let btnReleased1 = game.btnPrev1 & (game.btnHeld1 ^ game.btnPrev1);
+		// Set the first set button in the queue to be active.
 
-					// B,A,Y,X
-					if(buttons[1].pressed ){ emu.funcs.emu_sendKeyEvent("keydown", "key_A"      , 1); } else{ emu.funcs.emu_sendKeyEvent("keyup", "key_A"      , 1); }
-					if(buttons[0].pressed ){ emu.funcs.emu_sendKeyEvent("keydown", "key_S"      , 1); } else{ emu.funcs.emu_sendKeyEvent("keyup", "key_S"      , 1); }
-					if(buttons[4].pressed ){ emu.funcs.emu_sendKeyEvent("keydown", "key_Q"      , 1); } else{ emu.funcs.emu_sendKeyEvent("keyup", "key_Q"      , 1); }
-					if(buttons[3].pressed ){ emu.funcs.emu_sendKeyEvent("keydown", "key_W"      , 1); } else{ emu.funcs.emu_sendKeyEvent("keyup", "key_W"      , 1); }
+		// setButtons.forEach(function(d,i,a){
+		// 	emu.gamepads.map1Button.call( d );
+		// });
+	},
+	// * Creates new map-config gamepad object.
+	newTemplateMapEntry  : function(obj){
+		emu.gamepads.mapping_newGamepads.push(
+			{
+				[obj.map_key] : {
+					"name":obj.name+"**"+obj.vendor+"**"+obj.product,
+					"btnMap":{
+						"BTN_B"      : { "type":"", "index":"" , "true":"", "sign":"" },
+						"BTN_Y"      : { "type":"", "index":"" , "true":"", "sign":"" },
+						"BTN_START"  : { "type":"", "index":"" , "true":"", "sign":"" },
+						"BTN_SELECT" : { "type":"", "index":"" , "true":"", "sign":"" },
+						"BTN_UP"     : { "type":"", "index":"" , "true":"", "sign":"" },
+						"BTN_DOWN"   : { "type":"", "index":"" , "true":"", "sign":"" },
+						"BTN_LEFT"   : { "type":"", "index":"" , "true":"", "sign":"" },
+						"BTN_RIGHT"  : { "type":"", "index":"" , "true":"", "sign":"" },
+						"BTN_A"      : { "type":"", "index":"" , "true":"", "sign":"" },
+						"BTN_X"      : { "type":"", "index":"" , "true":"", "sign":"" },
+						"BTN_SL"     : { "type":"", "index":"" , "true":"", "sign":"" },
+						"BTN_SR"     : { "type":"", "index":"" , "true":"", "sign":"" },
+					}
+				}
+			}
+		);
+	},
+	// * Update an in-RAM gamepad mapping at the gamepad config screen.
+	modifyTempMapEntry   : function(gpIndex, btnKey, typeKey, index, trueVal, sign){
+		// Get the object key for this gamepad.
+		var key = Object.keys(emu.gamepads.mapping_newGamepads[gpIndex])[0];
+		// Get a handle to the specific button record in the object.
+		let thisEntry = emu.gamepads.mapping_newGamepads[gpIndex][key]["btnMap"]["BTN_"+btnKey];
+		// Set the values.
+		thisEntry["type"]  = typeKey;
+		thisEntry["index"] = index;
+		thisEntry["true"]  = trueVal;
+		thisEntry["sign"]  = sign;
+	},
+	// * Main poll loop. Sets/activates gamepads, starts map template, polls for button press.
+	mapping_gp_poll_loop : function(){
+		// Generate the controller name ("status") if not already done.
+		let src_gamepads = emu.gamepads.getSrcGamepads();
+		if(!emu.vars.dom.gamepad["gp1_status"].innerHTML.length && src_gamepads.length>0){
+			// console.log("assigning gamepad name (1)");
+			let obj = emu.gamepads.generateGamepadName(src_gamepads[0]);
+			emu.vars.dom.gamepad["gp1_status"].innerHTML = obj.name + "**"+ obj.vendor+"**"+obj.product;
+			document.querySelector("#emu_gamepadConfig_P1.disconnected").classList.remove("disconnected");
+			emu.gamepads.newTemplateMapEntry(obj);
+		}
+		if(!emu.vars.dom.gamepad["gp2_status"].innerHTML.length && src_gamepads.length>1){
+			// console.log("assigning gamepad name (2)");
+			let obj = emu.gamepads.generateGamepadName(src_gamepads[1]);
+			emu.vars.dom.gamepad["gp2_status"].innerHTML = obj.name + "**"+ obj.vendor+"**"+obj.product;
+			document.querySelector("#emu_gamepadConfig_P2.disconnected").classList.remove("disconnected");
+			emu.gamepads.newTemplateMapEntry(obj);
+		}
 
-					// lShoulder, rShoulder
-					if(buttons[6].pressed ){ emu.funcs.emu_sendKeyEvent("keydown", "key_LSHIFT" , 1); } else{ emu.funcs.emu_sendKeyEvent("keyup", "key_LSHIFT" , 1); }
-					if(buttons[7].pressed ){ emu.funcs.emu_sendKeyEvent("keydown", "key_RSHIFT" , 1); } else{ emu.funcs.emu_sendKeyEvent("keyup", "key_RSHIFT" , 1); }
+		let buttonWasSet=false;
+		for(let i=0; i<emu.vars.dom.gamepad["gp_cfg_setBtns"].length; i+=1){
 
-					// UNUSED
-					// if(buttons[6].pressed ){ emu.funcs.emu_sendKeyEvent("keydown", ""           , 1); } else{ emu.funcs.emu_sendKeyEvent("keyup", ""           , 1); }
-					// if(buttons[7].pressed ){ emu.funcs.emu_sendKeyEvent("keydown", ""           , 1); } else{ emu.funcs.emu_sendKeyEvent("keyup", ""           , 1); }
+			let thisSetButton = emu.vars.dom.gamepad["gp_cfg_setBtns"][i];
+			if(thisSetButton.classList.contains("activeBtnMap")){
+				buttonWasSet = emu.gamepads.map1Button.call( thisSetButton );
 
-					// select, start
-					if(buttons[10].pressed ){ emu.funcs.emu_sendKeyEvent("keydown", "key_SPACE"  , 1); } else{ emu.funcs.emu_sendKeyEvent("keyup", "key_SPACE"  , 1); }
-					if(buttons[11].pressed ){ emu.funcs.emu_sendKeyEvent("keydown", "key_ENTER"  , 1); } else{ emu.funcs.emu_sendKeyEvent("keyup", "key_ENTER"  , 1); }
+				// Did the user press a button?
+				if(buttonWasSet){
+					// Deactivate all the set buttons.
+					emu.gamepads.deActivateSetButtons();
 
-					// UNUSED
-					// if(buttons[10].pressed){ emu.funcs.emu_sendKeyEvent("keydown", ""           , 1); } else{ emu.funcs.emu_sendKeyEvent("keyup", ""           , 1); }
-					// if(buttons[11].pressed){ emu.funcs.emu_sendKeyEvent("keydown", ""           , 1); } else{ emu.funcs.emu_sendKeyEvent("keyup", ""           , 1); }
+					// Is autoset on?
+					if(emu.gamepads.autoSet_buttonsToAssign.length){
+						// Remove the first index. We just did that button.
+						emu.gamepads.autoSet_buttonsToAssign.shift();
+					}
 
-					// up, down, left, right
-					if(axes[1] == -1){ emu.funcs.emu_sendKeyEvent("keydown", "key_UP"     , 1); } else{ emu.funcs.emu_sendKeyEvent("keyup", "key_UP"     , 1); }
-					if(axes[1] ==  1){ emu.funcs.emu_sendKeyEvent("keydown", "key_DOWN"   , 1); } else{ emu.funcs.emu_sendKeyEvent("keyup", "key_DOWN"   , 1); }
-					if(axes[0] == -1){ emu.funcs.emu_sendKeyEvent("keydown", "key_LEFT"   , 1); } else{ emu.funcs.emu_sendKeyEvent("keyup", "key_LEFT"   , 1); }
-					if(axes[0] ==  1){ emu.funcs.emu_sendKeyEvent("keydown", "key_RIGHT"  , 1); } else{ emu.funcs.emu_sendKeyEvent("keyup", "key_RIGHT"  , 1); }
+					// Are there any autosets left?
+					if(emu.gamepads.autoSet_buttonsToAssign.length){
+						// Set the next set button as activeBtnMap.
+						emu.gamepads.autoSet_buttonsToAssign[0].classList.add("activeBtnMap");
+					}
+					// No? We are all done with this gamepad then.
+					else{
+						// Deactivate all setAll buttons.
+						document.querySelectorAll(".gp_setAll").forEach(function(d,i,a){
+							d.classList.remove("active");
+						});
+					}
+					break;
+				}
+			}
+		}
 
+		// Start another iteration of the gamepad polling loop.
+		if(emu.gamepads.gamepadMapPolling==true){
+			setTimeout(emu.gamepads.mapping_gp_poll_loop, 100);
+		}
+	},
+	// * Unsets all the set buttons, sets the button that was clicked.
+	activateSetButton    : function(){
+		// Store the previous state.
+		let wasAlreadySet = this.classList.contains("activeBtnMap");
+
+		// Deactivate all the set buttons.
+		emu.gamepads.deActivateSetButtons();
+
+		// Only set this set button if it was not already set (acts like a toggle.)
+		if(!wasAlreadySet){
+			this.classList.add("activeBtnMap");
+		}
+	},
+	// * Sets all the set buttons to non-active.
+	deActivateSetButtons : function(){
+		// Deactivate all the set buttons.
+		emu.vars.dom.gamepad["gp_cfg_setBtns"].forEach(function(d,i,a){
+			d.classList.remove("activeBtnMap");
+		});
+	},
+	// * Looks for a gamepad button press. Sets the value in RAM, displays the value on the config screen.
+	map1Button           : function(e){
+		// Get the button name relative to this clicked "set" button.
+		let key  = this.closest('td').getAttribute("name");
+		// console.log(key);
+		// Get the destination element where the result string will be stored.
+		let dest = this.closest('td').nextElementSibling.querySelector("span[name='map']");
+
+		// alert("Hold '"+key+"' on the gamepad while clicking 'OK'");
+
+		// Poll the gamepads.
+		let src_gamepads = emu.gamepads.getSrcGamepads();
+
+		// console.log(src_gamepads);
+
+		// Go through the src_gamepad array buttons and axis.
+		var userHasSelectedAButton=false;
+		var newHTML;
+		for(let i=0; i<src_gamepads.length; i+=1){
+			if(userHasSelectedAButton){
+				return userHasSelectedAButton;
+			}
+
+			let buttons = src_gamepads[i].buttons.map(function(d,i,a){ return d.value; });
+			let axes    = src_gamepads[i].axes.map(function(d,i,a){ return d; });
+
+			// Get counts of buttons pressed.
+			let axesNegCnt    = axes.filter(function(d,i,a){ if(d==-1) { return true; } }).length
+			let axesPosCnt    = axes.filter(function(d,i,a){ if(d== 1) { return true; } }).length
+			let buttonsNegCnt = buttons.filter(function(d,i,a){ if(d==-1) { return true; } }).length
+			let buttonsPosCnt = buttons.filter(function(d,i,a){ if(d== 1) { return true; } }).length
+			let inputCount    = (axesNegCnt+axesPosCnt+buttonsNegCnt+buttonsPosCnt) ;
+
+			if(inputCount>1){
+				// alert("Please only press one button at a time.");
+				return userHasSelectedAButton;
+			}
+			else if(inputCount==0){
+				// console.log("No buttons pressed.");
+				return userHasSelectedAButton;
+			}
+
+			// Look through the axes/buttons for a non-zero value.
+			if     (axesNegCnt    || axesPosCnt)   {
+				let negIndex = axes.indexOf(-1);
+				let posIndex = axes.indexOf( 1);
+
+				if     (axes.indexOf(-1) !=-1){
+					newHTML="a:"+negIndex+":-1";
+					userHasSelectedAButton=true;
+					emu.gamepads.modifyTempMapEntry(i, key, "axes", negIndex, -1, "-");
+				}
+				else if(axes.indexOf( 1) !=-1){
+					newHTML="a:"+posIndex+":1";
+					userHasSelectedAButton=true;
+					emu.gamepads.modifyTempMapEntry(i, key, "axes", posIndex, 1, "+");
 				}
 				else{
-					// console.log(
-					// 	"\nSkipping...",
-					// 	"\n diff         :", thisPad.timestamp - thisPad.lastTimestamp,
-					// 	"\n timestamp    :", thisPad.timestamp,
-					// 	"\n lastTimestamp:", thisPad.lastTimestamp
-					// );
+					// console.log("Didn't actually press a axis??");
+				}
+			}
+			else if(buttonsNegCnt || buttonsPosCnt){
+				let negIndex = buttons.indexOf(-1);
+				let posIndex = buttons.indexOf( 1);
+
+				if     (buttons.indexOf(-1) !=-1){
+					newHTML="b:"+negIndex+":-1";
+					userHasSelectedAButton=true;
+					emu.gamepads.modifyTempMapEntry(i, key, "buttons", negIndex, -1, "-");
+				}
+				else if(buttons.indexOf( 1) !=-1){
+					newHTML="b:"+posIndex+":1";
+					userHasSelectedAButton=true;
+					emu.gamepads.modifyTempMapEntry(i, key, "buttons", posIndex, 1, "+");
+				}
+				else{
+					// console.log("Didn't actually press a button??");
 				}
 
 			}
-			// else if(thisPad.id == ""){
-			// }
+
+		}
+		if(newHTML && emu.gamepads.lastAssignedButton != newHTML){
+			dest.innerHTML = newHTML;
+			emu.gamepads.lastAssignedButton = newHTML;
+			return true;
+		}
+		else{
+			return false;
 		}
 
-		// document.querySelectorAll("g.hover_group").forEach(function(d,i,a){
-		// 	let pad=d.getAttribute("pad");
-		// 	let key=d.getAttribute("name");
-
-		// 	if(pad == "1"){
-		// 		d.addEventListener("mousedown" , function() { emu.funcs.emu_sendKeyEvent("keydown", key , 1); }, false);
-		// 		d.addEventListener("mouseleave", function() { emu.funcs.emu_sendKeyEvent("keyup"  , key , 1); }, false);
-		// 		d.addEventListener("mouseup"   , function() { emu.funcs.emu_sendKeyEvent("keyup"  , key , 1); }, false);
-		// 	}
-		// 	else if(d.getAttribute("pad") == "2"){
-		// 		d.addEventListener("mousedown" , function() { emu.funcs.emu_sendKeyEvent("keydown", "key_RALT" , 2); emu.funcs.emu_sendKeyEvent("keydown", key        , 2); }, false);
-		// 		d.addEventListener("mouseleave", function() { emu.funcs.emu_sendKeyEvent("keyup"  , key        , 2); emu.funcs.emu_sendKeyEvent("keyup"  , "key_RALT" , 2); }, false);
-		// 		d.addEventListener("mouseup"   , function() { emu.funcs.emu_sendKeyEvent("keyup"  , key        , 2); emu.funcs.emu_sendKeyEvent("keyup"  , "key_RALT" , 2); }, false);
-		// 	}
-		// });
 
 	},
+	// * Turns off the main polling, opens the config window, handles emulator pause state.
+	openGamepadConfig    : function(){
+		// Reset the values in this section.
+		emu.gamepads.mapping_newGamepads     = []
+		emu.gamepads.prev_pollState          = false
+		emu.gamepads.prev_emuAutoPauseSetting= false
+		emu.gamepads.gamepadMapPolling       = false
+		emu.gamepads.autoSet_buttonsToAssign = []
+		emu.gamepads.lastAssignedButton      = ""
 
-	haveEvents            : [],
-	controllers           : [],
-	rAF                   : undefined,
-	gamepadPollIntervalId : undefined,
+		// Stop the current gamepad polling if it is running.
+		if(emu.gamepads.enabled){
+			emu.gamepads.prev_pollState=emu.gamepads.enabled;
+			emu.gamepads.enabled=true;
+			emu.gamepads.init();
+		}
 
-	enabled : false,
+		// Pause the emulator.
+		if(emu.vars.dom.view["emuControls_autopause_chk"].classList.contains("enabled")){
+			emu.gamepads.prev_emuAutoPauseSetting=true;
+		}
+		emu.vars.dom.view["emuControls_autopause_chk"].classList.add("enabled");
+		emu.funcs.emu_focusing(null, "mouseleave");
 
-	deInit : function(){
-		emu.gamepads.enabled=true;
-		emu.gamepads.init();
+		// Turn on very basic polling.
+		emu.gamepads.gamepadMapPolling=true;
+		setTimeout(emu.gamepads.mapping_gp_poll_loop, 100);
+
+		// Open the gamepad config modal.
+		emu.vars.dom.gamepad["gamepadConfigDiv"].classList.add('showModal');
+
 	},
-	init : function(){
-		emu.gamepads.haveEvents = 'GamepadEvent' in window;
-		emu.gamepads.controllers = [];
-		emu.gamepads.rAF = window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.requestAnimationFrame;
-		emu.gamepads.gamepadPollIntervalId = undefined;
+	// * Turns off the basic polling, closes the config window, handles emulator pause state.
+	closeGamepadConfig   : function(){
+		// Clear the flag for the gamepad map polling.
+		emu.gamepads.gamepadMapPolling=false;
 
+		// Wait a short bit to make sure any remaining polls complete.
+		setTimeout(function(){
+			// Close the gamepad config modal.
+			emu.vars.dom.gamepad["gamepadConfigDiv"].classList.remove('showModal');
+
+			// Restore the previous gamepad polling if it was enabled before.
+			if(emu.gamepads.prev_pollState){
+				emu.gamepads.enabled=false;
+				emu.gamepads.init();
+			}
+
+			// Unpause the emulator.
+			if(emu.gamepads.prev_emuAutoPauseSetting==true){
+				emu.vars.dom.view["emuControls_autopause_chk"].classList.add("enabled");
+				emu.funcs.emu_focusing(null, "mouseleave");
+			}
+			else{
+				emu.vars.dom.view["emuControls_autopause_chk"].classList.remove("enabled");
+				emu.funcs.emu_focusing(null, "mouseenter");
+			}
+
+		}, 250);
+
+
+	},
+	// * Updates the local gamepad mapping object for the displayed active gamepads.
+	saveChanges : function(){
+		// Go through all the new gamepad JSON.
+		for(let i=0; i<emu.gamepads.mapping_newGamepads.length; i+=1){
+			// Get the key.
+			var key = Object.keys(emu.gamepads.mapping_newGamepads[i])[0];
+			// Set that key (overwrite if it already exists) with the new data.
+			emu.gamepads.gp_config_mappings[key] = emu.gamepads.mapping_newGamepads[i][key];
+		}
+
+		// Update LocalStorage with the full gp_config_mappings object.
+		localStorage.setItem("EMU_gp_config_mappings", JSON.stringify(emu.gamepads.gp_config_mappings));
+
+		// Tell the user the operation is done. Offer to close the config window.
+		let conf = confirm("Changes saved (in RAM and LocalStorage) and ready for immediate use!\n\nPress 'OK' to close the config window.\n\nPress 'Cancel' to just close this message.");
+
+		// If the user clicked 'OK' then close the config window.
+		if(conf){
+			emu.gamepads.closeGamepadConfig();
+		}
+	},
+	// * Reads from the gp_config_mappings in RAM and provides a JSON download of the data.
+	download    : function(){
+		var EMU_gp_config_mappingsuser = JSON.parse(localStorage.getItem("EMU_gp_config_mappings"));
+		if(EMU_gp_config_mappingsuser){
+			// Load FileSaver if needed.
+			featureDetection.funcs.applyFeatures_fromList([ "FileSaver" ]).then(
+				function(res){
+					// Convert to blob.
+					var blob = new Blob( [JSON.stringify(EMU_gp_config_mappingsuser,null,0)] , {type: "text/plain;charset=utf-8"});
+					// Present the download.
+					saveAs(blob, "EMU_gp_config_mappings.json");
+				}
+				,emu.funcs.shared.rejectedPromise
+			);
+
+		}
+	},
+	// * Reads from a user-supplied gp_config_mappings file then integrates it and updates localStorage.
+	upload      : function(){
+		// Create a temporary input button.
+		let input  = document.createElement("input");
+		input.type = "file";
+		input.id   = "tempGamepadFileUpload";
+		// Create an onchange listener for when the user selects a file.
+		input.onchange=function(){
+			input.onchange=null;
+			let prom = new Promise(function(resolve, reject) {
+				// Set up the new FileReader.
+				var reader = new FileReader();
+				// Create the onload listener to handle the results.
+				reader.onload = (function(e) {
+					reader.onload=null;
+					// Return the file data.
+					resolve(e.target.result);
+				});
+				// Read the file.
+				reader.readAsText(input.files[0]);
+
+			});
+			// Handle the results from the FileReader.
+			prom.then(function(res){
+				input=null;
+				// Parse the JSON.
+				let newJSON = JSON.parse(res);
+				console.log(newJSON);
+
+				let keys = Object.keys(newJSON);
+				// Go through all the new gamepad JSON.
+				for(let i=0; i<keys.length; i+=1){
+					// Get the key.
+					var key = keys[i];
+					// Set that key (overwrite if it already exists) with the new data.
+					emu.gamepads.gp_config_mappings[key] = newJSON[key];
+				}
+
+				// Update LocalStorage with the full gp_config_mappings object.
+				localStorage.setItem("EMU_gp_config_mappings", JSON.stringify(emu.gamepads.gp_config_mappings));
+
+				// Tell the user the operation is done. Offer to close the config window.
+				let conf = confirm("Changes saved (in RAM and LocalStorage) and ready for immediate use!\n\nPress 'OK' to close the config window.\n\nPress 'Cancel' to just close this message.");
+
+				// If the user clicked 'OK' then close the config window.
+				if(conf){
+					emu.gamepads.closeGamepadConfig();
+				}
+
+			}
+			,emu.funcs.shared.rejectedPromise
+			);
+		};
+
+		// Click it.
+		input.click();
+
+		// User selects file from their computer.
+		// Read the file.
+		// Integrate the file into the current game mappings.
+	},
+
+	// MAIN GAMEPAD FUNCTIONS/VARIABLES.
+	enabled                : false,     // Saves the status of the main gamepad polling. Used in init to determine to init or de-init.
+	gp_setTimeout_id       : undefined, // Stores the id returned by setTimeout.
+	gp_raf_id              : undefined, // Stores the id returned by requestAnimationFrame.
+	gp_poll_freq           : 16,        // Frequency of gamepad polling.
+	gamepads               : [],        // Stores the found gamepads and some additional state data.
+	// * Used in translation of Uzebox buttons to their bit position and the key the browser needs to send to get that button pressed in CUzeBox.
+	uzeBox_gamepad_mapping : {
+		"BTN_B"      : { "key":"key_A"     , "bitPos":0  },
+		"BTN_Y"      : { "key":"key_Q"     , "bitPos":1  },
+		"BTN_SELECT" : { "key":"key_SPACE" , "bitPos":2  },
+		"BTN_START"  : { "key":"key_ENTER" , "bitPos":3  },
+		"BTN_UP"     : { "key":"key_UP"    , "bitPos":4  },
+		"BTN_DOWN"   : { "key":"key_DOWN"  , "bitPos":5  },
+		"BTN_LEFT"   : { "key":"key_LEFT"  , "bitPos":6  },
+		"BTN_RIGHT"  : { "key":"key_RIGHT" , "bitPos":7  },
+		"BTN_A"      : { "key":"key_S"     , "bitPos":8  },
+		"BTN_X"      : { "key":"key_W"     , "bitPos":9  },
+		"BTN_SL"     : { "key":"key_RSHIFT", "bitPos":10 },
+		"BTN_SR"     : { "key":"key_LSHIFT", "bitPos":11 },
+	},
+	// * Gamepad button mappings to Uzebox buttons. Specific to the gamepad.
+	gp_config_mappings     : {
+		// "2820:0009" : {
+		// 	"name":"8Bitdo SNES30 GamePad**2820**0009",
+		// 	"btnMap":{
+		// 		"BTN_B"      : { "type":"buttons" , "index":1 , "true":1 , "sign":"+" },
+		// 		"BTN_Y"      : { "type":"buttons" , "index":4 , "true":1 , "sign":"+" },
+		// 		"BTN_START"  : { "type":"buttons" , "index":11, "true":1 , "sign":"+" },
+		// 		"BTN_SELECT" : { "type":"buttons" , "index":10, "true":1 , "sign":"+" },
+		// 		"BTN_UP"     : { "type":"axes"    , "index":1 , "true":-1, "sign":"-" },
+		// 		"BTN_DOWN"   : { "type":"axes"    , "index":1 , "true":1 , "sign":"+" },
+		// 		"BTN_LEFT"   : { "type":"axes"    , "index":0 , "true":-1, "sign":"-" },
+		// 		"BTN_RIGHT"  : { "type":"axes"    , "index":0 , "true":1 , "sign":"+" },
+		// 		"BTN_A"      : { "type":"buttons" , "index":0 , "true":1 , "sign":"+" },
+		// 		"BTN_X"      : { "type":"buttons" , "index":3 , "true":1 , "sign":"+" },
+		// 		"BTN_SL"     : { "type":"buttons" , "index":6 , "true":1 , "sign":"+" },
+		// 		"BTN_SR"     : { "type":"buttons" , "index":7 , "true":1 , "sign":"+" },
+		// 	}
+		// },
+		"05ac:111d" : {
+			"name":"Gamepad**05ac**111d",
+			"btnMap":{
+				"BTN_B"      : { "type":"buttons" , "index":0 , "true":1 , "sign":"+" },
+				"BTN_Y"      : { "type":"buttons" , "index":3 , "true":1 , "sign":"+" },
+				"BTN_START"  : { "type":"buttons" , "index":11, "true":1 , "sign":"+" },
+				"BTN_SELECT" : { "type":"buttons" , "index":10, "true":1 , "sign":"+" },
+				"BTN_UP"     : { "type":"axes"    , "index":7 , "true":-1, "sign":"-" },
+				"BTN_DOWN"   : { "type":"axes"    , "index":7 , "true":1 , "sign":"+" },
+				"BTN_LEFT"   : { "type":"axes"    , "index":6 , "true":-1, "sign":"-" },
+				"BTN_RIGHT"  : { "type":"axes"    , "index":6 , "true":1 , "sign":"+" },
+				"BTN_A"      : { "type":"buttons" , "index":1 , "true":1 , "sign":"+" },
+				"BTN_X"      : { "type":"buttons" , "index":4 , "true":1 , "sign":"+" },
+				"BTN_SL"     : { "type":"buttons" , "index":6 , "true":1 , "sign":"+" },
+				"BTN_SR"     : { "type":"buttons" , "index":7 , "true":1 , "sign":"+" },
+			}
+		},
+		"1234:bead" : {
+			"name":"vJoy - Virtual Joystick**1234**bead)",
+			"btnMap":{
+				"BTN_B"      : { "type":"buttons" , "index":0  , "true":1 , "sign":"+" },
+				"BTN_Y"      : { "type":"buttons" , "index":1  , "true":1 , "sign":"+" },
+				"BTN_START"  : { "type":"buttons" , "index":2  , "true":1 , "sign":"+" },
+				"BTN_SELECT" : { "type":"buttons" , "index":3  , "true":1 , "sign":"+" },
+				"BTN_UP"     : { "type":"buttons" , "index":4  , "true":1 , "sign":"+" },
+				"BTN_DOWN"   : { "type":"buttons" , "index":5  , "true":1 , "sign":"+" },
+				"BTN_LEFT"   : { "type":"buttons" , "index":6  , "true":1 , "sign":"+" },
+				"BTN_RIGHT"  : { "type":"buttons" , "index":7  , "true":1 , "sign":"+" },
+				"BTN_A"      : { "type":"buttons" , "index":8  , "true":1 , "sign":"+" },
+				"BTN_X"      : { "type":"buttons" , "index":9  , "true":1 , "sign":"+" },
+				"BTN_SL"     : { "type":"buttons" , "index":10 , "true":1 , "sign":"+" },
+				"BTN_SR"     : { "type":"buttons" , "index":11 , "true":1 , "sign":"+" },
+			}
+		}
+	},
+	// * Gets a raw copy of navigator.gamepads() and strips out any null or blank values.
+	getSrcGamepads      : function(){
+		// Get the gamepad info. There are many different ways. Use the first one that returns data.
+		let raw_gamepads = navigator.getGamepads ? navigator.getGamepads() : ( navigator.webkitGetGamepads ? navigator.webkitGetGamepads() : [] ) ;
+
+		// Create blank array for the src_gamepads.
+		let src_gamepads=[];
+
+		// Copy the raw_gamepads into src_gamepads.
+		for(let i=0; i<raw_gamepads.length; i+=1){
+			// Is this actually a gamepad object? If not then don't add it.
+			if("undefined"==typeof raw_gamepads[i] || raw_gamepads[i]==null){ continue; }
+
+			// Add the gamepad. Use the same index value as indicated by the gamepad data.
+			if(raw_gamepads[i]) { src_gamepads[ raw_gamepads[i].index ] = raw_gamepads[i] ; }
+		}
+		return src_gamepads;
+	},
+	// * Returns an object with the unique identifiers for a specified gamepad instance.
+	generateGamepadName : function(thisPad){
+		// Get the vendor and product id.
+		let ff_id = thisPad.id.split("-").map(function(d,i,a){ return d.trim();} );
+		let cr_id = thisPad.id.split(":").map(function(d,i,a){ return d.trim();} );
+		let vendor  = "";
+		let product = "";
+		let name    = "";
+		let map_key = "";
+		let newMapping=undefined;
+
+		// Is this a Firefox id string?
+		if(ff_id.length==3){
+			vendor  = ff_id[0].trim();
+			product = ff_id[1].trim();
+			name    = ff_id[2].trim();
+		}
+		// Is this a Chrome id string?
+		else if(cr_id.length==3){
+			// Need to clean up the string first.
+			name    = cr_id[0].split("(")[0].trim();
+			vendor  = cr_id[1].split(" Product")[0].trim();
+			product = cr_id[2].split(")")[0].trim();
+		}
+
+		// Put together what the mapping key would be for this controller.
+		map_key = vendor+":"+product;
+
+		return {
+			"name"   :name   ,
+			"vendor" :vendor ,
+			"product":product,
+			"map_key":map_key,
+		};
+
+	},
+	// * Handles updating the local gamepad cache, determining pressed buttons, sending keyboard events.
+	handleInputs        : function(){
+		// * Send the specified key from the specified player gamepad.
+		function sendNewKey(i, btnPressed, btnReleased){
+			let p2=function(i, dir){
+				// Only act on player 2.
+				if(i==1){
+					if     (dir=="dn"){ emu.funcs.emu_sendKeyEvent("keydown", "key_RALT" , i+1); }
+					else if(dir=="up"){ emu.funcs.emu_sendKeyEvent("keyup"  , "key_RALT" , i+1); }
+				}
+			}
+
+			// Named constants.
+			const BTN_SR     = 2048 // = ( 1<<11 ) ;
+			const BTN_SL     = 1024 // = ( 1<<10 ) ;
+			const BTN_X      = 512  // = ( 1<<9  ) ;
+			const BTN_A      = 256  // = ( 1<<8  ) ;
+			const BTN_RIGHT  = 128  // = ( 1<<7  ) ;
+			const BTN_LEFT   = 64   // = ( 1<<6  ) ;
+			const BTN_DOWN   = 32   // = ( 1<<5  ) ;
+			const BTN_UP     = 16   // = ( 1<<4  ) ;
+			const BTN_START  = 8    // = ( 1<<3  ) ;
+			const BTN_SELECT = 4    // = ( 1<<2  ) ;
+			const BTN_Y      = 2    // = ( 1<<1  ) ;
+			const BTN_B      = 1    // = ( 1<<0  ) ;
+
+			// If the button was pressed or held then send a keydown event.
+			// If the button was released then send a keyup event.
+			// If this the second iteration of this loop then send the key modifier to indicate player 2.
+
+			if     ( btnPressed  & BTN_B     ) { p2(i,"dn");   emu.funcs.emu_sendKeyEvent("keydown", "key_A"      , i+1);   p2(i,"up"); }
+			else if( btnReleased & BTN_B     ) { p2(i,"dn");   emu.funcs.emu_sendKeyEvent("keyup"  , "key_A"      , i+1);   p2(i,"up"); }
+
+			if     ( btnPressed  & BTN_A     ) { p2(i,"dn");   emu.funcs.emu_sendKeyEvent("keydown", "key_S"      , i+1);   p2(i,"up"); }
+			else if( btnReleased & BTN_A     ) { p2(i,"dn");   emu.funcs.emu_sendKeyEvent("keyup"  , "key_S"      , i+1);   p2(i,"up"); }
+
+			if     ( btnPressed  & BTN_Y     ) { p2(i,"dn");   emu.funcs.emu_sendKeyEvent("keydown", "key_Q"      , i+1);   p2(i,"up"); }
+			else if( btnReleased & BTN_Y     ) { p2(i,"dn");   emu.funcs.emu_sendKeyEvent("keyup"  , "key_Q"      , i+1);   p2(i,"up"); }
+
+			if     ( btnPressed  & BTN_X     ) { p2(i,"dn");   emu.funcs.emu_sendKeyEvent("keydown", "key_W"      , i+1);   p2(i,"up"); }
+			else if( btnReleased & BTN_X     ) { p2(i,"dn");   emu.funcs.emu_sendKeyEvent("keyup"  , "key_W"      , i+1);   p2(i,"up"); }
+
+			if     ( btnPressed  & BTN_SL    ) { p2(i,"dn");   emu.funcs.emu_sendKeyEvent("keydown", "key_LSHIFT" , i+1);   p2(i,"up"); }
+			else if( btnReleased & BTN_SL    ) { p2(i,"dn");   emu.funcs.emu_sendKeyEvent("keyup"  , "key_LSHIFT" , i+1);   p2(i,"up"); }
+
+			if     ( btnPressed  & BTN_SR    ) { p2(i,"dn");   emu.funcs.emu_sendKeyEvent("keydown", "key_RSHIFT" , i+1);   p2(i,"up"); }
+			else if( btnReleased & BTN_SR    ) { p2(i,"dn");   emu.funcs.emu_sendKeyEvent("keyup"  , "key_RSHIFT" , i+1);   p2(i,"up"); }
+
+			if     ( btnPressed  & BTN_SELECT) { p2(i,"dn");   emu.funcs.emu_sendKeyEvent("keydown", "key_SPACE"  , i+1);   p2(i,"up"); }
+			else if( btnReleased & BTN_SELECT) { p2(i,"dn");   emu.funcs.emu_sendKeyEvent("keyup"  , "key_SPACE"  , i+1);   p2(i,"up"); }
+
+			if     ( btnPressed  & BTN_START ) { p2(i,"dn");   emu.funcs.emu_sendKeyEvent("keydown", "key_ENTER"  , i+1);   p2(i,"up"); }
+			else if( btnReleased & BTN_START ) { p2(i,"dn");   emu.funcs.emu_sendKeyEvent("keyup"  , "key_ENTER"  , i+1);   p2(i,"up"); }
+
+			if     ( btnPressed  & BTN_RIGHT ) { p2(i,"dn");   emu.funcs.emu_sendKeyEvent("keydown", "key_RIGHT"  , i+1);   p2(i,"up"); }
+			else if( btnReleased & BTN_RIGHT ) { p2(i,"dn");   emu.funcs.emu_sendKeyEvent("keyup"  , "key_RIGHT"  , i+1);   p2(i,"up"); }
+
+			if     ( btnPressed  & BTN_LEFT  ) { p2(i,"dn");   emu.funcs.emu_sendKeyEvent("keydown", "key_LEFT"   , i+1);   p2(i,"up"); }
+			else if( btnReleased & BTN_LEFT  ) { p2(i,"dn");   emu.funcs.emu_sendKeyEvent("keyup"  , "key_LEFT"   , i+1);   p2(i,"up"); }
+
+			if     ( btnPressed  & BTN_DOWN  ) { p2(i,"dn");   emu.funcs.emu_sendKeyEvent("keydown", "key_DOWN"   , i+1);   p2(i,"up"); }
+			else if( btnReleased & BTN_DOWN  ) { p2(i,"dn");   emu.funcs.emu_sendKeyEvent("keyup"  , "key_DOWN"   , i+1);   p2(i,"up"); }
+
+			if     ( btnPressed  & BTN_UP    ) { p2(i,"dn");   emu.funcs.emu_sendKeyEvent("keydown", "key_UP"     , i+1);   p2(i,"up"); }
+			else if( btnReleased & BTN_UP    ) { p2(i,"dn");   emu.funcs.emu_sendKeyEvent("keyup"  , "key_UP"     , i+1);   p2(i,"up"); }
+		}
+		// * Update the local cache of gamepad objects.
+		function getNewGamepadStates(){
+			function update_gamepadObj(src_gamepads){
+				// Create the data for new gamepads or update the gamepad key on the known gamepads.
+				for(let i=0; i<src_gamepads.length; i+=1){
+					let thisPad = src_gamepads[i];
+
+					// Is this an unconfigured gamepad?
+					if(
+						!emu.gamepads.gamepads[thisPad.index] && // No data entry at this index.
+						thisPad.id                                // And the src has data.
+					){
+
+						let newMapping=undefined;
+						let map_key = emu.gamepads.generateGamepadName(thisPad).map_key;
+
+						// Find the gamepad mapping:
+						if( emu.gamepads.gp_config_mappings.hasOwnProperty(map_key) !=-1){
+							// Assign the map.
+							newMapping=emu.gamepads.gp_config_mappings[map_key];
+						}
+
+						// We don't already have a mapping for this gamepad. Did the user load a mapping?
+						if(newMapping==undefined){
+							// Cannot use this gamepad. A map must be created for it first.
+							// emu.gamepads.unmappedGamepads
+							// alert("test");
+						}
+						else{
+							console.log("Gamepad found! Index:", thisPad.index, ", id:", thisPad.id, "map_key:", map_key);
+							// Add the new gamepad.
+							emu.gamepads.gamepads[ thisPad.index ] = {
+								"gamepad"       : thisPad   ,
+								"btnMap"        : newMapping,
+								"btnPrev"       : 0         ,
+								"lastTimestamp" : 0         ,
+							};
+						}
+					}
+					// Just update the gamepad data key but make sure that the cached data already exists.
+					else if( emu.gamepads.gamepads[thisPad.id]){
+						// console.log("Updating existing gamepad!", emu.gamepads.gamepads[i].btnPrev);
+						emu.gamepads.gamepads[ thisPad.index ].gamepad = src_gamepads[i];
+					}
+					else{
+						// Gamepad data is not cached and/or the src has no data.
+						//
+					}
+				}
+			}
+			update_gamepadObj( emu.gamepads.getSrcGamepads() );
+		}
+		// * Reads gamepad instance. Uses the specified gamepad mapping and returns an Uzebox-compatible value for the gamepad button state.
+		function findGpButtonsViaMapping (gp_obj){
+			// gp_obj provides the custom values as well as the gamepad state.
+			let map     = gp_obj.btnMap.btnMap;
+			let axes    = gp_obj.gamepad.axes;
+			let buttons = gp_obj.gamepad.buttons.map(function(d,i,a){ return d.value });
+
+			// Return these after populating them.
+			let uzeBin      = 0;
+			let uzeKeys     = [];
+			let browserKeys = [];
+
+			// Look through the axes/buttons mappings.
+			let map_keys = Object.keys(map);
+
+			for(let i=0; i<map_keys.length; i+=1){
+				let d=map_keys[i];
+				let btn_value  = buttons[map[d].index];
+				let axes_value = axes[map[d].index];
+
+				if     (map[d].type=="buttons"){
+					// Is the button at the specified button array index true?
+					// ??? Look for what the "index" is.
+					if(btn_value==1){
+						// Get the key for that button.
+						let key = map_keys[i];
+						// Use the key to get the associated Uzebox gamepad key and the Uzebox bitPos.
+						let uzeBtn = emu.gamepads.uzeBox_gamepad_mapping[key];
+						let kb_key = uzeBtn.key;
+						let bitPos = uzeBtn.bitPos;
+
+						uzeBin |= (1<<bitPos);
+						uzeKeys.push(key);
+						browserKeys.push(kb_key);
+					}
+				}
+				else if (map[d].type=="axes"){
+					// Is the button at the specified button array index true?
+					// ??? Look for what the "index" is.
+
+					if(axes_value!=0){
+						// Does the sign of the value match the designated sign for this button?
+						let value_sign = Math.sign(axes_value) == -1 ? "-" : "+";
+						let req_sign   = map[d].sign;
+
+						if(value_sign == req_sign){
+							// Get the key for that button.
+							let key = map_keys[i];
+							// Use the key to get the associated Uzebox gamepad key and the Uzebox bitPos.
+							let uzeBtn = emu.gamepads.uzeBox_gamepad_mapping[key];
+							let kb_key = uzeBtn.key;
+							let bitPos = uzeBtn.bitPos;
+
+							uzeBin |= (1<<bitPos);
+							uzeKeys.push(key);
+							browserKeys.push(kb_key);
+						}
+
+					}
+
+				}
+			}
+
+			return {
+				"uzeBin"     :uzeBin     ,
+				"uzeKeys"    :uzeKeys    ,
+				"browserKeys":browserKeys,
+			};
+
+		}
+
+		// Read the source gamepad data, add to local cache if defined and not null and found button mapping.
+		getNewGamepadStates();
+
+		// var newHTML1="";
+		// var newHTML2="";
+		// var padsUsed=[];
+
+		// Go through the gamepad list.
+		for(let i=0; i<emu.gamepads.gamepads.length; i+=1){
+			// Only two gamepads are allowed for now.
+			if(i>1){ break; }
+
+			// Get a handle to this gamepad.
+			let padIndex = emu.gamepads.gamepads[i].gamepad.index;
+			let thisPad   = emu.gamepads.gamepads[ padIndex ] ;
+
+			// First, is the timestamp the same? If so, there has been no new input. Skip!
+			if( thisPad.gamepad.timestamp == thisPad.lastTimestamp ){ continue; }
+
+			// Decipher the input into Uzebox binary.
+			let input = findGpButtonsViaMapping( thisPad );
+
+			// Determine what buttons have changed.
+			// Compare old data to new data.
+
+			// The buttons held at the last poll.
+			let btnPrev     = thisPad.btnPrev;//emu.gamepads.gamepads[i].btnHeld;
+			// The buttons held at THIS poll.
+			let btnHeld     = input.uzeBin;
+			// The new buttons pressed at THIS poll.
+			let btnPressed  = btnHeld & (btnHeld ^ btnPrev);
+			// The buttons released at THIS poll.
+			let btnReleased = btnPrev & (btnHeld ^ btnPrev);
+
+			// Save the last timestamp.
+			thisPad.lastTimestamp=thisPad.gamepad.timestamp;
+
+			// Save the prevBtn state for the next poll.
+			thisPad.btnPrev=btnHeld;
+
+			// Indicate that this pad had activity.
+			// padsUsed[i]=true;
+
+			// Send the keys that the user pressed on the the gamepad.
+			sendNewKey(i, btnPressed, btnReleased);
+
+			// Add to the debug info.
+			// let tempHTML = "";
+			// tempHTML+='<table class="table1">';
+			// tempHTML+='	<tr> <td>Map name:   </td> <td style="font-size:75%;"> ' + thisPad.btnMap.name +' </td> </tr>';
+			// tempHTML+='	<tr> <td>btnPrev     </td> <td> ' + btnPrev     .toString(2).padStart(16, "0") +' </td> </tr>';
+			// tempHTML+='	<tr> <td>btnHeld     </td> <td> ' + btnHeld     .toString(2).padStart(16, "0") +' </td> </tr>';
+			// tempHTML+='	<tr> <td>btnPressed  </td> <td> ' + btnPressed  .toString(2).padStart(16, "0") +' </td> </tr>';
+			// tempHTML+='	<tr> <td>btnReleased </td> <td> ' + btnReleased .toString(2).padStart(16, "0") +' </td> </tr>';
+			// tempHTML+='	<tr> <td>pressed     </td> <td> ' + input.uzeKeys.join("<br>")                 +' </td> </tr>';
+			// tempHTML+='</table>';
+			// tempHTML+='<br>';
+
+			// if     (i==0){ newHTML1+=tempHTML; }
+			// else if(i==1){ newHTML2+=tempHTML; }
+		}
+
+		// Output some debug info:
+		// document.querySelector("#gamepadConfig #gamepads_count").innerHTML = emu.gamepads.gamepads.length;
+		// if(padsUsed[0]){ document.querySelector("#gamepadConfig #gamepad1_status").innerHTML = newHTML1; }
+		// if(padsUsed[1]){ document.querySelector("#gamepadConfig #gamepad2_status").innerHTML = newHTML2; }
+
+		// Request another animation frame.
+		emu.gamepads.gp_setTimeout_id = setTimeout(function(){
+			emu.gamepads.gp_raf_id = window.requestAnimationFrame(emu.gamepads.handleInputs);
+		}, emu.gamepads.gp_poll_freq);
+
+	},
+	// * For activating or de-activating the gamepad polling.
+	init                : function(){
+		// Determine if this call should be an init or a de-init.
 		let initialize=undefined;
 		if(emu.gamepads.enabled==true){ initialize=false; }
-		else{ initialize=true; }
+		else                           { initialize=true; }
 
+		// INIT:
 		if     (initialize==true){
-			// For Firefox, when a gamepad appears there is an event for it.
-			if (emu.gamepadshaveEvents) {
-				window.addEventListener("gamepadconnected"   , emu.gamepads.connecthandler);
-				window.addEventListener("gamepaddisconnected", emu.gamepads.disconnecthandler);
+			// Check if localStorage has mapping values. If so then integrate them into the in-RAM mapping values.
+			var EMU_gp_config_mappingsuser = JSON.parse(localStorage.getItem("EMU_gp_config_mappings"));
+			if(EMU_gp_config_mappingsuser){
+				let keys = Object.keys(EMU_gp_config_mappingsuser);
+				// Go through all the new gamepad JSON.
+				for(let i=0; i<keys.length; i+=1){
+					// Get the key.
+					var key = keys[i];
+					// Set that key (overwrite if it already exists) with the new data.
+					emu.gamepads.gp_config_mappings[key] = EMU_gp_config_mappingsuser[key];
+				}
 			}
-			// For Chrome you need to poll.
-			else {
-				emu.gamepads.gamepadPollIntervalId = setInterval(emu.gamepads.scangamepads, 25);
-			}
-			emu.gamepads.enabled=true;
-			console.log("Gamepad input has been ENABLED!");
-		}
-		else if(initialize==false){
-			// For Firefox, when a gamepad appears there is an event for it.
-			if (emu.gamepadshaveEvents) {
-				window.removeEventListener("gamepadconnected"   , emu.gamepads.connecthandler);
-				window.removeEventListener("gamepaddisconnected", emu.gamepads.disconnecthandler);
-			}
-			// For Chrome you need to poll.
-			else {
-				clearInterval(emu.gamepads.gamepadPollIntervalId);
-			}
-			emu.gamepads.enabled=false;
-			console.log("Gamepad input has been disabled!");
-		}
 
+			// Set first polling iteration.
+			emu.gamepads.gp_setTimeout_id = setTimeout(function(){
+				// Do the first requestAnimationFrame.
+				emu.gamepads.gp_raf_id = window.requestAnimationFrame(emu.gamepads.handleInputs);
+
+				// Set the flag to indicate that the gamepads ARE enabled.
+				emu.gamepads.enabled=true;
+			}, emu.gamepads.gp_poll_freq);
+
+			// Indicate the new gamepad polling state.
+			document.querySelector("#gamepadIcon_container1").classList.add("pollingActive");
+			// console.log("GAMEPAD POLLING ENABLED");
+
+		}
+		// DE-INIT:
+		else if(initialize==false){
+			// Cancel the last polling iteration: setTimeout..
+			window.clearTimeout( emu.gamepads.gp_setTimeout_id );
+
+			// Cancel the last polling iteration: requestAnimationFrame.
+			window.cancelAnimationFrame( emu.gamepads.gp_raf_id );
+
+			// Set the flag to indicate that the gamepads are NOT enabled.
+			emu.gamepads.enabled=false;
+
+			// Indicate the new gamepad polling state.
+			document.querySelector("#gamepadIcon_container1").classList.remove("pollingActive");
+			// console.log("GAMEPAD POLLING DISABLED");
+		}
 	},
 };
 emu.funcs           = {
+	addAllListeners: function() {
+		let EL_gamepads = function(){
+			// GAMEPAD CONFIG: Data Manager
+			emu.vars.dom.gamepad["saveChanges"].addEventListener("click", emu.gamepads.saveChanges, false);
+			emu.vars.dom.gamepad["download"   ].addEventListener("click", emu.gamepads.download, false);
+			emu.vars.dom.gamepad["upload"     ].addEventListener("click", emu.gamepads.upload, false);
+
+			// GAMEPAD CONFIG: Open and close buttons for the gamepad config modal.
+			emu.vars.dom.gamepad["openBtn" ].addEventListener("click", emu.gamepads.openGamepadConfig, false);
+			emu.vars.dom.gamepad["closeBtn"].addEventListener("click", emu.gamepads.closeGamepadConfig, false);
+
+			// GAMEPAD CONFIG: Individual "set" buttons.
+			var gpCfgBtns = emu.vars.dom.gamepad["gp_cfg_setBtns"];
+			gpCfgBtns.forEach(function(d, i, a) {
+				d.addEventListener("click", emu.gamepads.activateSetButton, false);
+			});
+
+			// GAMEPAD CONFIG: "setAll" buttons.
+			emu.vars.dom.gamepad["gp1_setAll"].addEventListener("click", emu.gamepads.mapAllButtons, false);
+			emu.vars.dom.gamepad["gp2_setAll"].addEventListener("click", emu.gamepads.mapAllButtons, false);
+		};
+		let EL_view = function(){
+			window.onbeforeunload = function() {
+				// On any sort of navigation make sure the eeprom.bin file in localStorage is updated.
+
+				// Is the emulator active?
+				if(emu.vars.innerEmu.emulatorIsReady==true){
+					// Save the CUzeBox eeprom.bin file to localStorage.
+					if( Object.keys(emu.vars.innerEmu.Module.FS.root.contents).indexOf("eeprom.bin") != -1 ){
+						localStorage.setItem("EMU_eeprom.bin", emu.vars.innerEmu.Module.FS.readFile("eeprom.bin") );
+						console.log("Saved eeprom.bin to localStorage.");
+					}
+				}
+				return;
+			};
+
+			// VIEW: Navigation (misc views.)
+			emu.vars.dom.view["emu_misc_navs"].forEach(function(d, i, a) {
+				d.addEventListener("click", function() { emu.funcs.nav.changeMiscView(this.getAttribute("view"), this) }, false);
+			});
+
+			// VIEW: Navigation (main views.)
+			var allTitleNavGroups = document.querySelectorAll(".sectionDivs_title_options");
+			allTitleNavGroups.forEach(function(d, i, a) {
+				d.querySelectorAll(".navOptions").forEach(function(d2, i2, a2) {
+					d2.addEventListener("click", function() { emu.funcs.nav.changeView(this.getAttribute("newview")); }, false);
+				});
+			});
+
+			// VIEW: Fullscreen mode.
+			document                                   .addEventListener("fullscreenchange", function(e) {
+				emu.vars.innerEmu.resizeEmuCanvas();
+				emu.funcs.emu_focusing(null, "mouseenter");
+			}, false);
+			emu.vars.dom.view["emuControls_FULLSCREEN"].addEventListener("click"   , emu.funcs.emuFullscreen, false);
+			emu.vars.dom.view["emuCanvas"]             .addEventListener("dblclick", emu.funcs.emuFullscreen, false);
+
+			// VIEW: File loading.
+			emu.vars.dom.view["emu_FilesFromJSON"]            .addEventListener("click", function() { this.select(); }, false);
+			emu.vars.dom.view["emu_FilesFromJSON_load"]       .addEventListener("click", function() { emu.funcs.getGameFiles("3"); }, false);
+			emu.vars.dom.view["builtInGames_select"]          .addEventListener("change", function() { emu.funcs.getGameFiles("1") }, false);
+			emu.vars.dom.view["emu_FilesFromUser"]            .addEventListener("change", emu.funcs.emu_processUserUploads, false);
+			emu.vars.dom.view["emu_FilesFromUser_viewableBtn"].addEventListener("click", emu.funcs.emu_clickUserUpload, false);
+
+			// VIEW: Canvas key events.
+			emu.vars.dom.view["emuCanvas"].addEventListener("keydown", function(e){
+				// Ask CUzeBox what keys are currently pressed. Then display them on the on-screen gamepads.
+				if(emu.vars.innerEmu.emulatorIsReady){
+					emu.funcs.showPressedKey();
+				}
+				// Handles auto-resizing of the emulator canvas when certain functions resize the canvas.
+				switch(e.code){
+					case 'F2'  : { setTimeout(function(){ emu.vars.innerEmu.resizeEmuCanvas(); }, 50); break; }
+					case 'F3'  : { setTimeout(function(){ emu.vars.innerEmu.resizeEmuCanvas(); }, 50); break; }
+					case 'F4'  : { setTimeout(function(){ emu.vars.innerEmu.resizeEmuCanvas(); }, 50); break; }
+					case 'F12' : { setTimeout(function(){ emu.vars.innerEmu.resizeEmuCanvas(); }, 50); break; }
+					default    : { break; }
+				}
+			});
+			emu.vars.dom.view["emuCanvas"].addEventListener("keyup", function(e){
+				// Ask CUzeBox what keys are currently pressed. Then display them on the on-screen gamepads.
+				if(emu.vars.innerEmu.emulatorIsReady){
+					emu.funcs.showPressedKey();
+				}
+			});
+
+			// VIEW: Handle input focus on the emulator. (Delegated)
+			emu.vars.dom.view["emu_misc_gamepads"]  .addEventListener("mouseenter", function() { this.classList.add(   "hovered"); emu.funcs.emu_focusing(null, "mouseenter"); }, false);
+			emu.vars.dom.view["emu_misc_gamepads"]  .addEventListener("mouseleave", function() { this.classList.remove("hovered"); emu.funcs.emu_focusing(null, "mouseleave"); }, false);
+			emu.vars.dom.view["emu_emulator_window"].addEventListener("mouseenter", function() { this.classList.add(   "hovered"); emu.funcs.emu_focusing(null, "mouseenter"); }, false);
+			emu.vars.dom.view["emu_emulator_window"].addEventListener("mouseleave", function() { this.classList.remove("hovered"); emu.funcs.emu_focusing(null, "mouseleave"); }, false);
+
+			// VIEW: Emulator controls (TOP ROW)
+			emu.vars.dom.view["emuControls_stop"]  .addEventListener("click", function(){ emu.funcs.stopEmu(true); }, false);
+			emu.vars.dom.view["emuControls_resize"].addEventListener("click", function(){ emu.vars.innerEmu.resizeEmuCanvas(); }, false);
+			emu.vars.dom.view["emuControls_reload"].addEventListener("click", emu.funcs.loadGame, false);
+			emu.vars.dom.view["emuControls_unload"].addEventListener("click", emu.funcs.emu_unload, false);
+			emu.vars.dom.view["emuControls_rotate"].addEventListener("click", emu.funcs.emu_rotate, false);
+			emu.vars.dom.view["emuControls_autopause_btn"].addEventListener("click", function() {
+				// Get a handle on the DOM element.
+				let autopause_chk = emu.vars.dom.view["emuControls_autopause_chk"];
+
+				// Toggle the enabled class.
+				autopause_chk.classList.toggle("enabled");
+
+				// Determine if the emu should be paused or unpaused.
+				if (autopause_chk.classList.contains("enabled")) { emu.funcs.emu_focusing(null, "mouseenter"); }
+				else { emu.funcs.emu_focusing(null, "mouseleave"); }
+			}, false);
+
+			// VIEW: Emulator controls (SECOND ROW)
+			emu.vars.dom.view["emuControls_QUALITY"].addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_F2" , null); displayCUzeBox_flags(); }, false);
+			emu.vars.dom.view["emuControls_QUALITY"].addEventListener("mouseup"  , function() { emu.funcs.emu_sendKeyEvent("keyup"  , "key_F2" , null); displayCUzeBox_flags(); }, false);
+			emu.vars.dom.view["emuControls_DEBUG"]  .addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_F3" , null); displayCUzeBox_flags(); }, false);
+			emu.vars.dom.view["emuControls_DEBUG"]  .addEventListener("mouseup"  , function() { emu.funcs.emu_sendKeyEvent("keyup"  , "key_F3" , null); displayCUzeBox_flags(); }, false);
+			emu.vars.dom.view["emuControls_FLICKER"].addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_F7" , null); displayCUzeBox_flags(); }, false);
+			emu.vars.dom.view["emuControls_FLICKER"].addEventListener("mouseup"  , function() { emu.funcs.emu_sendKeyEvent("keyup"  , "key_F7" , null); displayCUzeBox_flags(); }, false);
+			emu.vars.dom.view["emuControls_PAUSE"]  .addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_F9" , null); displayCUzeBox_flags(); }, false);
+			emu.vars.dom.view["emuControls_PAUSE"]  .addEventListener("mouseup"  , function() { emu.funcs.emu_sendKeyEvent("keyup"  , "key_F9" , null); displayCUzeBox_flags(); }, false);
+			emu.vars.dom.view["emuControls_STEP"]   .addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_F10", null); displayCUzeBox_flags(); }, false);
+			emu.vars.dom.view["emuControls_STEP"]   .addEventListener("mouseup"  , function() { emu.funcs.emu_sendKeyEvent("keyup"  , "key_F10", null); displayCUzeBox_flags(); }, false);
+
+			// VIEW: Event listeners for the onscreen gamepad buttons.
+			document.querySelectorAll("g.hover_group").forEach(function(d,i,a){
+				// Get the pad and the name of the button.
+				let pad=d.getAttribute("pad");
+				let key=d.getAttribute("name");
+
+				// Send the appropriate key. (Player 1)
+				if(pad == "1"){
+					d.addEventListener("mousedown" , function() { emu.funcs.emu_sendKeyEvent("keydown", key , 1); }, false);
+					d.addEventListener("mouseleave", function() { emu.funcs.emu_sendKeyEvent("keyup"  , key , 1); }, false);
+					d.addEventListener("mouseup"   , function() { emu.funcs.emu_sendKeyEvent("keyup"  , key , 1); }, false);
+				}
+				// Send the appropriate keys. (Player 2)
+				else if(d.getAttribute("pad") == "2"){
+					d.addEventListener("mousedown" , function() { emu.funcs.emu_sendKeyEvent("keydown", "key_RALT" , 2); emu.funcs.emu_sendKeyEvent("keydown", key        , 2); }, false);
+					d.addEventListener("mouseleave", function() { emu.funcs.emu_sendKeyEvent("keyup"  , key        , 2); emu.funcs.emu_sendKeyEvent("keyup"  , "key_RALT" , 2); }, false);
+					d.addEventListener("mouseup"   , function() { emu.funcs.emu_sendKeyEvent("keyup"  , key        , 2); emu.funcs.emu_sendKeyEvent("keyup"  , "key_RALT" , 2); }, false);
+				}
+			});
+		};
+
+		EL_gamepads();
+		EL_view();
+	},
+
 	emu_rotate: function() {
 		return;
 		// emu_rotate
@@ -384,19 +1277,32 @@ emu.funcs           = {
 				emu.funcs.shared.textOnCanvas({ "canvas": emu.vars.dom.view["emuCanvas"], "text": " - STOPPED - " });
 			}
 
+
 			// Abort the current emulator instance?
 			if(emu.vars.innerEmu.Module.abort) {
 				try{
-					// De-initialize the gamepad polling if it is enabled.
-					if(emu.gamepads.enabled==true){
-						emu.gamepads.deInit();
+					// Save the CUzeBox eeprom.bin file to localStorage before we end the Emscripten instance?
+					if( Object.keys(emu.vars.innerEmu.Module.FS.root.contents).indexOf("eeprom.bin") !=-1 ){
+						localStorage.setItem("EMU_eeprom.bin", emu.vars.innerEmu.Module.FS.readFile("eeprom.bin") );
+						console.log("Saved eeprom.bin to localStorage.");
 					}
+
 					// Abort the Emscripten module.
 					emu.vars.innerEmu.Module.abort();
+
 				} catch(e){
-					// The abort always throws and exception so it always catches. This is expected.
+					// The abort always throws an exception so it always catches. This is expected.
 					// console.log("A failure occurred at stopEmu:", e);
 				}
+
+				// // Stop the current gamepad polling if it is running.
+				// if(emu.gamepads.enabled==true){
+				// 	console.log("Gamepads were enabled. Disabling them now.");
+				// 	emu.gamepads.prev_pollState=emu.gamepads.enabled;
+				// 	emu.gamepads.enabled=true;
+				// 	emu.gamepads.init();
+				// }
+
 			}
 			// Clear Module.
 			emu.vars.innerEmu.Module = null;
@@ -423,7 +1329,6 @@ emu.funcs           = {
 		// Reset.
 		emu.vars.gameFiles = [];
 		emu.vars.gameFile  = "";
-		emu.vars.gameTitle = "";
 
 		document.querySelector("#emu_filesList_links").innerHTML="";
 	},
@@ -442,7 +1347,6 @@ emu.funcs           = {
 		// Reset.
 		emu.vars.gameFiles = [];
 		emu.vars.gameFile  = "";
-		emu.vars.gameTitle = "";
 
 		// Clear the selected DB game.
 		emu.vars.dom.view.builtInGames_select.value = "";
@@ -534,8 +1438,6 @@ emu.funcs           = {
 	// * Used by the "PLAY" button in the game files list. Starts the specified game.
 	loadGameFromList: function(game) {
 		emu.vars.gameFile = game;
-		emu.vars.gameTitle = game;
-		console.log(emu.vars);
 		emu.funcs.loadGame();
 	},
 	// * Downloads the specified file out of the game files list.
@@ -722,16 +1624,11 @@ emu.funcs           = {
 						// Get the gamefile name.
 						emu.vars.gameFile = res.remoteload.gamefile;
 
-						// Get the game title.
-						emu.vars.gameTitle = res.remoteload.title;
-
 						// Games are loaded. Make sure we can continue.
 						var doWeLoadTheGame = true;
 						if (!emu.vars.gameFile.length) { console.log("No gamefile in emu.gameFile!");
 							doWeLoadTheGame = false; }
 						if (!emu.vars.gameFiles.length) { console.log("No game files in emu.gameFiles!");
-							doWeLoadTheGame = false; }
-						if (!emu.vars.gameTitle.length) { console.log("No gameTitle files in emu.gameTitles!");
 							doWeLoadTheGame = false; }
 
 						if (doWeLoadTheGame) {
@@ -783,7 +1680,6 @@ emu.funcs           = {
 											emu.vars.gameFiles[i].name.toLowerCase().indexOf(".hex") != -1
 										) {
 											emu.vars.gameFile = emu.vars.gameFiles[i].name;
-											emu.vars.gameTitle = emu.vars.gameFiles[i].name;
 											emu.funcs.loadGame();
 											break;
 										}
@@ -838,7 +1734,6 @@ emu.funcs           = {
 			// Use a file reader to read as array buffer.
 			// Add each file to the gameFiles array.
 			// Use Promise.all instead of something recursive.
-			// console.log(userFiles.files, new Uint8Array( userFiles.files[0] ));
 
 			if (!userFiles.files.length) {
 				console.log("No files.");
@@ -1001,7 +1896,10 @@ emu.funcs           = {
 		var target = emu.vars.dom.view.emuCanvas;
 
 		// Is there an element there?
-		if (null == target) { console.log("no Emscripten canvas."); return; }
+		if (null == target) {
+			// console.log("no Emscripten canvas.");
+			return;
+		}
 
 		// Is it loaded and ready?
 		else if (
@@ -1128,13 +2026,13 @@ emu.funcs           = {
 		// A bit of delay is required otherwise the displayed gamepad states will not update properly.
 
 		if( emu.vars.innerEmu.emulatorIsReady == false ) {
-			console.log("1 showPressedKey: The emu is not ready.");
+			// console.log("1 showPressedKey: The emu is not ready.");
 			return;
 		}
 
 		setTimeout(function(){
 			if( emu.vars.innerEmu.emulatorIsReady == false ) {
-				console.log("2 showPressedKey: The emu is not ready.");
+				// console.log("2 showPressedKey: The emu is not ready.");
 				return;
 			}
 
@@ -1218,113 +2116,6 @@ emu.funcs           = {
 		}
 	},
 
-	//EMSCRIPTEN_KEEPALIVE
-	addAllListeners: function() {
-		// Fullscreen mode.
-		document.addEventListener("fullscreenchange", function(e) {
-			emu.vars.innerEmu.resizeEmuCanvas();
-			emu.funcs.emu_focusing(null, "mouseenter");
-		}, false);
-		emu.vars.dom.view["emuControls_FULLSCREEN"].addEventListener("click"   , emu.funcs.emuFullscreen, false);
-		emu.vars.dom.view["emuCanvas"].addEventListener("dblclick", emu.funcs.emuFullscreen, false);
-
-		emu.vars.dom.view["emu_FilesFromJSON"].addEventListener("click", function() { this.select(); }, false);
-		emu.vars.dom.view["emu_FilesFromJSON_load"].addEventListener("click", function() { emu.funcs.getGameFiles("3"); }, false);
-
-		// Misc views: nav buttons
-		emu.vars.dom.view["emu_misc_navs"].forEach(function(d, i, a) {
-			d.addEventListener("click", function() { emu.funcs.nav.changeMiscView(this.getAttribute("view"), this) }, false);
-		});
-
-		// Add the event listeners for the quick nav buttons.
-		var allTitleNavGroups = document.querySelectorAll(".sectionDivs_title_options");
-		allTitleNavGroups.forEach(function(d, i, a) {
-			d.querySelectorAll(".navOptions").forEach(function(d2, i2, a2) {
-				d2.addEventListener("click", function() { emu.funcs.nav.changeView(this.getAttribute("newview")); }, false);
-			});
-		});
-
-		// Handles auto-resizing of the emulator canvas if F2 or F3 is used, which will mess up the screen normally.
-		emu.vars.dom.view["emuCanvas"].addEventListener("keydown", function(e){
-			if(emu.vars.innerEmu.emulatorIsReady){
-				emu.funcs.showPressedKey();
-			}
-			switch(e.code){
-				// Emulator controls. These will
-				case 'F2'  : { setTimeout(function(){ emu.vars.innerEmu.resizeEmuCanvas(); }, 50); break; }
-				case 'F3'  : { setTimeout(function(){ emu.vars.innerEmu.resizeEmuCanvas(); }, 50); break; }
-				default    : { break; }
-			}
-		});
-		emu.vars.dom.view["emuCanvas"].addEventListener("keyup", function(e){
-			if(emu.vars.innerEmu.emulatorIsReady){
-				emu.funcs.showPressedKey();
-			}
-		});
-
-		// Handle new built-in DB game selection.
-		emu.vars.dom.view.builtInGames_select.addEventListener("change", function() { emu.funcs.getGameFiles("1") }, false);
-
-		// Handle input focus on the emulator. (Delegated)
-		emu.vars.dom.view["emu_misc_gamepads"]  .addEventListener("mouseenter", function() { this.classList.add("hovered");    emu.funcs.emu_focusing(null, "mouseenter"); }, false);
-		emu.vars.dom.view["emu_misc_gamepads"]  .addEventListener("mouseleave", function() { this.classList.remove("hovered"); emu.funcs.emu_focusing(null, "mouseleave"); }, false);
-		emu.vars.dom.view["emu_emulator_window"].addEventListener("mouseenter", function() { this.classList.add("hovered");    emu.funcs.emu_focusing(null, "mouseenter"); }, false);
-		emu.vars.dom.view["emu_emulator_window"].addEventListener("mouseleave", function() { this.classList.remove("hovered"); emu.funcs.emu_focusing(null, "mouseleave"); }, false);
-
-		// Hidden file upload button.
-		emu.vars.dom.view["emu_FilesFromUser"].addEventListener("change", emu.funcs.emu_processUserUploads, false);
-
-		// Visible upload button.
-		emu.vars.dom.view["emu_FilesFromUser_viewableBtn"].addEventListener("click", emu.funcs.emu_clickUserUpload, false);
-
-		// Emulator controls (TOP)
-		emu.vars.dom.view["emuControls_stop"]  .addEventListener("click", function(){ emu.funcs.stopEmu(true); }, false);
-		emu.vars.dom.view["emuControls_resize"].addEventListener("click", function(){ emu.vars.innerEmu.resizeEmuCanvas(); }, false);
-		emu.vars.dom.view["emuControls_reload"].addEventListener("click", emu.funcs.loadGame, false);
-		emu.vars.dom.view["emuControls_unload"].addEventListener("click", emu.funcs.emu_unload, false);
-		emu.vars.dom.view["emuControls_rotate"].addEventListener("click", emu.funcs.emu_rotate, false);
-		emu.vars.dom.view["emuControls_autopause_btn"].addEventListener("click", function() {
-			// Get a handle on the DOM element.
-			let autopause_chk = emu.vars.dom.view["emuControls_autopause_chk"];
-
-			// Toggle the enabled class.
-			autopause_chk.classList.toggle("enabled");
-
-			// Determine if the emu should be paused or unpaused.
-			if (autopause_chk.classList.contains("enabled")) { emu.funcs.emu_focusing(null, "mouseenter"); }
-			else { emu.funcs.emu_focusing(null, "mouseleave"); }
-		}, false);
-
-		// Emulator controls (BOTTOM)
-		emu.vars.dom.view["emuControls_QUALITY"].addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_F2" , null); displayCUzeBox_flags(); }, false);
-		emu.vars.dom.view["emuControls_QUALITY"].addEventListener("mouseup"  , function() { emu.funcs.emu_sendKeyEvent("keyup"  , "key_F2" , null); displayCUzeBox_flags(); }, false);
-		emu.vars.dom.view["emuControls_DEBUG"]  .addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_F3" , null); displayCUzeBox_flags(); }, false);
-		emu.vars.dom.view["emuControls_DEBUG"]  .addEventListener("mouseup"  , function() { emu.funcs.emu_sendKeyEvent("keyup"  , "key_F3" , null); displayCUzeBox_flags(); }, false);
-		emu.vars.dom.view["emuControls_FLICKER"].addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_F7" , null); displayCUzeBox_flags(); }, false);
-		emu.vars.dom.view["emuControls_FLICKER"].addEventListener("mouseup"  , function() { emu.funcs.emu_sendKeyEvent("keyup"  , "key_F7" , null); displayCUzeBox_flags(); }, false);
-		emu.vars.dom.view["emuControls_PAUSE"]  .addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_F9" , null); displayCUzeBox_flags(); }, false);
-		emu.vars.dom.view["emuControls_PAUSE"]  .addEventListener("mouseup"  , function() { emu.funcs.emu_sendKeyEvent("keyup"  , "key_F9" , null); displayCUzeBox_flags(); }, false);
-		emu.vars.dom.view["emuControls_STEP"]   .addEventListener("mousedown", function() { emu.funcs.emu_sendKeyEvent("keydown", "key_F10", null); displayCUzeBox_flags(); }, false);
-		emu.vars.dom.view["emuControls_STEP"]   .addEventListener("mouseup"  , function() { emu.funcs.emu_sendKeyEvent("keyup"  , "key_F10", null); displayCUzeBox_flags(); }, false);
-
-		// Event listeners for the onscreen gamepad buttons.
-		document.querySelectorAll("g.hover_group").forEach(function(d,i,a){
-			let pad=d.getAttribute("pad");
-			let key=d.getAttribute("name");
-
-			if(pad == "1"){
-				d.addEventListener("mousedown" , function() { emu.funcs.emu_sendKeyEvent("keydown", key , 1); }, false);
-				d.addEventListener("mouseleave", function() { emu.funcs.emu_sendKeyEvent("keyup"  , key , 1); }, false);
-				d.addEventListener("mouseup"   , function() { emu.funcs.emu_sendKeyEvent("keyup"  , key , 1); }, false);
-			}
-			else if(d.getAttribute("pad") == "2"){
-				d.addEventListener("mousedown" , function() { emu.funcs.emu_sendKeyEvent("keydown", "key_RALT" , 2); emu.funcs.emu_sendKeyEvent("keydown", key        , 2); }, false);
-				d.addEventListener("mouseleave", function() { emu.funcs.emu_sendKeyEvent("keyup"  , key        , 2); emu.funcs.emu_sendKeyEvent("keyup"  , "key_RALT" , 2); }, false);
-				d.addEventListener("mouseup"   , function() { emu.funcs.emu_sendKeyEvent("keyup"  , key        , 2); emu.funcs.emu_sendKeyEvent("keyup"  , "key_RALT" , 2); }, false);
-			}
-		});
-	},
-
 };
 emu.funcs.UAM       = {
 	// * Adds the UAM event listeners.
@@ -1370,7 +2161,6 @@ emu.funcs.UAM       = {
 		// Get values from UAM.
 		emu.vars.originUAM      = true;
 		emu.vars.uamwindow      = window.top;
-		emu.vars.uamwindow_objs = emu.vars.uamwindow._debug_displayCustomGlobals(true);
 		emu.vars.user_id        = emu.vars.uamwindow.shared.user_id;
 
 		// Unhide UAM DOM.
@@ -1395,7 +2185,6 @@ emu.funcs.UAM       = {
 		// Unset the values that came from UAM.
 		emu.vars.originUAM      = false;
 		emu.vars.uamwindow      = undefined;
-		emu.vars.uamwindow_objs = undefined;
 		emu.vars.user_id        = undefined;
 
 		// Hide UAM DOM.
@@ -1458,6 +2247,7 @@ emu.funcs.UAM       = {
 		let user_id = emu.vars.user_id;
 		if (!user_id) {
 			console.log("No user_id. Are you logged into UAM?");
+			alert      ("No user_id. Are you logged into UAM?");
 			return;
 		}
 
@@ -1516,6 +2306,7 @@ emu.funcs.UAM       = {
 		// Prevent this action if the user_id was not found.
 		if (!user_id) {
 			console.log("No user_id. Are you logged into UAM?");
+			alert      ("No user_id. Are you logged into UAM?");
 			return;
 		}
 
@@ -1542,7 +2333,7 @@ emu.funcs.UAM       = {
 		};
 		emu.funcs.shared.serverRequest(formData).then(
 			function(res) {
-				console.log(res);
+				// console.log(res);
 				let compileCount = res.c2binCount;
 				let c2binCount = res.compileCount;
 				let error = res.error;
@@ -1615,11 +2406,11 @@ emu.funcs.UAM       = {
 					return outputHTML;
 				};
 
-				var bss_objects = table_from_Obj(res.info2.bss_objects.data, res.info2.bss_objects['caption']);
-				var text_funcs = table_from_Obj(res.info2.text_funcs.data, res.info2.text_funcs['caption']);
-				var text_objects = table_from_Obj(res.info2.text_objects.data, res.info2.text_objects['caption']);
+				var bss_objects          = table_from_Obj(res.info2.bss_objects.data, res.info2.bss_objects['caption']);
+				var text_funcs           = table_from_Obj(res.info2.text_funcs.data, res.info2.text_funcs['caption']);
+				var text_objects         = table_from_Obj(res.info2.text_objects.data, res.info2.text_objects['caption']);
 				var text_objects_progmem = table_from_Obj(res.info2.text_objects_progmem.data, res.info2.text_objects_progmem['caption']);
-				var other = table_from_Obj(res.info2.other.data, res.info2.other['caption']);
+				var other                = table_from_Obj(res.info2.other.data, res.info2.other['caption']);
 
 				output2.innerHTML = "<span id='emu_dataTop'></span>";
 				// emu_console2.innerHTML += "<pre>"+data.cflow           + "</pre><br><br>";
@@ -1646,15 +2437,15 @@ emu.funcs.UAM       = {
 				consoleOutputString += "COMPILE COUNT :" + compileCount + "\n";
 				consoleOutputString += "C2BIN COUNT   :" + c2binCount + "\n";
 				consoleOutputString = consoleOutputString
-					.replace(/\r\n/g, "\n") // Normalize to Unix line endings.
-					.replace(/\n\n/g, "\n") // Remove double line-breaks;
-					.replace("AVR Memory Usage\n", "") // Remove this line.
-					.replace("----------------\n", "") // Remove this line.
-					.replace("Device: atmega644\n", "") // Remove this line.
+					.replace(/\r\n/g, "\n")                         // Normalize to Unix line endings.
+					.replace(/\n\n/g, "\n")                         // Remove double line-breaks;
+					.replace("AVR Memory Usage\n", "")              // Remove this line.
+					.replace("----------------\n", "")              // Remove this line.
+					.replace("Device: atmega644\n", "")             // Remove this line.
 					.replace("(.text + .data + .bootloader)\n", "") // Remove this line.
-					.replace("(.data + .bss + .noinit)\n\n", "") // Remove this line.
-					.replace(/  /g, " ") // Replace all double-spaces with one space.
-					.replace(/\n/g, "\r\n") // Normalize to Windows line endings.
+					.replace("(.data + .bss + .noinit)\n\n", "")    // Remove this line.
+					.replace(/  /g, " ")                            // Replace all double-spaces with one space.
+					.replace(/\n/g, "\r\n")                         // Normalize to Windows line endings.
 					.trim();
 				emu_latestCompile.innerHTML = consoleOutputString;
 
@@ -1735,7 +2526,8 @@ emu.funcs.shared    = {
 		var rectX=0;
 		var rectY=(obj.canvas.height/2)-fontSize*1.5;
 		var rectW=Math.floor(obj.canvas.width);
-		var rectH=fontSize*3;
+		var rectH=fontSize*2.25;
+
 		ctx.fillStyle = obj.backgroundColor;
 		ctx.fillRect(rectX, rectY, rectW, rectH);
 
@@ -1948,7 +2740,17 @@ emu.funcs.shared    = {
 		canvas.getContext("2d").oImageSmoothingEnabled = false; //
 		canvas.getContext("2d").webkitImageSmoothingEnabled = false; //
 		canvas.getContext("2d").msImageSmoothingEnabled = false; //
-	}
+	},
+	arrayToArrayBuffer : function (array){
+		// https://stackoverflow.com/q/34089569
+		var length = array.length;
+		var buffer = new ArrayBuffer( length );
+		var view = new Uint8Array(buffer);
+		for ( var i = 0; i < length; i++) {
+		    view[i] = parseInt(array[i]);
+		}
+		return buffer;
+	},
 };
 emu.funcs.nav       = {
 	// * Options for Element.scrollIntoView.
@@ -2093,8 +2895,7 @@ emu.funcs.db  = {
 			emu.funcs.db.gameDb_deleteGame();
 		}, false);
 	},
-
-	// Puts the emu_status values into the select menu for "status".
+	// * Puts the emu_status values into the select menu for "status".
 	gameDb_populateStatusSelectMenu : function(){
 		var option = undefined;
 		var select = emu.vars.dom.db["dataField_status"];
@@ -2115,8 +2916,8 @@ emu.funcs.db  = {
 
 		if(! select.value){
 			// emu.gameDb.clearAllDisplayedGameData();
-			alert      ("No game selected.");
 			console.log("No game selected.");
+			alert      ("No game selected.");
 			return;
 		}
 
@@ -2254,7 +3055,10 @@ emu.funcs.db  = {
 	// * Handles the upload of new game files.
 	gameDb_addFiles                 : function(){
 		var select = emu.vars.dom.db["gameSelect"];
-		if(! select.value){ console.log("No game selected."); return; }
+		if(! select.value){
+			// console.log("No game selected.");
+			return;
+		}
 		var gameid = select.value;
 
 		var files = emu.vars.dom.db["db_builtInGames_fileUpload"];
@@ -2274,7 +3078,7 @@ emu.funcs.db  = {
 		);
 
 		if(!confirmed){
-			console.log("User has cancelled the file upload.");
+			// console.log("User has cancelled the file upload.");
 			files.value="";
 			return;
 		}
@@ -2304,7 +3108,10 @@ emu.funcs.db  = {
 	// * Deletes the specified file from the game's directory.
 	gameDb_deleteFile               : function(gameid, filename){
 		var select = emu.vars.dom.db["gameSelect"];
-		if(! select.value){ console.log("No game selected."); return; }
+		if(! select.value){
+			// console.log("No game selected.");
+			return;
+		}
 		var gameid = select.value;
 
 		// Confirm the deletion.
@@ -2314,12 +3121,12 @@ emu.funcs.db  = {
 				filename + "\n\n" + "Continue?"
 			)
 		){
-			console.log("User has cancelled the file delete.");
+			// console.log("User has cancelled the file delete.");
 			return;
 		}
 		// Confirm again.
 		if(! confirm("Are you certain?") ){
-			console.log("User has cancelled the file delete.");
+			// console.log("User has cancelled the file delete.");
 			return;
 		}
 
@@ -2341,7 +3148,10 @@ emu.funcs.db  = {
 	},
 	// * Updates the game data in the database with the data displayed on the form.
 	gameDb_updateGameData           : function(){
-		if(! emu.vars.dom.db["gameSelect"].value){ console.log("No game selected."); return; }
+		if(! emu.vars.dom.db["gameSelect"].value){
+			// console.log("No game selected.");
+			return;
+		}
 
 		var obj = {
 			'title'       : emu.vars.dom.db["dataField_title"]      .value ,
@@ -2385,17 +3195,18 @@ emu.funcs.db  = {
 
 	} ,
 
+	//
 	gameDb_newGame : function(){
 		// gameDb_newGame
 		var title = prompt("Choose a title for the new game entry.\n\nYou can fill the rest of the values later.", "");
 
 		if     (!title){
-			console.log("Action cancelled.");
+			// console.log("Action cancelled.");
 			alert      ("Action cancelled.");
 			return;
 		}
 		else if(title==""){
-			console.log("You did not choose a title");
+			// console.log("You did not choose a title");
 			alert("You did not choose a title");
 			return;
 		}
@@ -2427,9 +3238,13 @@ emu.funcs.db  = {
 
 	},
 
+	//
 	gameDb_deleteGame               : function(){
 		var select = emu.vars.dom.db["gameSelect"];
-		if(! emu.vars.dom.db["gameSelect"].value){ console.log("No game selected."); return; }
+		if(! emu.vars.dom.db["gameSelect"].value){
+			console.log("No game selected.");
+			return;
+		}
 		var gameid = select.value;
 
 		var gameTitle = emu.vars.dom.db["dataField_title"].value;
@@ -2443,12 +3258,12 @@ emu.funcs.db  = {
 				"\n" +
 				"Continue?")
 		){
-			console.log("User has cancelled the game delete.");
+			// console.log("User has cancelled the game delete.");
 			return;
 		}
 		else{
 			if(!confirm("Are you VERY certain?")){
-				console.log("User has cancelled the game delete.");
+				// console.log("User has cancelled the game delete.");
 				return;
 			}
 		}
@@ -2474,42 +3289,29 @@ emu.funcs.db  = {
 };
 
 function displayCUzeBox_flags(){
-setTimeout(function(){
-	var div = document.querySelector("#CUzeBox_flags");
+	setTimeout(function(){
+		var flags = emu.vars.innerEmu.Module._guicore_getflags();
 
-	var flags = emu.vars.innerEmu.Module._guicore_getflags();
+		let GUICORE_SMALL      = emu.vars.innerEmu.Module._NRA_returnFlags(3) ? true : false;
+		let GUICORE_GAMEONLY   = emu.vars.innerEmu.Module._NRA_returnFlags(4) ? true : false;
+		let main_fmerge        = emu.vars.innerEmu.Module._NRA_returnFlags(5) ? true : false;
+		let main_ispause       = emu.vars.innerEmu.Module._NRA_returnFlags(6) ? true : false;
+		let main_isadvfr       = emu.vars.innerEmu.Module._NRA_returnFlags(7) ? true : false;
+		// let GUICORE_NOVSYNC    = emu.vars.innerEmu.Module._NRA_returnFlags(2) ;
+		// let GUICORE_FULLSCREEN = emu.vars.innerEmu.Module._NRA_returnFlags(1) ;
 
-	let GUICORE_SMALL      = emu.vars.innerEmu.Module._NRA_returnFlags(3) ? true : false;
-	let GUICORE_GAMEONLY   = emu.vars.innerEmu.Module._NRA_returnFlags(4) ? true : false;
-	let main_fmerge        = emu.vars.innerEmu.Module._NRA_returnFlags(5) ? true : false;
-	let main_ispause       = emu.vars.innerEmu.Module._NRA_returnFlags(6) ? true : false;
-	let main_isadvfr       = emu.vars.innerEmu.Module._NRA_returnFlags(7) ? true : false;
-	// let GUICORE_NOVSYNC    = emu.vars.innerEmu.Module._NRA_returnFlags(2) ;
-	// let GUICORE_FULLSCREEN = emu.vars.innerEmu.Module._NRA_returnFlags(1) ;
+		if(!GUICORE_SMALL    ) { emu.vars.dom.view["emuControls_QUALITY"].classList.add   ('activated'); }
+		else                   { emu.vars.dom.view["emuControls_QUALITY"].classList.remove('activated'); }
+		if(!GUICORE_GAMEONLY ) { emu.vars.dom.view["emuControls_DEBUG"]  .classList.add   ('activated'); }
+		else                   { emu.vars.dom.view["emuControls_DEBUG"]  .classList.remove('activated'); }
+		if(main_fmerge       ) { emu.vars.dom.view["emuControls_FLICKER"].classList.add   ('activated'); }
+		else                   { emu.vars.dom.view["emuControls_FLICKER"].classList.remove('activated'); }
+		if(main_ispause      ) { emu.vars.dom.view["emuControls_PAUSE"]  .classList.add   ('activated'); }
+		else                   { emu.vars.dom.view["emuControls_PAUSE"]  .classList.remove('activated'); }
+		if(main_isadvfr      ) { emu.vars.dom.view["emuControls_STEP"]   .classList.add   ('activated'); }
+		else                   { emu.vars.dom.view["emuControls_STEP"]   .classList.remove('activated'); }
 
-	if(!GUICORE_SMALL    ) { emu.vars.dom.view["emuControls_QUALITY"].classList.add   ('activated'); }
-	else                   { emu.vars.dom.view["emuControls_QUALITY"].classList.remove('activated'); }
-	if(!GUICORE_GAMEONLY ) { emu.vars.dom.view["emuControls_DEBUG"]  .classList.add   ('activated'); }
-	else                   { emu.vars.dom.view["emuControls_DEBUG"]  .classList.remove('activated'); }
-	if(main_fmerge       ) { emu.vars.dom.view["emuControls_FLICKER"].classList.add   ('activated'); }
-	else                   { emu.vars.dom.view["emuControls_FLICKER"].classList.remove('activated'); }
-	if(main_ispause      ) { emu.vars.dom.view["emuControls_PAUSE"]  .classList.add   ('activated'); }
-	else                   { emu.vars.dom.view["emuControls_PAUSE"]  .classList.remove('activated'); }
-	if(main_isadvfr      ) { emu.vars.dom.view["emuControls_STEP"]   .classList.add   ('activated'); }
-	else                   { emu.vars.dom.view["emuControls_STEP"]   .classList.remove('activated'); }
-
-	var newHTML = "";
-	newHTML+='<table class="table1">';
-	newHTML+='	<tr> <td>GUICORE_SMALL   </td><td>'+GUICORE_SMALL+'</td> </tr>';
-	newHTML+='	<tr> <td>GUICORE_GAMEONLY</td><td>'+GUICORE_GAMEONLY+'</td> </tr>';
-	newHTML+='	<tr> <td>main_fmerge     </td><td>'+main_fmerge+'</td> </tr>';
-	newHTML+='	<tr> <td>main_ispause    </td><td>'+main_ispause+'</td> </tr>';
-	newHTML+='	<tr> <td>main_isadvfr    </td><td>'+main_isadvfr+'</td> </tr>';
-	newHTML+='	<tr> <td>flags           </td><td>'+(flags)+'</td> </tr>';
-	newHTML+='</table>';
-	div.innerHTML=newHTML;
-
-},5);
+	},5);
 
 };
 
@@ -2591,14 +3393,14 @@ window.onload = function() {
 
 			// Load the Web Assemby version?
 			if(core=="WASM"){
-				console.log("Using Web Assembly");
+				// console.log("Using Web Assembly");
 				document.querySelector("#coresetting #coresetting_text").innerHTML="Using Web Assembly ";
 				document.querySelector("#coresetting #coresetting_toggle").classList.remove("hidden");
 				newJs.src = "CUzeBox_emu_core/emu_core_WASM.js";
 			}
 			// Load the ASMJS version instead.
 			else{
-				console.log("Using asm.js");
+				// console.log("Using asm.js");
 				document.querySelector("#coresetting #coresetting_text").innerHTML="Using ASM.js ";
 				document.querySelector("#coresetting #coresetting_toggle").classList.remove("hidden");
 				newJs.src = "CUzeBox_emu_core/emu_core_ASMJS.js";
@@ -2669,6 +3471,9 @@ window.onload = function() {
 					}
 				}
 			);
+
+			// Turn on the gamepad polling.
+			document.querySelector("#gamepadIcon_container1").click();
 
 		});
 

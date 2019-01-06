@@ -57,17 +57,214 @@
 
 <div id="bodyContainer">
 	<div id="emu_view"   class="sectionDivs">
-		<div id="CUzeBox_flags">
-			<!--/* Request full screen GUI */-->
-			<!--#define GUICORE_FULLSCREEN 0x0001U-->
-			<!--/* Disable sticking to display refresh rate */-->
-			<!--#define GUICORE_NOVSYNC    0x0002U-->
-			<!--/* Use a small screen (320 x 270 instead of 640 x 560) */-->
-			<!--#define GUICORE_SMALL      0x0004U-->
-			<!--/* Display only the game region */-->
-			<!--#define GUICORE_GAMEONLY   0x0008U-->
-		</div>
-		<div id="gamepadConfig">
+
+		<!--This window acts like a modal-->
+		<div id="gamepadConfigDiv" class="sectionWindow">
+			<div class="sectionWindow_title">
+				gamepadConfigDiv
+				<span id="gamepadConfig_closeBtn" class="hyperlink1 modalCloseBtn" >(CLOSE)</span>
+			</div>
+
+			<div class="sectionWindow_content">
+
+				<div id="gamepadConfigDiv_pads"     class="sectionWindow">
+					<div class="sectionWindow_title">
+						PADS
+					</div>
+
+					<div class="sectionWindow_content">
+						<!--Gamepad #1 Image-->
+						<div id="emu_gamepadConfig_P1_status" class="emu_gamepadConfig_statuses"></div>
+						<div id="emu_gamepadConfig_P1" class="emu_gamepadConfig_div disconnected" draggable="false">
+
+							<figure>
+								<svg
+									width              ="420" height="160"
+									viewBox            ="0 0 420 160"
+									preserveAspectRatio="xMinYMin meet"
+									version            ="1.1"
+									xmlns              ="http://www.w3.org/2000/svg"
+									xmlns:xlink        ="http://www.w3.org/1999/xlink"
+									class="emu_gamepadConfig_svg"
+								>
+									<image width="420" height="160" xlink:href="img/CUzeBox_controls_modified.png"></image>
+									<g pad="1" uzename="BTN_B"      name="key_A"      id="emuGamepad_1_key_W"      class="hover_group"> <circle cx="316" cy="110" r="15"                        ></circle></g>
+									<g pad="1" uzename="BTN_Y"      name="key_Q"      id="emuGamepad_1_key_A"      class="hover_group"> <circle cx="280" cy="81"  r="15"                        ></circle></g>
+									<g pad="1" uzename="BTN_SELECT" name="key_SPACE"  id="emuGamepad_1_key_SPACE"  class="hover_group"> <rect   x= "160" y ="77"         width="30" height="30" ></rect>  </g>
+									<g pad="1" uzename="BTN_START"  name="key_ENTER"  id="emuGamepad_1_key_ENTER"  class="hover_group"> <rect   x= "200" y ="77"         width="30" height="30" ></rect>  </g>
+									<g pad="1" uzename="BTN_UP"     name="key_UP"     id="emuGamepad_1_key_UP"     class="hover_group"> <rect   x= "90"  y ="48"         width="26" height="21" ></rect>  </g>
+									<g pad="1" uzename="BTN_DOWN"   name="key_DOWN"   id="emuGamepad_1_key_DOWN"   class="hover_group"> <rect   x= "90"  y ="92"         width="26" height="21" ></rect>  </g>
+									<g pad="1" uzename="BTN_LEFT"   name="key_LEFT"   id="emuGamepad_1_key_LEFT"   class="hover_group"> <rect   x= "64"  y ="70"         width="26" height="21" ></rect>  </g>
+									<g pad="1" uzename="BTN_RIGHT"  name="key_RIGHT"  id="emuGamepad_1_key_RIGHT"  class="hover_group"> <rect   x= "116" y ="70"         width="26" height="21" ></rect>  </g>
+									<g pad="1" uzename="BTN_A"      name="key_S"      id="emuGamepad_1_key_Q"      class="hover_group"> <circle cx="353" cy="81"  r="15"                        ></circle></g>
+									<g pad="1" uzename="BTN_X"      name="key_W"      id="emuGamepad_1_key_S"      class="hover_group"> <circle cx="317" cy="52"  r="15"                        ></circle></g>
+									<g pad="1" uzename="BTN_SL"     name="key_LSHIFT" id="emuGamepad_1_key_LSHIFT" class="hover_group"> <rect   x= "65"  y ="2"          width="75" height="15" ></rect>  </g>
+									<g pad="1" uzename="BTN_SR"     name="key_RSHIFT" id="emuGamepad_1_key_RSHIFT" class="hover_group"> <rect   x= "280" y ="2"          width="75" height="15" ></rect>  </g>
+								</svg>
+							</figure>
+						</div>
+
+						<!--Gamepad #2 Image-->
+						<div id="emu_gamepadConfig_P2_status" class="emu_gamepadConfig_statuses"></div>
+						<div id="emu_gamepadConfig_P2" class="emu_gamepadConfig_div disconnected" draggable="false">
+							<figure>
+								<svg
+									width              ="420" height="160"
+									viewBox            ="0 0 420 160"
+									preserveAspectRatio="xMinYMin meet"
+									version            ="1.1"
+									xmlns              ="http://www.w3.org/2000/svg"
+									xmlns:xlink        ="http://www.w3.org/1999/xlink"
+									class="emu_gamepadConfig_svg"
+								>
+									<image width="420" height="160" xlink:href="img/CUzeBox_controls_modified.png"></image>
+									<g pad="1" uzename="BTN_B"      name="key_A"      id="emuGamepad_1_key_W"      class="hover_group"> <circle cx="316" cy="110" r="15"                        ></circle></g>
+									<g pad="1" uzename="BTN_Y"      name="key_Q"      id="emuGamepad_1_key_A"      class="hover_group"> <circle cx="280" cy="81"  r="15"                        ></circle></g>
+									<g pad="1" uzename="BTN_SELECT" name="key_SPACE"  id="emuGamepad_1_key_SPACE"  class="hover_group"> <rect   x= "160" y ="77"         width="30" height="30" ></rect>  </g>
+									<g pad="1" uzename="BTN_START"  name="key_ENTER"  id="emuGamepad_1_key_ENTER"  class="hover_group"> <rect   x= "200" y ="77"         width="30" height="30" ></rect>  </g>
+									<g pad="1" uzename="BTN_UP"     name="key_UP"     id="emuGamepad_1_key_UP"     class="hover_group"> <rect   x= "90"  y ="48"         width="26" height="21" ></rect>  </g>
+									<g pad="1" uzename="BTN_DOWN"   name="key_DOWN"   id="emuGamepad_1_key_DOWN"   class="hover_group"> <rect   x= "90"  y ="92"         width="26" height="21" ></rect>  </g>
+									<g pad="1" uzename="BTN_LEFT"   name="key_LEFT"   id="emuGamepad_1_key_LEFT"   class="hover_group"> <rect   x= "64"  y ="70"         width="26" height="21" ></rect>  </g>
+									<g pad="1" uzename="BTN_RIGHT"  name="key_RIGHT"  id="emuGamepad_1_key_RIGHT"  class="hover_group"> <rect   x= "116" y ="70"         width="26" height="21" ></rect>  </g>
+									<g pad="1" uzename="BTN_A"      name="key_S"      id="emuGamepad_1_key_Q"      class="hover_group"> <circle cx="353" cy="81"  r="15"                        ></circle></g>
+									<g pad="1" uzename="BTN_X"      name="key_W"      id="emuGamepad_1_key_S"      class="hover_group"> <circle cx="317" cy="52"  r="15"                        ></circle></g>
+									<g pad="1" uzename="BTN_SL"     name="key_LSHIFT" id="emuGamepad_1_key_LSHIFT" class="hover_group"> <rect   x= "65"  y ="2"          width="75" height="15" ></rect>  </g>
+									<g pad="1" uzename="BTN_SR"     name="key_RSHIFT" id="emuGamepad_1_key_RSHIFT" class="hover_group"> <rect   x= "280" y ="2"          width="75" height="15" ></rect>  </g>
+								</svg>
+							</figure>
+						</div>
+
+						<div id="emu_gamepadConfig_notes1" class="disconnected" draggable="false">
+							Ensure that your gamepad is connected and that you have pushed some buttons to activate it.
+						</div>
+					</div>
+				</div>
+
+				<div id="gamepadConfigDiv_mappings_P1" class="sectionWindow">
+					<div class="sectionWindow_title">
+						MAPPINGS
+					</div>
+
+					<div class="sectionWindow_content">
+						<table class="table1 gamepadMappingTable">
+							<caption>
+								Gamepad #1 (Player 1)
+								<br>
+								<input id="gp1_setAll" class="gp_setAll" type="button" value="Set all">
+							</caption>
+							<tr>
+								<td name="UP"    >UP    <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
+							</tr>
+							<tr>
+								<td name="DOWN"  >DOWN  <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
+							</tr>
+							<tr>
+								<td name="LEFT"  >LEFT  <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
+							</tr>
+							<tr>
+								<td name="RIGHT" >RIGHT <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
+							</tr>
+							<tr>
+								<td name="A"     >A     <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
+							</tr>
+							<tr>
+								<td name="B"     >B     <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
+							</tr>
+							<tr>
+								<td name="Y"     >Y     <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
+							</tr>
+							<tr>
+								<td name="X"     >X     <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
+							</tr>
+							<tr>
+								<td name="SELECT">SELECT<span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
+							</tr>
+							<tr>
+								<td name="START" >START <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
+							</tr>
+							<tr>
+								<td name="SL"    >SL    <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
+							</tr>
+							<tr>
+								<td name="SR"    >SR    <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
+							</tr>
+						</table>
+
+						<hr>
+
+					</div>
+				</div>
+				<div id="gamepadConfigDiv_mappings_P2" class="sectionWindow">
+					<div class="sectionWindow_title">
+						MAPPINGS
+					</div>
+
+					<div class="sectionWindow_content">
+						<table class="table1 gamepadMappingTable">
+							<caption>
+								Gamepad #2 (Player 2)
+								<br>
+								<input id="gp2_setAll" class="gp_setAll" type="button" value="Set all">
+							</caption>
+							<tr>
+								<td name="UP"    >UP    <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
+							</tr>
+							<tr>
+								<td name="DOWN"  >DOWN  <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
+							</tr>
+							<tr>
+								<td name="LEFT"  >LEFT  <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
+							</tr>
+							<tr>
+								<td name="RIGHT" >RIGHT <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
+							</tr>
+							<tr>
+								<td name="A"     >A     <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
+							</tr>
+							<tr>
+								<td name="B"     >B     <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
+							</tr>
+							<tr>
+								<td name="Y"     >Y     <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
+							</tr>
+							<tr>
+								<td name="X"     >X     <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
+							</tr>
+							<tr>
+								<td name="SELECT">SELECT<span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
+							</tr>
+							<tr>
+								<td name="START" >START <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
+							</tr>
+							<tr>
+								<td name="SL"    >SL    <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
+							</tr>
+							<tr>
+								<td name="SR"    >SR    <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
+							</tr>
+						</table>
+
+						<hr>
+
+					</div>
+				</div>
+
+				<div id="gamepadConfigDiv_datamanager" class="sectionWindow">
+					<div class="sectionWindow_title">
+						DATA MANAGER
+					</div>
+
+					<div class="sectionWindow_content">
+						<div class="horizontalCenter">
+							<input type="button" id="gpmap_saveChanges" value="Save changes">
+							<input type="button" id="gpmap_download_maps" value="Download">
+							<input type="button" id="gpmap_upload_maps" value="Upload">
+						</div>
+					</div>
+
+				</div>
+			</div>
+
 		</div>
 
 		<div class="sectionDivs_title">
@@ -150,9 +347,6 @@
 
 				<div class="emu_misc_view noSelect active" id="emu_misc_gamepads" draggable="false">
 
-					<div id="gamepadIcon" onclick="emu.gamepads.init();">
-						<div class="gamepadIcon gamepadicon1" title="Click to configure your gamepad!"></div>
-					</div>
 					<div id="emu_onscreenGamepads_1" draggable="false">
 						<figure>
 							<svg
@@ -165,6 +359,7 @@
 								id                 ="emu_gamepad1"
 							>
 								<image width="420" height="160" xlink:href="img/CUzeBox_controls_modified.png"></image>
+								<text x="25" y="20" style="font-size:18px;font-weight:bold;" fill="black">P1</text>
 								<g pad="1" name="key_LEFT"   id="emuGamepad_1_key_LEFT"   class="hover_group"> <rect   x= "64"  y ="70"         width="26" height="21" ></rect>  </g>
 								<g pad="1" name="key_UP"     id="emuGamepad_1_key_UP"     class="hover_group"> <rect   x= "90"  y ="48"         width="26" height="21" ></rect>  </g>
 								<g pad="1" name="key_RIGHT"  id="emuGamepad_1_key_RIGHT"  class="hover_group"> <rect   x= "116" y ="70"         width="26" height="21" ></rect>  </g>
@@ -193,6 +388,7 @@
 								id                 ="emu_gamepad2"
 							>
 								<image width="420" height="160" xlink:href="img/CUzeBox_controls_modified.png"></image>
+								<text x="25" y="20" style="font-size:18px;font-weight:bold;" fill="black">P2</text>
 								<g pad="2" name="key_LEFT"   id="emuGamepad_2_key_LEFT"   class="hover_group"> <rect   x ="64"  y ="70"         width="26" height="21" ></rect>  </g>
 								<g pad="2" name="key_UP"     id="emuGamepad_2_key_UP"     class="hover_group"> <rect   x ="90"  y ="48"         width="26" height="21" ></rect>  </g>
 								<g pad="2" name="key_RIGHT"  id="emuGamepad_2_key_RIGHT"  class="hover_group"> <rect   x ="116" y ="70"         width="26" height="21" ></rect>  </g>
@@ -211,29 +407,33 @@
 
 				</div>
 
-				<div class="emu_misc_view" id="emu_misc_info">
-					DB	Choose a built-in game.
-					User	Use your own game files.
-					JSON	Supply a URL to a remoteload.json file. You can play games hosted on other servers this way.
+				<div class="emu_misc_view " id="emu_misc_info">
+					Methods Of Game Loading:<br><br>
+					** DB	Choose a built-in game.<br>
+					** User	Use your own game files.<br>
+					** JSON	Supply a URL to a remoteload.json file. You can play games hosted on other servers this way.<br>
+					<br>
 
-					NOTE: JSON Method:
-					** On remote servers you MUST configure Access Control headers or this will not work!
-					** Example .htaccess config: View
+					NOTE: JSON Method:<br>
+					** On remote servers you MUST configure Access Control headers or this will not work!<br>
+					** Example .htaccess config: View<br>
 				</div>
 
-				<div class="emu_misc_view" id="emu_misc_misc">
-					LINKS:
+				<div class="emu_misc_view " id="emu_misc_misc">
+					LINKS:<br>
+					<br>
+					Uzebox Forums<br>
+					All Uzebox Games Online! (Cuzebox and Emscripten)<br>
+					CUzeBox - a new Uzebox emulator in progress<br>
+					<br>
 
-					Uzebox Forums
-					All Uzebox Games Online! (Cuzebox and Emscripten)
-					CUzeBox - a new Uzebox emulator in progress
+					Github<br>
+					nicksen782/OnlineUzeboxPlayer<br>
+					Jubatian/cuzebox<br>
+					<br>
 
-					Github
-					nicksen782/OnlineUzeboxPlayer
-					Jubatian/cuzebox
-
-					Uzebox Wiki
-					Games and Demos
+					Uzebox Wiki<br>
+					Games and Demos<br>
 				</div>
 
 			</div>
@@ -246,6 +446,12 @@
 					<span id="coresetting_text"></span>
 					<span id="coresetting_toggle" class="hyperlink1 hidden" onclick="toggleCore();">(Toggle core)</span>
 				</div>
+
+				<div id="gamepadIcon_container1" class="gamepadIcon_container" onclick="emu.gamepads.init();">
+					<div class="gamepadIcon" title="(method 1) Click to configure your gamepad!"></div>
+				</div>
+
+				<span class="hyperlink1 modalOpenBtn" id="gamepadConfig_openBtn">(GAMEPAD CONFIG)</span>
 			</div>
 			<div class="sectionWindow_content">
 				<div class="emu_emuControls" id="emu_emuControlsTOP">

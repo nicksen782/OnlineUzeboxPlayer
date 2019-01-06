@@ -200,6 +200,16 @@
   "test"        : "if ( !Element.prototype.remove ) { false; } else { true; }",
   "website"     : ""
  },
+ "find"          : {
+  "type"        : "polyfill",
+  "text"        : "",
+  "req"         : true,
+  "have"        : null,
+  "hadNatively" : null,
+  "url"         : "_featureLoader/polyfills/find.js",
+  "test"        : "if ( !Array.prototype.find ) { false; } else { true; }",
+  "website"     : ""
+ },
  "requestFullScreen" : {
   "type"        : "polyfill",
   "text"        : "Polyfill for browser prefixes for the fullscreen api. (Supports IE11)",

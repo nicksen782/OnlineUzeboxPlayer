@@ -26,6 +26,11 @@ else { $dev=0; }
 $emu_dir = './';
 $emu_games_dir = $emu_dir . '/games/';
 
+// Look for UAM. It should be one directory back.
+$filename = "../UAMVER.TXT";
+$UAMFOUND = false;
+if (file_exists($filename)) { $UAMFOUND = true; }
+
 require_once("emu_uam_p.php");
 
 // if( ! file_exists( $_db_file )){ createInitialDatabase(); }
@@ -41,9 +46,10 @@ else{
 	exit();
 }
 
+
 function API_REQUEST( $api, $type ){
 	// Is this a UAM request or an EMULATOR ONLY request?
-	//
+	global $UAMFOUND;
 
 	$stats = array(
 		'error'      => false ,
@@ -59,7 +65,8 @@ function API_REQUEST( $api, $type ){
 	// $admin    = in_array( $_SESSION['username'], array('nicksen782') ) ? 1 : 0;
 
 	// Rights.
-	$public      = 1 ; // No rights required.
+	$public = 1        ; // No rights required.
+	$UAM    = $UAMFOUND; // Requires UAM.
 
 	$o_values=array();
 
@@ -70,21 +77,21 @@ function API_REQUEST( $api, $type ){
 	// EMULATOR FUNCTIONS - VIEW (NON-UAM)
 	$o_values["emu_getBuiltInGamelist"]  = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
 	$o_values["emu_returnJSON_byGameId"] = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
+	$o_values["emu_init"]                = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
 
 	// EMULATOR FUNCTIONS - VIEW (UAM)
-	$o_values["gameman_manifest_user"] = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
-	$o_values["c2bin_UamGame"]         = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
-	$o_values["compile_UamGame"]       = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
-	$o_values["c2bin_UamGame_2"]       = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
-	// $o_values["getGamesAndXmlFilepathsViaUserId"]      = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
+	$o_values["gameman_manifest_user"] = [ "p"=>( ( $UAM) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
+	$o_values["c2bin_UamGame"]         = [ "p"=>( ( $UAM) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
+	$o_values["compile_UamGame"]       = [ "p"=>( ( $UAM) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
+	$o_values["c2bin_UamGame_2"]       = [ "p"=>( ( $UAM) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
 
 	// EMULATOR FUNCTIONS - GAMES DB (UAM)
-	$o_values["getData_oneGame"]       = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
-	$o_values["gameDb_addFiles"]       = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
-	$o_values["gameDb_deleteFile"]     = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
-	$o_values["gameDb_updateGameData"] = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
-	$o_values["gameDb_newGame"]        = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
-	$o_values["gameDb_deleteGame"]     = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
+	$o_values["getData_oneGame"]       = [ "p"=>( ( $UAM) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
+	$o_values["gameDb_addFiles"]       = [ "p"=>( ( $UAM) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
+	$o_values["gameDb_deleteFile"]     = [ "p"=>( ( $UAM) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
+	$o_values["gameDb_updateGameData"] = [ "p"=>( ( $UAM) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
+	$o_values["gameDb_newGame"]        = [ "p"=>( ( $UAM) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
+	$o_values["gameDb_deleteGame"]     = [ "p"=>( ( $UAM) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
 
 	// DETERMINE IF THE API IS AVAILABLE TO THE USER.
 
@@ -219,6 +226,37 @@ class sqlite3_DB_PDO__UAM5{
 }
 
 
+// Returns the existance of UAM, returns permissions if applicable, Runs at start.
+function emu_init(){
+	// Was UAM found?
+	global $UAMFOUND;
+
+	// If yes then return the base session information including permissions list.
+	if($UAMFOUND){
+		// Get permissions.
+		// $perms    = users_sessionAndPermissions_internal();
+		// $_SESSION['o_api']    = $api  ;
+		// $_SESSION['via_type'] = $type ;
+		// $loggedIn = $_SESSION['hasActiveLogin']                              ? 1 : 0;
+		// $admin    = in_array( $_SESSION['username'], array('nicksen782') ) ? 1 : 0;
+
+		$UAMDATA = $_SESSION;
+	}
+	// If no, then that's it. No UAM.
+	// else{
+	// }
+
+	echo json_encode(array(
+		'data'       => []        ,
+		'success'    => true      ,
+		'UAMFOUND'   => $UAMFOUND ,
+		'UAMDATA'    => $UAMDATA  ,
+
+		// DEBUG
+		// '$_POST'     => $_POST      ,
+	) );
+}
+
 // *************
 // Gets the list of games from the DB. (type 1)
 function emu_getBuiltInGamelist(){
@@ -308,28 +346,6 @@ ORDER BY id
 	// NO?
 	else{
 		$filelist = get_and_populate_fileslist_field($gameId, $directory);
-
-		// // Now get a list of the files that are within the game's directory.
-		// $scanned_directory = array_values(array_diff(scandir($directory), array('..', '.', '.git')));
-		// $filelist2=array();
-
-		// // Gather only the file names.
-		// for($i=0; $i<sizeof($scanned_directory); $i++){
-		// 	if( ! is_dir($directory.'/'.$scanned_directory[$i]) ){
-		// 		array_unshift($filelist2, $scanned_directory[$i]);
-		// 		array_unshift($filelist,
-		// 			[ "filename"=>$scanned_directory[$i], "completefilepath"=>$directory.''.$scanned_directory[$i] ]
-		// 		);
-		// 	}
-		// }
-
-		// // update gamelist set gamefiles = "";
-		// // Update the gamefiles entry. There may be some extra files but this is still a better way.
-		// $s_SQL2 = 'UPDATE "gamelist" SET "gamefiles"=:json WHERE id = :gameId';
-		// $prp2     = $dbhandle->prepare($s_SQL2);
-		// $dbhandle->bind(':gameId' , $gameId ) ;
-		// $dbhandle->bind(':json' , json_encode($filelist2) ) ;
-		// $retval2  = $dbhandle->execute();
 	}
 
 	$remoteload = array(
@@ -339,16 +355,6 @@ ORDER BY id
 		'baseURL'  => $directory            ,
 	);
 
-	// Loading from url with a gameid will cause a double recording. This prevents this.
-	// $alreadyRecorded = $_COOKIE['alreadyRecorded'] ? intval($_COOKIE['alreadyRecorded']) : null;
-	// if($alreadyRecorded == 1){
-	// 	setcookie("alreadyRecorded" , "0" , time() - 86400, "/");        // Clear the cookie.
-	// }
-	// else{
-	// 	emu_history('BUILTINDB', null, $gameId, null);
-	// 	//
-	// }
-
 	echo json_encode(array(
 		'data'       => $results1   ,
 		'success'    => true        ,
@@ -356,9 +362,6 @@ ORDER BY id
 
 		// DEBUG
 		// '$_POST'     => $_POST      ,
-		// '$directory' => $directory  ,
-		// '$gamefiles' => $gamefiles  ,
-		// '$dev'       => $dev        ,
 	) );
 
 	// audit_API_newRecord( $_SESSION['user_id'], $_SESSION['o_api'], $_SESSION['via_type'], 1, '' );

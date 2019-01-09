@@ -14,20 +14,13 @@
 	<link rel="stylesheet" type="text/css" href="css/customBaseline.css">
 	<link rel="stylesheet" type="text/css" href="css/emu.css">
 
-	<!--JQUERY STUFF-->
-	<!--<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">-->
-	<!--<script src="https://code.jquery.com/jquery-1.12.4.js"></script>-->
-	<!--<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>-->
-
-	<!--<script src="https://cdn.polyfill.io/v2/polyfill.min.js"></script>-->
-	<!--<script src="js/ie11polyfill.js"></script>-->
-
 	<script src="_featureLoader/js/featureLoader.js"></script>
 	<script src="js/emu.js"></script>
+	<script src="js/shared.js"></script>
+	<script src="js/gamepads.js"></script>
+	<script src="js/db.js"></script>
+	<script src="js/innerEmu.js"></script>
 	<script src="js/dom.js"></script>
-	<script src="js/crossBrowser_initKeyboardEvent.js"></script>
-	<!--<script src="CUzeBox_emu_core/combinedFiles_emu.js"></script>-->
-	<!--<script src="js/xml2json.min.js"></script>-->
 
 <script>
 
@@ -42,7 +35,6 @@
 // 	"location": e["location"]
 // }, null, 0)
 // );
-
 
 </script>
 
@@ -61,7 +53,7 @@
 		<!--This window acts like a modal-->
 		<div id="gamepadConfigDiv" class="sectionWindow">
 			<div class="sectionWindow_title">
-				gamepadConfigDiv
+				Gamepad Configuration
 				<span id="gamepadConfig_closeBtn" class="hyperlink1 modalCloseBtn" >(CLOSE)</span>
 			</div>
 
@@ -76,7 +68,6 @@
 						<!--Gamepad #1 Image-->
 						<div id="emu_gamepadConfig_P1_status" class="emu_gamepadConfig_statuses"></div>
 						<div id="emu_gamepadConfig_P1" class="emu_gamepadConfig_div disconnected" draggable="false">
-
 							<figure>
 								<svg
 									width              ="420" height="160"
@@ -88,18 +79,18 @@
 									class="emu_gamepadConfig_svg"
 								>
 									<image width="420" height="160" xlink:href="img/CUzeBox_controls_modified.png"></image>
-									<g pad="1" uzename="BTN_B"      name="key_A"      id="emuGamepad_1_key_W"      class="hover_group"> <circle cx="316" cy="110" r="15"                        ></circle></g>
-									<g pad="1" uzename="BTN_Y"      name="key_Q"      id="emuGamepad_1_key_A"      class="hover_group"> <circle cx="280" cy="81"  r="15"                        ></circle></g>
-									<g pad="1" uzename="BTN_SELECT" name="key_SPACE"  id="emuGamepad_1_key_SPACE"  class="hover_group"> <rect   x= "160" y ="77"         width="30" height="30" ></rect>  </g>
-									<g pad="1" uzename="BTN_START"  name="key_ENTER"  id="emuGamepad_1_key_ENTER"  class="hover_group"> <rect   x= "200" y ="77"         width="30" height="30" ></rect>  </g>
-									<g pad="1" uzename="BTN_UP"     name="key_UP"     id="emuGamepad_1_key_UP"     class="hover_group"> <rect   x= "90"  y ="48"         width="26" height="21" ></rect>  </g>
-									<g pad="1" uzename="BTN_DOWN"   name="key_DOWN"   id="emuGamepad_1_key_DOWN"   class="hover_group"> <rect   x= "90"  y ="92"         width="26" height="21" ></rect>  </g>
-									<g pad="1" uzename="BTN_LEFT"   name="key_LEFT"   id="emuGamepad_1_key_LEFT"   class="hover_group"> <rect   x= "64"  y ="70"         width="26" height="21" ></rect>  </g>
-									<g pad="1" uzename="BTN_RIGHT"  name="key_RIGHT"  id="emuGamepad_1_key_RIGHT"  class="hover_group"> <rect   x= "116" y ="70"         width="26" height="21" ></rect>  </g>
-									<g pad="1" uzename="BTN_A"      name="key_S"      id="emuGamepad_1_key_Q"      class="hover_group"> <circle cx="353" cy="81"  r="15"                        ></circle></g>
-									<g pad="1" uzename="BTN_X"      name="key_W"      id="emuGamepad_1_key_S"      class="hover_group"> <circle cx="317" cy="52"  r="15"                        ></circle></g>
-									<g pad="1" uzename="BTN_SL"     name="key_LSHIFT" id="emuGamepad_1_key_LSHIFT" class="hover_group"> <rect   x= "65"  y ="2"          width="75" height="15" ></rect>  </g>
-									<g pad="1" uzename="BTN_SR"     name="key_RSHIFT" id="emuGamepad_1_key_RSHIFT" class="hover_group"> <rect   x= "280" y ="2"          width="75" height="15" ></rect>  </g>
+									<g pad="1" class="hover_group" uzename="BTN_B"      name="key_A"     > <circle cx="316" cy="110" r="15"                        ></circle></g>
+									<g pad="1" class="hover_group" uzename="BTN_Y"      name="key_Q"     > <circle cx="280" cy="81"  r="15"                        ></circle></g>
+									<g pad="1" class="hover_group" uzename="BTN_SELECT" name="key_SPACE" > <rect   x= "160" y ="77"         width="30" height="30" ></rect>  </g>
+									<g pad="1" class="hover_group" uzename="BTN_START"  name="key_ENTER" > <rect   x= "200" y ="77"         width="30" height="30" ></rect>  </g>
+									<g pad="1" class="hover_group" uzename="BTN_UP"     name="key_UP"    > <rect   x= "90"  y ="48"         width="26" height="21" ></rect>  </g>
+									<g pad="1" class="hover_group" uzename="BTN_DOWN"   name="key_DOWN"  > <rect   x= "90"  y ="92"         width="26" height="21" ></rect>  </g>
+									<g pad="1" class="hover_group" uzename="BTN_LEFT"   name="key_LEFT"  > <rect   x= "64"  y ="70"         width="26" height="21" ></rect>  </g>
+									<g pad="1" class="hover_group" uzename="BTN_RIGHT"  name="key_RIGHT" > <rect   x= "116" y ="70"         width="26" height="21" ></rect>  </g>
+									<g pad="1" class="hover_group" uzename="BTN_A"      name="key_S"     > <circle cx="353" cy="81"  r="15"                        ></circle></g>
+									<g pad="1" class="hover_group" uzename="BTN_X"      name="key_W"     > <circle cx="317" cy="52"  r="15"                        ></circle></g>
+									<g pad="1" class="hover_group" uzename="BTN_SL"     name="key_LSHIFT"> <rect   x= "65"  y ="2"          width="75" height="15" ></rect>  </g>
+									<g pad="1" class="hover_group" uzename="BTN_SR"     name="key_RSHIFT"> <rect   x= "280" y ="2"          width="75" height="15" ></rect>  </g>
 								</svg>
 							</figure>
 						</div>
@@ -118,18 +109,18 @@
 									class="emu_gamepadConfig_svg"
 								>
 									<image width="420" height="160" xlink:href="img/CUzeBox_controls_modified.png"></image>
-									<g pad="1" uzename="BTN_B"      name="key_A"      id="emuGamepad_1_key_W"      class="hover_group"> <circle cx="316" cy="110" r="15"                        ></circle></g>
-									<g pad="1" uzename="BTN_Y"      name="key_Q"      id="emuGamepad_1_key_A"      class="hover_group"> <circle cx="280" cy="81"  r="15"                        ></circle></g>
-									<g pad="1" uzename="BTN_SELECT" name="key_SPACE"  id="emuGamepad_1_key_SPACE"  class="hover_group"> <rect   x= "160" y ="77"         width="30" height="30" ></rect>  </g>
-									<g pad="1" uzename="BTN_START"  name="key_ENTER"  id="emuGamepad_1_key_ENTER"  class="hover_group"> <rect   x= "200" y ="77"         width="30" height="30" ></rect>  </g>
-									<g pad="1" uzename="BTN_UP"     name="key_UP"     id="emuGamepad_1_key_UP"     class="hover_group"> <rect   x= "90"  y ="48"         width="26" height="21" ></rect>  </g>
-									<g pad="1" uzename="BTN_DOWN"   name="key_DOWN"   id="emuGamepad_1_key_DOWN"   class="hover_group"> <rect   x= "90"  y ="92"         width="26" height="21" ></rect>  </g>
-									<g pad="1" uzename="BTN_LEFT"   name="key_LEFT"   id="emuGamepad_1_key_LEFT"   class="hover_group"> <rect   x= "64"  y ="70"         width="26" height="21" ></rect>  </g>
-									<g pad="1" uzename="BTN_RIGHT"  name="key_RIGHT"  id="emuGamepad_1_key_RIGHT"  class="hover_group"> <rect   x= "116" y ="70"         width="26" height="21" ></rect>  </g>
-									<g pad="1" uzename="BTN_A"      name="key_S"      id="emuGamepad_1_key_Q"      class="hover_group"> <circle cx="353" cy="81"  r="15"                        ></circle></g>
-									<g pad="1" uzename="BTN_X"      name="key_W"      id="emuGamepad_1_key_S"      class="hover_group"> <circle cx="317" cy="52"  r="15"                        ></circle></g>
-									<g pad="1" uzename="BTN_SL"     name="key_LSHIFT" id="emuGamepad_1_key_LSHIFT" class="hover_group"> <rect   x= "65"  y ="2"          width="75" height="15" ></rect>  </g>
-									<g pad="1" uzename="BTN_SR"     name="key_RSHIFT" id="emuGamepad_1_key_RSHIFT" class="hover_group"> <rect   x= "280" y ="2"          width="75" height="15" ></rect>  </g>
+									<g pad="2" uzename="BTN_B"      name="key_A"      class="hover_group"> <circle cx="316" cy="110" r="15"                        ></circle></g>
+									<g pad="2" uzename="BTN_Y"      name="key_Q"      class="hover_group"> <circle cx="280" cy="81"  r="15"                        ></circle></g>
+									<g pad="2" uzename="BTN_SELECT" name="key_SPACE"  class="hover_group"> <rect   x= "160" y ="77"         width="30" height="30" ></rect>  </g>
+									<g pad="2" uzename="BTN_START"  name="key_ENTER"  class="hover_group"> <rect   x= "200" y ="77"         width="30" height="30" ></rect>  </g>
+									<g pad="2" uzename="BTN_UP"     name="key_UP"     class="hover_group"> <rect   x= "90"  y ="48"         width="26" height="21" ></rect>  </g>
+									<g pad="2" uzename="BTN_DOWN"   name="key_DOWN"   class="hover_group"> <rect   x= "90"  y ="92"         width="26" height="21" ></rect>  </g>
+									<g pad="2" uzename="BTN_LEFT"   name="key_LEFT"   class="hover_group"> <rect   x= "64"  y ="70"         width="26" height="21" ></rect>  </g>
+									<g pad="2" uzename="BTN_RIGHT"  name="key_RIGHT"  class="hover_group"> <rect   x= "116" y ="70"         width="26" height="21" ></rect>  </g>
+									<g pad="2" uzename="BTN_A"      name="key_S"      class="hover_group"> <circle cx="353" cy="81"  r="15"                        ></circle></g>
+									<g pad="2" uzename="BTN_X"      name="key_W"      class="hover_group"> <circle cx="317" cy="52"  r="15"                        ></circle></g>
+									<g pad="2" uzename="BTN_SL"     name="key_LSHIFT" class="hover_group"> <rect   x= "65"  y ="2"          width="75" height="15" ></rect>  </g>
+									<g pad="2" uzename="BTN_SR"     name="key_RSHIFT" class="hover_group"> <rect   x= "280" y ="2"          width="75" height="15" ></rect>  </g>
 								</svg>
 							</figure>
 						</div>
@@ -152,45 +143,19 @@
 								<br>
 								<input id="gp1_setAll" class="gp_setAll" type="button" value="Set all">
 							</caption>
-							<tr>
-								<td name="UP"    >UP    <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
-							</tr>
-							<tr>
-								<td name="DOWN"  >DOWN  <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
-							</tr>
-							<tr>
-								<td name="LEFT"  >LEFT  <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
-							</tr>
-							<tr>
-								<td name="RIGHT" >RIGHT <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
-							</tr>
-							<tr>
-								<td name="A"     >A     <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
-							</tr>
-							<tr>
-								<td name="B"     >B     <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
-							</tr>
-							<tr>
-								<td name="Y"     >Y     <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
-							</tr>
-							<tr>
-								<td name="X"     >X     <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
-							</tr>
-							<tr>
-								<td name="SELECT">SELECT<span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
-							</tr>
-							<tr>
-								<td name="START" >START <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
-							</tr>
-							<tr>
-								<td name="SL"    >SL    <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
-							</tr>
-							<tr>
-								<td name="SR"    >SR    <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
-							</tr>
+							<tr><td name="UP"    >UP    <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td></tr>
+							<tr><td name="DOWN"  >DOWN  <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td></tr>
+							<tr><td name="LEFT"  >LEFT  <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td></tr>
+							<tr><td name="RIGHT" >RIGHT <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td></tr>
+							<tr><td name="A"     >A     <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td></tr>
+							<tr><td name="B"     >B     <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td></tr>
+							<tr><td name="Y"     >Y     <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td></tr>
+							<tr><td name="X"     >X     <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td></tr>
+							<tr><td name="SELECT">SELECT<span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td></tr>
+							<tr><td name="START" >START <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td></tr>
+							<tr><td name="SL"    >SL    <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td></tr>
+							<tr><td name="SR"    >SR    <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td></tr>
 						</table>
-
-						<hr>
 
 					</div>
 				</div>
@@ -206,45 +171,19 @@
 								<br>
 								<input id="gp2_setAll" class="gp_setAll" type="button" value="Set all">
 							</caption>
-							<tr>
-								<td name="UP"    >UP    <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
-							</tr>
-							<tr>
-								<td name="DOWN"  >DOWN  <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
-							</tr>
-							<tr>
-								<td name="LEFT"  >LEFT  <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
-							</tr>
-							<tr>
-								<td name="RIGHT" >RIGHT <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
-							</tr>
-							<tr>
-								<td name="A"     >A     <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
-							</tr>
-							<tr>
-								<td name="B"     >B     <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
-							</tr>
-							<tr>
-								<td name="Y"     >Y     <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
-							</tr>
-							<tr>
-								<td name="X"     >X     <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
-							</tr>
-							<tr>
-								<td name="SELECT">SELECT<span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
-							</tr>
-							<tr>
-								<td name="START" >START <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
-							</tr>
-							<tr>
-								<td name="SL"    >SL    <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
-							</tr>
-							<tr>
-								<td name="SR"    >SR    <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td>
-							</tr>
+							<tr><td name="UP"    >UP    <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td></tr>
+							<tr><td name="DOWN"  >DOWN  <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td></tr>
+							<tr><td name="LEFT"  >LEFT  <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td></tr>
+							<tr><td name="RIGHT" >RIGHT <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td></tr>
+							<tr><td name="A"     >A     <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td></tr>
+							<tr><td name="B"     >B     <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td></tr>
+							<tr><td name="Y"     >Y     <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td></tr>
+							<tr><td name="X"     >X     <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td></tr>
+							<tr><td name="SELECT">SELECT<span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td></tr>
+							<tr><td name="START" >START <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td></tr>
+							<tr><td name="SL"    >SL    <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td></tr>
+							<tr><td name="SR"    >SR    <span class="gp_cfg_set hyperlink2"></span></td> <td> <span name="map" class="buttonCode"></span> </td></tr>
 						</table>
-
-						<hr>
 
 					</div>
 				</div>
@@ -359,19 +298,35 @@
 								id                 ="emu_gamepad1"
 							>
 								<image width="420" height="160" xlink:href="img/CUzeBox_controls_modified.png"></image>
+
 								<text x="25" y="20" style="font-size:18px;font-weight:bold;" fill="black">P1</text>
-								<g pad="1" name="key_LEFT"   id="emuGamepad_1_key_LEFT"   class="hover_group"> <rect   x= "64"  y ="70"         width="26" height="21" ></rect>  </g>
-								<g pad="1" name="key_UP"     id="emuGamepad_1_key_UP"     class="hover_group"> <rect   x= "90"  y ="48"         width="26" height="21" ></rect>  </g>
-								<g pad="1" name="key_RIGHT"  id="emuGamepad_1_key_RIGHT"  class="hover_group"> <rect   x= "116" y ="70"         width="26" height="21" ></rect>  </g>
-								<g pad="1" name="key_DOWN"   id="emuGamepad_1_key_DOWN"   class="hover_group"> <rect   x= "90"  y ="92"         width="26" height="21" ></rect>  </g>
-								<g pad="1" name="key_SPACE"  id="emuGamepad_1_key_SPACE"  class="hover_group"> <rect   x= "160" y ="77"         width="30" height="30" ></rect>  </g>
-								<g pad="1" name="key_ENTER"  id="emuGamepad_1_key_ENTER"  class="hover_group"> <rect   x= "200" y ="77"         width="30" height="30" ></rect>  </g>
-								<g pad="1" name="key_LSHIFT" id="emuGamepad_1_key_LSHIFT" class="hover_group"> <rect   x= "65"  y ="2"          width="75" height="15" ></rect>  </g>
-								<g pad="1" name="key_RSHIFT" id="emuGamepad_1_key_RSHIFT" class="hover_group"> <rect   x= "280" y ="2"          width="75" height="15" ></rect>  </g>
-								<g pad="1" name="key_S"      id="emuGamepad_1_key_Q"      class="hover_group"> <circle cx="353" cy="81"  r="15"                        ></circle></g>
-								<g pad="1" name="key_A"      id="emuGamepad_1_key_W"      class="hover_group"> <circle cx="316" cy="110" r="15"                        ></circle></g>
-								<g pad="1" name="key_Q"      id="emuGamepad_1_key_A"      class="hover_group"> <circle cx="280" cy="81"  r="15"                        ></circle></g>
-								<g pad="1" name="key_W"      id="emuGamepad_1_key_S"      class="hover_group"> <circle cx="317" cy="52"  r="15"                        ></circle></g>
+
+								<g class="gamepadLabelG_style5" > <text x="95"  y="62"  width="26" height="21" uzebtn="BTN_UP"    >UP</text>    </g>
+								<g class="gamepadLabelG_style5" > <text x="95"  y="105" width="26" height="21" uzebtn="BTN_DOWN"  >DN</text>    </g>
+								<g class="gamepadLabelG_style5" > <text x="74"  y="84"  width="26" height="21" uzebtn="BTN_LEFT"  >LT</text>    </g>
+								<g class="gamepadLabelG_style5" > <text x="118" y="84"  width="26" height="21" uzebtn="BTN_RIGHT" >RT</text>    </g>
+								<g class="gamepadLabelG_style2" text-anchor="middle"; dominant-baseline="central"; transform="rotate(-35, 165, 73)"; > <text x="162" y="95"  width="30" height="30" uzebtn="BTN_SELECT">SPACE</text> </g>
+								<g class="gamepadLabelG_style2" text-anchor="middle"; dominant-baseline="central"; transform="rotate(-37, 205, 74)"; > <text x="202" y="95"  width="30" height="30" uzebtn="BTN_START" >ENTER</text> </g>
+								<g class="gamepadLabelG_style3" > <text x="85"  y="14"  width="75" height="15" uzebtn="BTN_SL"    >LSHIFT</text></g>
+								<g class="gamepadLabelG_style3" > <text x="300" y="14"  width="75" height="15" uzebtn="BTN_SR"    >RSHIFT</text></g>
+								<g class="gamepadLabelG_style1" > <text x="275" y="84"  width="75" height="15" uzebtn="BTN_Y"     >Q</text>     </g>
+								<g class="gamepadLabelG_style1" > <text x="312" y="56"  width="75" height="15" uzebtn="BTN_X"     >W</text>     </g>
+								<g class="gamepadLabelG_style4" > <text x="312" y="114" width="75" height="15" uzebtn="BTN_B"     >A</text>     </g>
+								<g class="gamepadLabelG_style4" > <text x="350" y="85"  width="75" height="15" uzebtn="BTN_A"     >S</text>     </g>
+
+								<g pad="1" uzebtn="BTN_UP"     name="key_UP"     id="emuGamepad_1_key_UP"     class="hover_group"> <rect     x ="90"  y ="48"         width="26" height="21" ></rect>  </g>
+								<g pad="1" uzebtn="BTN_DOWN"   name="key_DOWN"   id="emuGamepad_1_key_DOWN"   class="hover_group"> <rect     x ="90"  y ="92"         width="26" height="21" ></rect>  </g>
+								<g pad="1" uzebtn="BTN_LEFT"   name="key_LEFT"   id="emuGamepad_1_key_LEFT"   class="hover_group"> <rect     x ="64"  y ="70"         width="26" height="21" ></rect>  </g>
+								<g pad="1" uzebtn="BTN_RIGHT"  name="key_RIGHT"  id="emuGamepad_1_key_RIGHT"  class="hover_group"> <rect     x ="116" y ="70"         width="26" height="21" ></rect>  </g>
+								<g pad="1" uzebtn="BTN_SELECT" name="key_SPACE"  id="emuGamepad_1_key_SPACE"  class="hover_group"> <rect     x ="160" y ="77"         width="30" height="30" ></rect>  </g>
+								<g pad="1" uzebtn="BTN_START"  name="key_ENTER"  id="emuGamepad_1_key_ENTER"  class="hover_group"> <rect     x ="200" y ="77"         width="30" height="30" ></rect>  </g>
+								<g pad="1" uzebtn="BTN_SL"     name="key_LSHIFT" id="emuGamepad_1_key_LSHIFT" class="hover_group"> <rect     x ="65"  y ="2"          width="75" height="15" ></rect>  </g>
+								<g pad="1" uzebtn="BTN_SR"     name="key_RSHIFT" id="emuGamepad_1_key_RSHIFT" class="hover_group"> <rect     x ="280" y ="2"          width="75" height="15" ></rect>  </g>
+								<g pad="1" uzebtn="BTN_Y"      name="key_Q"      id="emuGamepad_1_key_Q"      class="hover_group"> <circle cx="280" cy="81"  r="15"                        ></circle></g>
+								<g pad="1" uzebtn="BTN_X"      name="key_W"      id="emuGamepad_1_key_W"      class="hover_group"> <circle cx="317" cy="52"  r="15"                        ></circle></g>
+								<g pad="1" uzebtn="BTN_B"      name="key_A"      id="emuGamepad_1_key_A"      class="hover_group"> <circle cx="316" cy="110" r="15"                        ></circle></g>
+								<g pad="1" uzebtn="BTN_A"      name="key_S"      id="emuGamepad_1_key_S"      class="hover_group"> <circle cx="353" cy="81"  r="15"                        ></circle></g>
+
 							</svg>
 						</figure>
 					</div>
@@ -388,19 +343,39 @@
 								id                 ="emu_gamepad2"
 							>
 								<image width="420" height="160" xlink:href="img/CUzeBox_controls_modified.png"></image>
+
 								<text x="25" y="20" style="font-size:18px;font-weight:bold;" fill="black">P2</text>
-								<g pad="2" name="key_LEFT"   id="emuGamepad_2_key_LEFT"   class="hover_group"> <rect   x ="64"  y ="70"         width="26" height="21" ></rect>  </g>
-								<g pad="2" name="key_UP"     id="emuGamepad_2_key_UP"     class="hover_group"> <rect   x ="90"  y ="48"         width="26" height="21" ></rect>  </g>
-								<g pad="2" name="key_RIGHT"  id="emuGamepad_2_key_RIGHT"  class="hover_group"> <rect   x ="116" y ="70"         width="26" height="21" ></rect>  </g>
-								<g pad="2" name="key_DOWN"   id="emuGamepad_2_key_DOWN"   class="hover_group"> <rect   x ="90"  y ="92"         width="26" height="21" ></rect>  </g>
-								<g pad="2" name="key_SPACE"  id="emuGamepad_2_key_SPACE"  class="hover_group"> <rect   x ="160" y ="77"         width="30" height="30" ></rect>  </g>
-								<g pad="2" name="key_ENTER"  id="emuGamepad_2_key_ENTER"  class="hover_group"> <rect   x ="200" y ="77"         width="30" height="30" ></rect>  </g>
-								<g pad="2" name="key_LSHIFT" id="emuGamepad_2_key_LSHIFT" class="hover_group"> <rect   x ="65"  y ="2"          width="75" height="15" ></rect>  </g>
-								<g pad="2" name="key_RSHIFT" id="emuGamepad_2_key_RSHIFT" class="hover_group"> <rect   x ="280" y ="2"          width="75" height="15" ></rect>  </g>
-								<g pad="2" name="key_S"      id="emuGamepad_2_key_Q"      class="hover_group"> <circle cx="353" cy="81"  r="15"                        ></circle></g>
-								<g pad="2" name="key_A"      id="emuGamepad_2_key_W"      class="hover_group"> <circle cx="316" cy="110" r="15"                        ></circle></g>
-								<g pad="2" name="key_Q"      id="emuGamepad_2_key_A"      class="hover_group"> <circle cx="280" cy="81"  r="15"                        ></circle></g>
-								<g pad="2" name="key_W"      id="emuGamepad_2_key_S"      class="hover_group"> <circle cx="317" cy="52"  r="15"                        ></circle></g>
+
+								<g class="gamepadLabelG_style5" > <text x="95"  y="62"  width="26" height="21" uzebtn="BTN_UP"    >UP</text>    </g>
+								<g class="gamepadLabelG_style5" > <text x="95"  y="105" width="26" height="21" uzebtn="BTN_DOWN"  >DN</text>    </g>
+								<g class="gamepadLabelG_style5" > <text x="74"  y="84"  width="26" height="21" uzebtn="BTN_LEFT"  >LT</text>    </g>
+								<g class="gamepadLabelG_style5" > <text x="118" y="84"  width="26" height="21" uzebtn="BTN_RIGHT" >RT</text>    </g>
+								<g class="gamepadLabelG_style2" text-anchor="middle"; dominant-baseline="central"; transform="rotate(-35, 165, 73)"; > <text x="162" y="95"  width="30" height="30" uzebtn="BTN_SELECT">SPACE</text> </g>
+								<g class="gamepadLabelG_style2" text-anchor="middle"; dominant-baseline="central"; transform="rotate(-37, 205, 74)"; > <text x="202" y="95"  width="30" height="30" uzebtn="BTN_START" >ENTER</text> </g>
+								<g class="gamepadLabelG_style3" > <text x="85"  y="14"  width="75" height="15" uzebtn="BTN_SL"    >LSHIFT</text></g>
+								<g class="gamepadLabelG_style3" > <text x="300" y="14"  width="75" height="15" uzebtn="BTN_SR"    >RSHIFT</text></g>
+								<g class="gamepadLabelG_style1" > <text x="275" y="84"  width="75" height="15" uzebtn="BTN_Y"     >Q</text>     </g>
+								<g class="gamepadLabelG_style1" > <text x="312" y="56"  width="75" height="15" uzebtn="BTN_X"     >W</text>     </g>
+								<g class="gamepadLabelG_style4" > <text x="312" y="114" width="75" height="15" uzebtn="BTN_B"     >A</text>     </g>
+								<g class="gamepadLabelG_style4" > <text x="350" y="85"  width="75" height="15" uzebtn="BTN_A"     >S</text>     </g>
+
+								<g pad="2" uzebtn="BTN_UP"     name="key_UP"     class="hover_group" id="emuGamepad_2_key_UP"    > <rect   x ="90"  y ="48"         width="26" height="21" ></rect>  </g>
+								<g pad="2" uzebtn="BTN_DOWN"   name="key_DOWN"   class="hover_group" id="emuGamepad_2_key_DOWN"  > <rect   x ="90"  y ="92"         width="26" height="21" ></rect>  </g>
+								<g pad="2" uzebtn="BTN_LEFT"   name="key_LEFT"   class="hover_group" id="emuGamepad_2_key_LEFT"  > <rect   x ="64"  y ="70"         width="26" height="21" ></rect>  </g>
+								<g pad="2" uzebtn="BTN_RIGHT"  name="key_RIGHT"  class="hover_group" id="emuGamepad_2_key_RIGHT" > <rect   x ="116" y ="70"         width="26" height="21" ></rect>  </g>
+								<g pad="2" uzebtn="BTN_SELECT" name="key_SPACE"  class="hover_group" id="emuGamepad_2_key_SPACE" > <rect   x ="160" y ="77"         width="30" height="30" ></rect>  </g>
+								<g pad="2" uzebtn="BTN_START"  name="key_ENTER"  class="hover_group" id="emuGamepad_2_key_ENTER" > <rect   x ="200" y ="77"         width="30" height="30" ></rect>  </g>
+								<g pad="2" uzebtn="BTN_SL"     name="key_LSHIFT" class="hover_group" id="emuGamepad_2_key_LSHIFT"> <rect   x ="65"  y ="2"          width="75" height="15" ></rect>  </g>
+								<g pad="2" uzebtn="BTN_SR"     name="key_RSHIFT" class="hover_group" id="emuGamepad_2_key_RSHIFT"> <rect   x ="280" y ="2"          width="75" height="15" ></rect>  </g>
+								<g pad="2" uzebtn="BTN_Y"      name="key_Q"      class="hover_group" id="emuGamepad_2_key_Q"     > <circle cx="280" cy="81"  r="15"                        ></circle></g>
+								<g pad="2" uzebtn="BTN_X"      name="key_W"      class="hover_group" id="emuGamepad_2_key_W"     > <circle cx="317" cy="52"  r="15"                        ></circle></g>
+								<g pad="2" uzebtn="BTN_B"      name="key_A"      class="hover_group" id="emuGamepad_2_key_A"     > <circle cx="316" cy="110" r="15"                        ></circle></g>
+								<g pad="2" uzebtn="BTN_A"      name="key_S"      class="hover_group" id="emuGamepad_2_key_S"     > <circle cx="353" cy="81"  r="15"                        ></circle></g>
+
+								<g style="font-size: 11px;fill: black;font-weight: bold;font-style: italic;">
+									<text x="145" y="157" width="75" height="15">* Modifier key: Hold either ALT or BACKSPACE.</text>
+								</g>
+
 							</svg>
 						</figure>
 					</div>
@@ -442,16 +417,11 @@
 		<div id="emu_emulator" class="sectionWindow">
 			<div class="sectionWindow_title">
 				Emulator Screen
+
 				<div id="coresetting">
 					<span id="coresetting_text"></span>
-					<span id="coresetting_toggle" class="hyperlink1 hidden" onclick="toggleCore();">(Toggle core)</span>
+					<span id="coresetting_toggle" class="hyperlink1 hidden">(Toggle core)</span>
 				</div>
-
-				<div id="gamepadIcon_container1" class="gamepadIcon_container" onclick="emu.gamepads.init();">
-					<div class="gamepadIcon" title="(method 1) Click to configure your gamepad!"></div>
-				</div>
-
-				<span class="hyperlink1 modalOpenBtn" id="gamepadConfig_openBtn">(GAMEPAD CONFIG)</span>
 			</div>
 			<div class="sectionWindow_content">
 				<div class="emu_emuControls" id="emu_emuControlsTOP">
@@ -673,7 +643,15 @@
 </div>
 
 <div id="bodyFooter">
-UAM5 (2018) Nickolas Andersen (nicksen782)
+	UAM5 (2018) Nickolas Andersen (nicksen782)
+
+	<div id="gamepadIcon_container1" class="gamepadIcon_container">
+		<div class="gamepadIcon" title="(method 1) Click to configure your gamepad!"></div>
+	</div>
+
+	<!--<span class="hyperlink1 modalOpenBtn" id="gamepadConfig_openBtn">(GAMEPAD CONFIG)</span>-->
+	<span class="hyperlink1 modalOpenBtn" id="gamepadConfig_openBtn">(Gamepad Config)</span>
+
 	<table id="paletteViewTable">
 		<tr>
 			<td> <div class="notVisible">&nbsp-;&nbsp;</div> </td>
@@ -708,8 +686,8 @@ UAM5 (2018) Nickolas Andersen (nicksen782)
 	</table>
 </div>
 
-<div id="entireBodyDiv" class="modals" onclick="emu.funcs.shared.activateProgressBar(false);"></div>
-<div id="progressbarDiv"></div>
+<!--<div id="entireBodyDiv" onclick="emu.funcs.shared.activateProgressBar(false);"></div>-->
+<!--<div id="progressbarDiv"></div>-->
 
 </body>
 

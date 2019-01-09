@@ -442,8 +442,7 @@ WHERE id = :gameid
 }
 function gameDb_updateGameData(){
 	// JSON decode the newData
-	$title   = $_POST['title']   ;
-	$gamedir = $_POST['gamedir'] ;
+	$data=json_decode($_POST["data"], true);
 
 	global $_appdir;
 	global $_db;
@@ -466,16 +465,16 @@ WHERE id = :gameid
 ";
 	$prp1    = $dbhandle->prepare($s_SQL1);
 
-	$dbhandle->bind(':title'       , $title              ) ;
-	$dbhandle->bind(':authors'     , ""                  ) ;
-	$dbhandle->bind(':description' , ""                  ) ;
-	$dbhandle->bind(':when_added'  , $data['when_added'] ) ;
-	$dbhandle->bind(':added_by'    , ""                  ) ;
-	$dbhandle->bind(':gamedir'     , $gamedir            ) ;
-	$dbhandle->bind(':gamefile'    , ""                  ) ;
-	$dbhandle->bind(':status'      , 0                   ) ;
-	$dbhandle->bind(':gamefiles'   , []                  ) ;
-	$dbhandle->bind(':gameid'      , $gameid             ) ;
+	$dbhandle->bind(':title'       , $data['title']       ) ;
+	$dbhandle->bind(':authors'     , $data['authors']     ) ;
+	$dbhandle->bind(':description' , $data['description'] ) ;
+	$dbhandle->bind(':when_added'  , $data['when_added']  ) ;
+	$dbhandle->bind(':added_by'    , $data['added_by']    ) ;
+	$dbhandle->bind(':gamedir'     , $data['gamedir']     ) ;
+	$dbhandle->bind(':gamefile'    , $data['gamefile']    ) ;
+	$dbhandle->bind(':status'      , $data['status']      ) ;
+	$dbhandle->bind(':gamefiles'   , $data['gamefiles']   ) ;
+	$dbhandle->bind(':gameid'      , $data['id']          ) ;
 
 	$retval1 = $dbhandle->execute();
 
@@ -484,6 +483,7 @@ WHERE id = :gameid
 		'data2'   => $data    ,
 		'success' => true     ,
 		'$_POST'  => $_POST   ,
+		'$data'   => $data    ,
 	) );
 }
 function gameDb_newGame(){
@@ -844,84 +844,6 @@ function c2bin_UamGame_2(){
 	];
 
 	// Then, write the data with c2bin C.
-}
-
-
-
-
-// TESTING
-function getGamesAndXmlFilepathsViaUserId(){
-	$author_user_id = $_POST["user_id"];
-
-	global $_appdir;
-	global $_db;
-	$dbhandle = new sqlite3_DB_PDO__UAM5($_db) or exit("cannot open the database");
-	$s_SQL1  ="
-SELECT
-	  gameId
-	, gameName
-	, UAMdir
-
-	--, author_user_id
-	--, author
-	--, gamedir
-	--, created
-	--, last_update
-FROM games_manifest
-WHERE author_user_id = :author_user_id
-ORDER BY last_update DESC
-	;";
-	$prp1    = $dbhandle->prepare($s_SQL1);
-	$dbhandle->bind(':author_user_id' , $author_user_id ) ;
-	$retval1 = $dbhandle->execute();
-	$results1= $dbhandle->statement->fetchAll(PDO::FETCH_ASSOC) ;
-
-	// You have the gameIds, gameNames, and UAMdirs. You need the XML filenames in the XML dir of the game's UAM dir.
-	$results2 = [];
-
-	for($i=0; $i<sizeof($results1); $i+=1){
-		$directory = $results1[$i]["UAMdir"] . "/XML";
-		$gameId = $results1[$i]["gameId"];
-		$gameName = $results1[$i]["gameName"];
-
-		// Scan the dir. Get the file names that have the XML extension.
-		$scanned_directory = array_values(
-			array_diff(
-				scandir($_SERVER["DOCUMENT_ROOT"] . "/" . $directory
-			)
-			, array('..', '.', '.git')
-			)
-		);
-
-		for($ii=0; $ii<sizeof($scanned_directory); $ii++){
-			// Don't include dirs.
-			if( ! is_dir($_SERVER["DOCUMENT_ROOT"] . "/" . $directory.'/'.$scanned_directory[$ii]) ){
-				array_push($results2,
-					[
-						// "fullpath" => $_SERVER["DOCUMENT_ROOT"] . "/" . $directory.'/'.$scanned_directory[$ii] ,
-						"webpath"  => "/".$directory.'/'.$scanned_directory[$ii] ,
-						"filename" => $scanned_directory[$ii]                ,
-						"gameid"   => $gameId                                  ,
-						"gamename" => $gameName                              ,
-						// "label"    => $gameName . " - "  .$scanned_directory[$ii]       ,
-					]
-				);
-			}
-		}
-
-	}
-
-	//
-
-	echo json_encode(array(
-		'data'      => [] ,
-		'success'   => true      ,
-
-		'$_POST'    => $_POST    ,
-		'$results1' => $results1 ,
-		'$results2' => $results2 ,
-	) );
-
 }
 
 ?>

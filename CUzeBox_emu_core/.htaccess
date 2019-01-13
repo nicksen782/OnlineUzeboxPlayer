@@ -1,0 +1,7 @@
+AddType application/wasm .wasm
+AddOutputFilterByType DEFLATE application/wasm
+
+# Options Multiviews
+# RemoveType .gz
+# AddEncoding x-gzip .gz
+# AddType application/wasm .wasm

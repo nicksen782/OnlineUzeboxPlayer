@@ -1,0 +1,1288 @@
+/* MODALS AND FADE ANIMATION KEYFRAMES */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+		visibility       : visible;
+    }
+
+    100% {
+        opacity: 1;
+		visibility       : visible;
+    }
+}
+@keyframes fadeOut {
+    0% {
+        opacity: 1;
+		visibility       : visible;
+    }
+
+    100% {
+        opacity: 0;
+		visibility       : hidden;
+    }
+}
+#entireBodyDiv{
+	position         : fixed;
+	top              : 0px;
+	left             : 0px;
+	width            : 100vw;
+	height           : 100vh;
+	background-color : rgba(0, 0, 0, 0.40);
+
+	opacity          : 0;
+	visibility       : hidden;
+	z-index:-1;
+
+	animation: fadeOut .25s;
+}
+#entireBodyDiv.active{
+	z-index          : 4999;
+	visibility       : visible;
+	opacity          : 1;
+	animation: fadeIn .25s;
+}
+#progressbarDiv{
+	border            : 2px solid rgb(83, 94, 135);
+	border-radius     : 5px;
+	background-image  : url(../img/ProgressBar.gif);
+	background-repeat : no-repeat;
+	background-size   : 100% 100%;
+	position          : fixed;
+	left              : 50%;
+	top               : 10px;
+	bottom            : 10px;
+	transform         : translate(-50%, 0%);
+	width             : 90%;
+	height            : 10px;
+
+	opacity          : 0;
+	visibility       : hidden;
+	z-index:-1;
+	animation: fadeOut .25s;
+
+}
+#progressbarDiv.active{
+	z-index          : 5000;
+	visibility       : visible;
+	opacity          : 1;
+	animation: fadeIn .25s;
+}
+.modals{
+	position      : fixed;
+	left          : 50%;
+	top           : 50%;
+	transform     : translate(-50%, -50%);
+	border        : 2px solid rgb(83, 94, 135);
+	border-radius : 5px;
+	background-color: lightgray;
+	min-height: 100px;
+	min-width:  100px;
+	padding: 10px;
+
+	opacity          : 0;
+	visibility       : hidden;
+	z-index:-1;
+	animation: fadeOut .25s;
+}
+.modals.active{
+	z-index          : 5000;
+	visibility       : visible;
+	opacity          : 1;
+	animation: fadeIn .25s;
+}
+
+#uamModal{
+	position: fixed;
+	left: 50%;
+	top: 10px;
+	transform: translate(-50%, 0%);
+	height: 150px;
+	width: 300px;
+}
+#uamIframe{
+	border: 0;
+	width: 300px;
+	height: 160px;
+	border-radius:5px;
+}
+
+#UAM_status{
+	/* background-color: #b9c6d0; */
+	/* width: 330px; */
+	position: absolute;
+	right: 5px;
+	top: 0px;
+	line-height: 26px;
+	font-size: 16px;
+	text-align: right;
+	padding-right: 5px;
+}
+.UAM_statuses{
+	display: none;
+}
+.UAM_statuses.show{
+	display:block;
+}
+
+#UAM_status_A{
+}
+#UAM_status_B{
+}
+#UAM_status_C{
+}
+
+
+
+
+.unavailableView {
+    /*cursor: not-allowed !important;*/
+	pointer-events: none;
+	opacity: 0.40;
+	/*text-decoration: line-through;*/
+	/* cursor: not-allowed; */
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+/**/
+/* UAM ONLY*/
+.uamOnly{
+	/*display:none;*/
+	opacity: 0.15;
+}
+.uamOnly.enabled{
+	/*display:block;*/
+	opacity: 1.0;
+}
+.uamOnly.sectionWindow{
+	background-color: rgba(40, 160, 210, 1);
+	border-style: solid;
+}
+.uamOnly .sectionWindow_title{
+	background-color: hsla(40, 69%, 53%, 1);
+}
+/* UAM ONLY*/
+/**/
+
+
+
+
+canvas {
+  /* Older versions of FF          */
+  image-rendering: optimizeSpeed;
+
+  /* FF 6.0+                       */
+  image-rendering: -moz-crisp-edges;
+
+  /* Safari                        */
+  image-rendering: -webkit-optimize-contrast;
+
+  /* OS X & Windows Opera (12.02+) */
+  image-rendering: -o-crisp-edges;
+
+  /* Awesome future-browsers       */
+  image-rendering: pixelated;
+
+  /* IE                            */
+  -ms-interpolation-mode: nearest-neighbor;
+}
+
+html {
+	max-width: 1200px;
+	width: 940px;
+	margin: 0 auto;
+	/*scroll-behavior: smooth;*/
+	/*font-family: "Times New Roman, Helvetica, serif";*/
+	font-family: Arial, Helvetica, Sans-Serif;
+	font-size: 16px;
+}
+html.wide  {width: 1180px;}
+html{
+  -webkit-transition: width 0.5s, height 0.5s; /* For Safari 3.1 to 6.0 */
+  transition        : width 0.5s, height 0.5s;
+}
+body {
+	position: relative;
+	background-color: #213a4e;
+}
+#bodyHeader {
+	text-align: center;
+	margin: 2px;
+	padding: 5px;
+	background-color: #b9c6d0;
+	border: 1px solid black;
+	border-radius: 5px;
+	position: relative;
+	overflow: hidden;
+}
+#bodyContainer {
+	min-height: 400px;
+	margin: 2px;
+	padding: 2px;
+	background-color: rgb(185, 198, 208);
+	background-color: hsl(206, 51%, 37%);
+	border: 1px solid black;
+	border-radius: 5px;
+	position: relative;
+}
+#bodyFooter {
+	text-align: left;
+	margin: 2px;
+	padding: 5px;
+	background-color: #b9c6d0;
+	border: 1px solid black;
+	border-radius: 5px;
+	position: relative;
+}
+
+
+/* USED AS THE CONTAINER FOR THE MAIN SECTIONS OF THIS APPLICATION */
+.sectionDivs {
+	position: relative;
+	min-height: 500px;
+	border: 2px solid black;
+	border-radius: 5px;
+	background-color: #aec4e0;
+	background-color: #6b7a8c;
+	/*display:none;*/
+}
+.sectionDivs.active{
+	display:block;
+}
+.sectionDivs.hidden{
+	display:none;
+}
+
+.sectionWindow_title, .sectionDivs_title {
+	background-color: #85a3e0;
+	padding: 5px;
+	text-align: center;
+	border-bottom: 1px solid steelblue;
+	border-radius: 4px 4px 0px 0px;
+	height: 25px;
+	font-size: 16px;
+}
+
+.sectionDivs_content {
+	padding: 5px;
+	border-radius: 0px 0px 4px 4px;
+	border: 5px solid blue;
+}
+
+.sectionDivs_title_text {
+	position: absolute;
+	left: 5px;
+	top: 5px;
+	font-size: 26px;
+	vertical-align: top;
+}
+
+.sectionDivs_title_options {
+	position: absolute;
+	right: 5px;
+	top: 0px;
+	width: 700px;
+	height: 2em;
+	text-align: right;
+	vertical-align: top;
+}
+
+/* USED AS CONTAINERS WITHING EACH MAIN SECTION OF THIS APPLICATION */
+.sectionWindow {
+	width: 250px;
+	height: 100px;
+	border: 2px solid black;
+	border-radius: 5px 5px 5px 5px;
+	position: absolute;
+	box-shadow: 0px 0px 10px 0px black;
+	background-color: #85a3e0;
+}
+
+.sectionWindow_title {
+	height: 15px;
+	background-color: hsla(220, 69%, 53%, 1);
+}
+
+.sectionWindow_content {
+	padding: 5px;
+	position:relative;
+}
+
+.navOptions {
+	font-size: 1.0em;
+	line-height: 1em;
+	display: inline-block;
+	background-color: #6994e9;
+	border-radius: 5px;
+	padding: 5px;
+	margin: 3px;
+	border: 2px solid #1e5a88;
+	vertical-align: top;
+}
+.navOptions:hover {
+	background-color: #a4c3ff;
+}
+.navOptions.hidden {
+	display:none;
+}
+
+#emu_view{height: 610px;/* overflow: hidden; */}
+#emu_gameSelector    {left: 5px;top: 40px;width: 320px;height: 120px;z-index: 100;}
+#emu_gameFiles       {width: 320px;height: 130px;position: absolute;top: 170px;left: 5px;z-index: 18;padding: 0px;border-radius: 5px;overflow: hidden;}
+#emu_onscreenGamepads{width: 320px;height: 290px;position: absolute;top: 310px;left: 5px;z-index: 18;}
+#emu_emulator        {left: 335px;top: 40px;width: 580px;height: 560px;overflow: hidden;background-color: #346cda;/* background-color: black; */}
+#emu_emulator .sectionWindow_content{/* background-color: #22205c; */position: relative;top: 0px;left: 0px;}
+
+#emu_view_uam{
+	background-color: rgb(101, 176, 66);
+	left: 925px;
+	top: 40px;
+	/* width: 200px; */
+	/* height: 100px; */
+	width: 240px;
+	height: 564px;
+	position: absolute;
+	font-size: 14px;
+	padding: 0px;
+	/* overflow: hidden; */
+	display:none;
+}
+#emu_view_uam.enabled{
+	display:block;
+}
+
+#emu_view_uam .table1{width:100%;margin-bottom: 5px;}
+#emu_view_uam .table1 td {padding: 3px;font-size: 10px;}
+
+#emu_gameSelector_uam{left: 3px;top: 0px;/* width: 200px; *//* height: 100px; */width: 230px;height: 180px;position: absolute;font-size: 12px;padding: 0px;overflow: hidden;}
+#emu_miniOutput1_uam {left: 3px;top: 195px;width: 230px;height: auto;position: absolute;padding: 0px;overflow: hidden;}
+#emu_miniOutput2_uam {left: 3px;top: 380px;width: 230px;height: auto;position: absolute;padding: 0px;overflow: hidden;}
+
+#emu_miniOutput1_uam .sectionWindow_content{ padding:0px; }
+#emu_miniOutput2_uam .sectionWindow_content{ padding:0px; }
+
+.dataHolder {
+	background-color: black;
+	color: palegoldenrod;
+	width: 280px;
+	width: 100%;
+	height: 140px;
+	text-align: left;
+	overflow: auto;
+	font-family: monospace;
+	font-size: 11px;
+	white-space: pre-line;
+	display: inline-block;
+	vertical-align: top;
+	z-index: 1;
+	position: relative;
+	padding: 4px;
+}
+
+.table1 {
+	width: 100%;
+	background-color: rgb(90, 120, 181);
+}
+.table1 caption {
+	background-color: rgba(128, 164, 236, 0.4);
+	border-bottom: 1px solid black;
+	border-style: dotted;
+	font-weight: bold;
+	text-decoration: underline;
+}
+.table1 td {
+	vertical-align: top;
+	font-size: 14px;
+}
+.table1 th {
+	vertical-align: top;
+}
+
+.table2 {
+	width: 100%;
+	background-color: rgb(90, 120, 181);
+}
+.table2 caption {
+	background-color: rgba(128, 164, 236, 0.4);
+	border-bottom: 1px solid black;
+	border-style: dotted;
+	font-weight: bold;
+	text-decoration: underline;
+}
+.table2 td {
+	vertical-align: top;
+	font-size: 14px;
+	padding: 4px;
+}
+.table2 th {
+	vertical-align: top;
+}
+
+#emu_db{height: 610px;overflow: hidden;}
+#emu_db_gameChoice{
+	left: 10px;
+	top: 50px;
+	width: 200px;
+	height: 100px;
+	width: 510px;
+	height: 100px;
+}
+#emu_db_gameMetadata{
+	left: 10px;
+	top: 170px;
+	/* width: 200px; */
+	/* height: 100px; */
+	width: 370px;
+	height: 420px;
+}
+#emu_db_files{
+	left: 410px;
+	top: 170px;
+	/* width: 200px; */
+	/* height: 100px; */
+	width: 500px;
+	height: 420px;
+}
+#emu_db_options{
+	left: 530px;
+	top: 50px;
+	/* width: 200px; */
+	/* height: 100px; */
+	width: 380px;
+	height: 70px;
+}
+
+div#emu_filesList_div {
+	height: 70px;
+	overflow: auto;
+	border-bottom: 1px solid black;
+	line-height: 20px;
+	font-size: 12px;
+}
+div#emu_filesList_div .table1 th:nth-child(1) {width: 20%;background-color: rgba(0, 0, 0, 0.1);font-weight: bold;text-decoration: underline;}
+div#emu_filesList_div .table1 th:nth-child(2) {width: 60%;background-color: rgba(0, 0, 0, 0.1);font-weight: bold;text-decoration: underline;}
+div#emu_filesList_div .table1 th:nth-child(3) {width: 20%;background-color: rgba(0, 0, 0, 0.1);font-weight: bold;text-decoration: underline;}
+
+div#emu_filesList_div .table1 td:nth-child(1) { }
+div#emu_filesList_div .table1 td:nth-child(2) {font-family:monospace;font-size: 12px;}
+div#emu_filesList_div .table1 td:nth-child(3) { font-family:monospace; }
+
+#emscripten_emu_container{
+	width: 570px;
+	height: 456px;
+	margin: 0px auto;
+	text-align: center;
+	position: relative;
+}
+.largerEmuWindow          {height: 560px !important;}
+.largerEmuWindow_container{ height: 455px !important; }
+
+#emu_FilesFromUser{
+	display:none;
+}
+#emu_FilesFromUser_viewableBtn{/* font-size: 12px; */}
+
+/*UAM*/
+#emu_gameSelect_UAM_select{
+	width: 115px;
+	font-size: 12px;
+}
+.checkbox_button{
+    /*border: 1px solid black;*/
+    margin-bottom: 2px;
+}
+.checkbox_button .checkbox{
+	background-color: red;
+	color: yellow;
+	width: 35px;
+	height: 15px;
+	line-height: 15px;
+	display: inline-block;
+	font-size: 12px;
+	border: 1px solid black;
+	border-radius: 5px;
+	text-align: center;
+	font-weight: bold;
+	margin: 1px;
+	margin-right: 10px;
+}
+.checkbox_button .checkbox.enabled{
+	background-color: #40cf40;
+}
+.checkbox_button .checkbox::before{
+	content: "OFF";
+}
+.checkbox_button .checkbox.enabled::before{
+	content: "ON ";
+}
+
+/*UAM*/
+
+.emuControls:hover{
+	background-color: #accce7;
+}
+.emuControls:active{
+	background-color: #5babef;
+}
+.emuControls{
+	width: 90px;
+	font-size: 10px;
+	margin: 2px auto;
+	border-radius: 5px;
+	border: 1px solid black;
+	display: inline-block;
+	background-color: #e4e4e4;
+	/* height: 2.25em; */
+	vertical-align: top;
+}
+.emuControls.checkbox{
+	/* height: 1.5em; */
+	text-align:center;
+	width: 180px;
+	/*pointer-events: none;*/
+	/*-webkit-touch-callout: none;*/
+	/*-webkit-user-select: none;*/
+	/*-khtml-user-select: none;*/
+	/*-moz-user-select: none;*/
+	/*-ms-user-select: none;*/
+	/*user-select: none;*/
+}
+.emuControls #emuControls_autopause_chk{
+	background-color: red;
+	color: yellow;
+	width: 35px;
+	height: 15px;
+	display: inline-block;
+	font-size: 12px;
+	border: 1px solid black;
+	border-radius: 5px;
+	text-align: center;
+	font-weight: bold;
+	margin-right: 10px;
+}
+.emuControls #emuControls_autopause_chk.enabled{
+	background-color: #40cf40;
+	color: yellow;
+	border: 1px solid black;
+	border-radius: 5px;
+	text-align: center;
+}
+.emuControls #emuControls_autopause_chk::before{
+	content: "OFF";
+}
+.emuControls #emuControls_autopause_chk.enabled::before{
+	content: "ON ";
+}
+
+
+#emscripten_emu_container:-webkit-full-screen{ height: 100% !important; }
+#emscripten_emu_container:-moz-full-screen   { height: 100% !important; }
+#emscripten_emu_container:-ms-fullscreen     { height: 100% !important; }
+#emscripten_emu_container:-fullscreen        { height: 100% !important; }
+
+/*FULL SCREEN*/
+/*:-webkit-full-screen {*/
+/*  width: 100% !important;*/
+/*}*/
+/*:-moz-full-screen {*/
+/*  width: 100% !important;*/
+/*}*/
+/*:-ms-fullscreen {*/
+/*  width: 100% !important;*/
+/*}*/
+/*:fullscreen {*/
+/*  width: 100% !important;*/
+/*}*/
+
+/* While in fullscreen, hide any children with class 'tohide' */
+/*:-webkit-full-screen .tohide {*/
+/*  display: none;*/
+/*}*/
+/*:-moz-full-screen .tohide {*/
+/*  display: none;*/
+/*}*/
+/*:-ms-fullscreen .tohide {*/
+/*  display: none;*/
+/*}*/
+/*:fullscreen .tohide {*/
+/*  display: none;*/
+/*}*/
+/*FULL SCREEN*/
+
+
+
+input#emu_FilesFromJSON {
+	width: 170px;
+	font-size: 10px;
+	height: 22px !important;
+	padding: 0px;
+	margin: 0px;
+}
+
+select#emu_builtInGames_select {
+	width: 95%;
+	/* font-size: 12px; */
+}
+
+div#emu_emuControlsTOP {
+}
+div#emu_emuControlsBOTTOM.fixedToolPosition {
+	position: fixed;bottom: 25px;
+}
+div.emu_emuControls {
+	text-align: center;
+	border-bottom: 2px solid #346cda;
+	background-color: #346cda;
+	z-index: 100;
+	position: relative;
+	/* border-bottom: 1px solid black; */
+	/* border-top: 1px solid black; */
+}
+
+.noSelect{
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-o-user-select: none;
+	user-select: none;
+}
+
+
+/* ************** */
+svg#emu_gamepad1, svg#emu_gamepad2 {
+    position: absolute;
+    top: 0px;
+    left: -20px;
+    top: 5px;
+}
+.hover_group {
+    opacity: 0.95;
+    fill: rgba(66, 44, 255, 0.45);
+    stroke: black;
+    stroke-width: 2px;
+    cursor: pointer;
+}
+.hover_group:hover {
+    fill: rgba(0, 164, 164, 0.5);
+}
+.hover_group:active {
+    fill: rgba(0, 255, 255, 0.75);
+}
+.hover_group.active        {
+	fill: rgba(0, 255, 255, 0.75) !important;
+}
+#emu_onscreenGamepads_1{
+	width: 380px;
+	height: 170px;
+	border-radius: 10px;
+	border: 2px solid black;
+	position: absolute;
+	top: 5px;
+	left: -32px;
+	transform: scale(0.8, 0.60);
+	z-index: 100;
+	padding: 0px;
+	background-color: #7e3c3c;
+}
+#emu_onscreenGamepads_2{
+	width: 380px;
+	height: 170px;
+	border-radius: 10px;
+	border: 2px solid black;
+	position: absolute;
+	top: 115px;
+	left: -32px;
+	transform: scale(0.8, 0.60);
+	z-index: 100;
+	padding: 0px;
+	background-color: #888841;
+}
+
+
+
+
+input#emu_FilesFromJSON_load {
+    /* font-size: 12px; */
+    width: 50px;
+}
+
+input#emu_FilesFromJSON_UAM {
+    width: 185px;
+    font-size: 6px;
+    /* display: block; */
+    display: none;
+}
+
+div#emu_debug1 {
+    height: 610px;
+    overflow: hidden;
+}
+
+#emu_debug1_output1{
+    left: 5px;
+    top: 40px;
+    width: 1150px;
+    height: 550px;
+    position: absolute;
+    font-size: 14px;
+    padding: 0px;
+    overflow: hidden;
+}
+#emu_debug1_output1 .output{
+	background-color: black;width: 100%;height: 515px;
+    color: palegoldenrod;
+    text-align: left;
+    overflow: auto;
+}
+#emu_debug2_output1{
+	left: 5px;
+    top: 40px;
+    width: 1150px;
+    height: 550px;
+    position: absolute;
+    font-size: 14px;
+    padding: 0px;
+    overflow: hidden;
+}
+#emu_debug2_output1 .output{
+	background-color: black;width: 100%;height: 515px;
+    color: palegoldenrod;
+    text-align: left;
+    overflow: auto;
+}
+
+#emu_debug1_output1 .output pre,
+#emu_debug1_output2 .output pre
+{
+    font-family: 'Courier New', Courier, monospace !important;
+    font-weight: normal;
+    background-color: #1b1b1b;
+    color: palegoldenrod;
+    margin: 0px auto;
+    font-size: 100%;
+}
+
+
+div#emu_debug2 {
+    height: 610px;
+    overflow: hidden;
+}
+
+canvas#emuCanvas {
+    width: 520px;
+    height: 382px;
+    margin: auto;
+    text-align: center;
+    display: block;
+    border: 0px none;
+    /* background-color: black; */
+    position: relative;
+}
+canvas#emuCanvas:focus {
+    outline: 0px dashed red;
+}
+
+#emu_misc_nav{
+	/*background-color:blue;*/
+	border-bottom: 0px solid black;
+	padding-left: 5px;
+}
+.emu_misc_navItem{
+	display:inline-block;
+	background-color: steelblue;
+	/* background-color: #dddddd; */
+	width: 85px;
+	font-size: 14px;
+	padding: 5px;
+	padding-bottom: 2px;
+	border-radius: 15px 15px 0px 0px;
+	text-align: center;
+	border: 1px solid black;
+	border-bottom: 0px;
+	cursor:pointer;
+}
+.emu_misc_navItem.active{
+	/* background-color: steelblue; */
+	background-color: #dddddd;
+}
+
+.emu_misc_view{
+	display:none;
+	width: 310px;
+	height: 230px;
+	background-color: #dddddd;
+	/* overflow: auto; */
+}
+.emu_misc_view.active{
+	display:block;
+	overflow: auto;
+}
+
+#emu_misc_gamepads{
+	/* background-color:blue; */
+}
+#emu_misc_info{
+	/* background-color:red; */
+}
+#emu_misc_misc{
+	/* background-color:green; */
+}
+
+.hovered{
+	/*transform:scale(0.9, 0.9);*/
+	/*border:2px dashed white;*/
+}
+
+.hyperlink1{
+	cursor:pointer;
+	text-decoration:underline;
+	color: black;
+	text-decoration-color: blue;
+	background-color: rgba(226, 226, 226, 0.4);
+}
+.hyperlink1:hover{
+	/*font-weight:bold;*/
+	background-color: rgba(255, 255, 255, 0.25);
+}
+.hyperlink1:active{
+	color:purple;
+}
+
+#gameLinksTable{ width:100%; }
+#gameLinksTable tr td:nth-child(1){ width:40%; }
+#gameLinksTable tr td:nth-child(2){ width:60%; }
+
+.gamelinks.notVisible{
+	visibility:hidden;
+}
+
+div#emu_filesList_links {
+	position: relative;
+	top: 5px;
+	/* left: 5px; */
+	text-align: center;
+}
+
+div#emscripten_emu_container_outer {
+	/* background-color: black; */
+	/* background-color: #22205c; */
+	background-color: #070707;
+	margin-top: 5px;
+}
+
+.verticalAlign {
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.fullWidthAndHeight{
+	width: 100% !important;
+	height: 100% !important;
+}
+
+input#emu_FilesFromJSON_UAM_load {
+    font-size: 14px;
+}
+
+input#emu_compile_UAM {
+    font-size: 12px;
+}
+
+input#emu_c2bin_UAM {
+    font-size: 12px;
+}
+
+input#emu_c2bin2_UAM {
+    font-size: 12px;
+}
+
+.playButton{
+	width: 85% !important;
+	font-size: 10px !important;
+	font-style: italic;
+	font-weight: bold;
+	background-color: #40cf40;
+	border: 1px solid black !important;
+}
+
+input.playButton:hover {
+    background-color: #4bf34b;
+}
+
+textarea#db_dataField_description {
+    width: 270px;
+    height: 80px;
+    position: relative;
+    top: 10px;
+}
+
+
+select#db_dataField_status {
+    width: 184px;
+    background-color: white;
+}
+
+div#emu_db_files_included {
+    border: 1px solid beige;
+    height: 140px;
+    /* height: auto; */
+    /* position: relative; */
+    /* top: 0px; */
+    overflow-y: auto;
+    background-color: rgb(90, 120, 181);
+}
+
+div#emu_db_files_allInDir {
+    border: 1px solid beige;
+    height: 190px;
+    /* position: relative; */
+    /* top: 20px; */
+    overflow-y: auto;
+    margin-top: 10px;
+    background-color: rgb(90, 120, 181);
+}
+
+#emu_db_gameMetadata input{
+	font-size:10px;
+	/* width:180px; */
+	width: 96%;
+}
+#emu_db_gameMetadata select{
+	font-size:10px;
+	width:185px;
+	width: 98%;
+}
+#emu_db_gameMetadata textarea{
+	font-size:10px;
+	width:275px;
+	width: 97%;
+}
+
+input#db_builtInGames_fileUpload {
+    display: none;
+}
+
+div#emu_db_files_uploadDiv {
+    margin-top: 10px;
+    text-align: center;
+}
+
+input#db_builtInGames_fileUpload_visible {
+    width: 200px;
+}
+
+select#db_gameSelect {
+    width: 270px;
+}
+
+.uamOnly.hidden{
+	display:none;
+}
+
+.navOptions.uamOnly.active{
+	background-color:yellow !important;
+}
+.debugButtons.uamOnly.enabled{
+	display:inline-block !important;
+	/*display:inline-block ;*/
+}
+
+
+
+#coresetting {
+    font-size: 10px;
+    position: absolute;
+    right: 5px;
+    top: 5px;
+    display: block;
+}
+#CUzeBox_flags{
+	width: 250px;
+	/* height: 150px; */
+	position:fixed;
+	top: 10px;
+	left: 10px;
+	background-color: #85a3e0;
+	padding: 10px;
+	border-radius: 10px;
+	display:none;
+}
+.activated{
+	background-color: #a9fffd !important;
+	font-size:90%           !important;
+}
+
+#gamepadIcon_container1{
+	position:absolute;
+	top: 2px;
+	right: 10px;
+	width: 50px;
+	height: 20px;
+	background-color: rgba(0, 1, 255, 0.25);
+	background-color: rgb(133, 163, 224);
+	border-radius: 10px;
+	padding: 1px;
+}
+#gamepadIcon_container2{
+	position:absolute;
+	top: 0px;
+	left: 100px;
+	width: 50px;
+	height: 20px;
+	background-color: rgba(0, 1, 255, 0.25);
+	border-radius: 10px;
+	padding: 1px;
+}
+.gamepadIcon_container:hover {
+	background-color: rgba(0, 1, 255, 0.25) !important;
+	/* background-color: rgb(133, 163, 224) !important; */
+}
+.gamepadIcon_container:active{background-color: rgba(0, 101, 255, 0.5) !important; }
+.gamepadIcon_container.pollingActive{background-color: rgba(255, 0, 0, 0.5) !important;/* background-color: initial !important; */box-shadow: 0px 0px 10px 3px rgba(255, 0, 0, 0.5);z-index: 1000000;}
+.gamepadIcon{
+	width: 100%;
+	height: 20px;
+	text-align: center;
+	line-height: 20px;
+	/* color: red; */
+	font-weight: bold;
+	display: inline-block;
+	background-image: url(../img/CUzeBox_controls_modified.png);
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+	cursor:pointer;
+}
+
+#gamepadConfig{
+	width: 400px;
+	height: 455px;
+	position:fixed;
+	top: 10px;
+	left: 10px;
+	background-color: #85a3e0;
+	padding: 5px;
+	border-radius: 10px;
+	/*display:none;*/
+}
+
+#gamepad1_status{
+	/*width:100%;*/
+	height:200px;
+	/* margin:5px; */
+}
+#gamepad2_status{
+	/*width:100%;*/
+	height:200px;
+	/* margin:5px; */
+	margin-top: 35px;
+}
+
+
+/**/
+
+
+#gamepadConfigDiv{
+	 position:absolute;
+	/*position: fixed;*/
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	width: 930px;
+	height: 565px;
+	/* background-color: #85a3e0; */
+	background-color: #113886;
+	z-index: 1000000000000;
+	display:none;
+}
+#gamepadConfigDiv.showModal{
+	display:block;
+}
+
+.emu_gamepadConfig_div{
+	width: 385px;
+	height: 170px;
+	border-radius: 10px;
+	border: 2px solid black;
+	position: absolute;
+	/*top: 0px;*/
+	/*! left: 8px; */
+	transform: scale(1, 1);
+	z-index: 100;
+	padding: 0px;
+}
+.emu_gamepadConfig_svg{
+	position: absolute;
+	top: 5px;
+	left: -20px;
+}
+#emu_gamepadConfig_P1{
+	position: absolute;
+	top: 30px;
+	background-color: #346cda;
+}
+#emu_gamepadConfig_P2{
+	position: absolute;
+	top: 250px;
+	background-color: #346cda;
+}
+
+#emu_gamepadConfig_notes1{
+	width: 375px;
+	height: 32px;
+	border-radius: 10px;
+	/* border: 2px solid black; */
+	position: absolute;
+	top: 440px;
+	/* left: 0px; */
+	/* transform: scale(1, 1); */
+	z-index: 100;
+	padding: 5px;
+	background-color: yellow;
+	font-size: 14px;
+}
+
+#gamepadConfigDiv_pads    {left: 5px;top: 10px;width: 400px;height: 520px;z-index: 100;}
+
+#gamepadConfigDiv_mappings_P1 {left: 430px;top: 10px;width: 230px;height: 420px;z-index: 100;}
+#gamepadConfigDiv_mappings_P2 {left: 690px;top: 10px;width: 230px;height: 420px;z-index: 100;}
+
+.gamepadMappingTable.table1 td{padding: 7px;position:relative;}
+.gamepadMappingTable.table1 td:nth-child(1){width: 70%;background-color: #346cda;}
+.gamepadMappingTable.table1 td:nth-child(2){width: 30%;text-align: center;}
+
+#gamepadConfigDiv_datamanager{left: 430px;top: 460px;width: 490px;height: 70px;z-index: 100;}
+
+.modalCloseBtn{
+	position: absolute;
+	top: 5px;
+	left: 5px;
+	font-size: 14px;
+}
+.modalOpenBtn{
+	position: absolute;
+	top: 5px;
+	right: 70px;
+	font-size: 14px;
+}
+
+.horizontalCenter{
+	text-align:center;
+	margin:auto;
+}
+
+.gp_cfg_set{
+	display:inline-block;
+	position: absolute;
+	right: 5px;
+	top: 5px;
+	border-radius: 5px;
+	padding: 5px;
+	font-weight: bold;
+	width: 70px;
+	text-align: center;
+}
+.gp_cfg_set::before{ content:"(Click to set)"; }
+.gp_cfg_set.activeBtnMap::before{ content:"(Press button)"; }
+.gp_cfg_set.activeBtnMap{
+	background-color: rgba(89, 245, 32, 0.7) !important;
+}
+.gp_setAll.active{
+	background-color: rgba(89, 245, 32, 0.7) !important;
+}
+
+.hyperlink2{
+	cursor:pointer;
+	text-decoration:underline;
+	color: black;
+	text-decoration-color: blue;
+	background-color: rgba(226, 226, 226, 0.4);
+	font-size: 10px;
+}
+.hyperlink2:hover{
+	/*font-weight:bold;*/
+	background-color: rgba(255, 255, 255, 0.25);
+}
+.hyperlink2:active{
+	color:purple;
+}
+
+.gamepadMappingTable input{width: 100px;}
+
+
+
+
+
+#emu_gamepadConfig_P1_status{position: absolute;top: 10px;font-size: 14px;}
+#emu_gamepadConfig_P2_status{position: absolute;top: 230px;font-size: 14px;}
+.emu_gamepadConfig_statuses{position: absolute;top: 10px;}
+.emu_gamepadConfig_div.disconnected figure{
+	opacity: 0.20;
+}
+
+
+
+div#emu_emuControlsBOTTOM {
+    border-bottom: 1px solid black;
+    padding-bottom: 5px;
+}
+
+.gamepadLabelG_style1{
+	font-size: 12px;
+	fill: black;
+	font-weight: bold;
+}
+.gamepadLabelG_style2{
+	font-size: 10px;
+	/* fill: #85fff3; */
+	fill: white;
+	font-weight: bold;
+}
+.gamepadLabelG_style3{
+	font-size: 12px;
+	fill: black;
+	font-weight: bold;
+}
+.gamepadLabelG_style4{
+	font-size: 12px;
+	fill: white;
+	font-weight: bold;
+}
+.gamepadLabelG_style5{
+	font-size: 12px;
+	fill: white;
+	font-weight: bold;
+}
+
+
+input#db_gameSelect_update {
+    width: 90%;
+    text-align: center;
+    margin: auto;
+    display: block;
+}
+
+input#db_gameSelect_create {
+    width: 90%;
+    text-align: center;
+    margin: auto;
+    display: block;
+}
+
+input#db_gameSelect_delete {
+    width: 90%;
+    text-align: center;
+    margin: auto;
+    display: block;
+}
+
+input#db_gameSelect_load {
+    width: 90%;
+    text-align: center;
+    margin: auto;
+    display: block;
+}

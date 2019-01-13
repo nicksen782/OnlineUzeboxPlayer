@@ -193,7 +193,7 @@ canvas {
 
 html {
 	max-width: 1200px;
-	width: 950px;
+	width: 940px;
 	margin: 0 auto;
 	/*scroll-behavior: smooth;*/
 	/*font-family: "Times New Roman, Helvetica, serif";*/
@@ -202,8 +202,8 @@ html {
 }
 html.wide  {width: 1180px;}
 html{
-  -webkit-transition: width 0.25s, height 0.25s; /* For Safari 3.1 to 6.0 */
-  transition: width 0.25s, height 0.25s;
+  -webkit-transition: width 0.5s, height 0.5s; /* For Safari 3.1 to 6.0 */
+  transition        : width 0.5s, height 0.5s;
 }
 body {
 	position: relative;
@@ -330,7 +330,7 @@ body {
 	display:none;
 }
 
-#emu_view{height: 610px;}
+#emu_view{height: 610px;/* overflow: hidden; */}
 #emu_gameSelector    {left: 5px;top: 40px;width: 320px;height: 120px;z-index: 100;}
 #emu_gameFiles       {width: 320px;height: 130px;position: absolute;top: 170px;left: 5px;z-index: 18;padding: 0px;border-radius: 5px;overflow: hidden;}
 #emu_onscreenGamepads{width: 320px;height: 290px;position: absolute;top: 310px;left: 5px;z-index: 18;}
@@ -338,7 +338,7 @@ body {
 #emu_emulator .sectionWindow_content{/* background-color: #22205c; */position: relative;top: 0px;left: 0px;}
 
 #emu_view_uam{
-	background-color: #65b0427a;
+	background-color: rgb(101, 176, 66);
 	left: 925px;
 	top: 40px;
 	/* width: 200px; */
@@ -358,9 +358,9 @@ body {
 #emu_view_uam .table1{width:100%;margin-bottom: 5px;}
 #emu_view_uam .table1 td {padding: 3px;font-size: 10px;}
 
-#emu_gameSelector_uam{left: 0px;top: 0px;/* width: 200px; *//* height: 100px; */width: 230px;height: 180px;position: absolute;font-size: 12px;padding: 0px;overflow: hidden;}
-#emu_miniOutput1_uam {left: 0px;top: 195px;width: 230px;height: auto;position: absolute;padding: 0px;overflow: hidden;}
-#emu_miniOutput2_uam {left: 0px;top: 380px;width: 230px;height: auto;position: absolute;padding: 0px;overflow: hidden;}
+#emu_gameSelector_uam{left: 3px;top: 0px;/* width: 200px; *//* height: 100px; */width: 230px;height: 180px;position: absolute;font-size: 12px;padding: 0px;overflow: hidden;}
+#emu_miniOutput1_uam {left: 3px;top: 195px;width: 230px;height: auto;position: absolute;padding: 0px;overflow: hidden;}
+#emu_miniOutput2_uam {left: 3px;top: 380px;width: 230px;height: auto;position: absolute;padding: 0px;overflow: hidden;}
 
 #emu_miniOutput1_uam .sectionWindow_content{ padding:0px; }
 #emu_miniOutput2_uam .sectionWindow_content{ padding:0px; }
@@ -402,38 +402,58 @@ body {
 	vertical-align: top;
 }
 
-#emu_db{height: 600px;}
+.table2 {
+	width: 100%;
+	background-color: rgb(90, 120, 181);
+}
+.table2 caption {
+	background-color: rgba(128, 164, 236, 0.4);
+	border-bottom: 1px solid black;
+	border-style: dotted;
+	font-weight: bold;
+	text-decoration: underline;
+}
+.table2 td {
+	vertical-align: top;
+	font-size: 14px;
+	padding: 4px;
+}
+.table2 th {
+	vertical-align: top;
+}
+
+#emu_db{height: 610px;overflow: hidden;}
 #emu_db_gameChoice{
 	left: 10px;
 	top: 50px;
 	width: 200px;
 	height: 100px;
-	width: 500px;
-	height: 70px;
+	width: 510px;
+	height: 100px;
 }
 #emu_db_gameMetadata{
 	left: 10px;
-	top: 140px;
+	top: 170px;
 	/* width: 200px; */
 	/* height: 100px; */
 	width: 370px;
 	height: 420px;
 }
 #emu_db_files{
-	left: 400px;
-	top: 140px;
+	left: 410px;
+	top: 170px;
 	/* width: 200px; */
 	/* height: 100px; */
 	width: 500px;
 	height: 420px;
 }
 #emu_db_options{
-	left: 920px;
-	top: 140px;
+	left: 530px;
+	top: 50px;
 	/* width: 200px; */
 	/* height: 100px; */
-	width: 210px;
-	height: 200px;
+	width: 380px;
+	height: 70px;
 }
 
 div#emu_filesList_div {
@@ -698,7 +718,8 @@ input#emu_FilesFromJSON_UAM {
 }
 
 div#emu_debug1 {
-    height: 600px;
+    height: 610px;
+    overflow: hidden;
 }
 
 #emu_debug1_output1{
@@ -747,7 +768,8 @@ div#emu_debug1 {
 
 
 div#emu_debug2 {
-    height: 600px;
+    height: 610px;
+    overflow: hidden;
 }
 
 canvas#emuCanvas {
@@ -955,7 +977,7 @@ input#db_builtInGames_fileUpload_visible {
 }
 
 select#db_gameSelect {
-    width: 300px;
+    width: 270px;
 }
 
 .uamOnly.hidden{
@@ -1234,4 +1256,33 @@ div#emu_emuControlsBOTTOM {
 	font-size: 12px;
 	fill: white;
 	font-weight: bold;
+}
+
+
+input#db_gameSelect_update {
+    width: 90%;
+    text-align: center;
+    margin: auto;
+    display: block;
+}
+
+input#db_gameSelect_create {
+    width: 90%;
+    text-align: center;
+    margin: auto;
+    display: block;
+}
+
+input#db_gameSelect_delete {
+    width: 90%;
+    text-align: center;
+    margin: auto;
+    display: block;
+}
+
+input#db_gameSelect_load {
+    width: 90%;
+    text-align: center;
+    margin: auto;
+    display: block;
 }

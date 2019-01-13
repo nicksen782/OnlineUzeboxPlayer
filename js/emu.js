@@ -70,9 +70,14 @@ emu.vars         = {
 	gameFiles: [],
 	gameFile : "",
 
+	// Holds the previous state of GUICORE_SMALL. It is set to true by default.
+	prev_GUICORE_SMALL : true,
+
 };
 emu.funcs        = {
-	addAllListeners: function() {
+	// * Adds event listeners.
+	addAllListeners       : function() {
+		// Add the gamepad listeners.
 		emu.gamepads.addAllListeners();
 
 		let EL_view = function(){
@@ -84,7 +89,7 @@ emu.funcs        = {
 					// Save the CUzeBox eeprom.bin file to localStorage.
 					if( Object.keys(emu.vars.innerEmu.Module.FS.root.contents).indexOf("eeprom.bin") != -1 ){
 						localStorage.setItem("EMU_eeprom.bin", emu.vars.innerEmu.Module.FS.readFile("eeprom.bin") );
-						console.log("Saved eeprom.bin to localStorage.");
+						// console.log("Saved eeprom.bin to localStorage.");
 						emu.funcs.shared.textOnCanvas2({"Saved EEPROM":""});
 					}
 				}
@@ -106,8 +111,45 @@ emu.funcs        = {
 
 			// VIEW: Fullscreen mode.
 			document                                   .addEventListener("fullscreenchange", function(e) {
-				emu.vars.innerEmu.resizeEmuCanvas();
-				emu.funcs.emu_focusing(null, "mouseenter");
+				if( emu.vars.innerEmu.emulatorIsReady !== false ) {
+					// console.log("1 fullscreen: The emu is not ready.");
+					// Determine which quality mode CUzeBox was in.
+					let GUICORE_SMALL      = emu.vars.innerEmu.Module._NRA_returnFlags(3) ? true : false; // Small view or larger view
+
+
+					// If small then make big.
+					if(GUICORE_SMALL){
+						// Save the previous GUICORE_SMALL value.
+						emu.vars.prev_GUICORE_SMALL = GUICORE_SMALL;
+
+						setTimeout(function(){
+							// console.log("Switching to increased resolution.");
+							emu.vars.innerEmu.emu_sendKeyEvent("keydown", "key_F2" , 1);
+							emu.vars.innerEmu.emu_sendKeyEvent("keyup", "key_F2" , 1);
+							emu.vars.innerEmu.displayCUzeBox_flags();
+						}, 25);
+					}
+					// If big then return the resolution to the previous state.
+					else{
+						if(emu.vars.prev_GUICORE_SMALL){
+							setTimeout(function(){
+								// console.log("returning to previous resolution");
+								emu.vars.innerEmu.emu_sendKeyEvent("keydown", "key_F2" , 1);
+								emu.vars.innerEmu.emu_sendKeyEvent("keyup", "key_F2" , 1);
+								emu.vars.innerEmu.displayCUzeBox_flags();
+							}, 25);
+						}
+						else{
+							// console.log("Already at increased resolution.");
+						}
+					}
+
+					// Resize the canvas to fit.
+					emu.vars.innerEmu.resizeEmuCanvas();
+
+					// Make sure the full screen has focus.
+					emu.funcs.emu_focusing(null, "mouseenter");
+				}
 			}, false);
 			emu.vars.dom.view["emuControls_FULLSCREEN"].addEventListener("click"   , emu.vars.innerEmu.emuFullscreen, false);
 			emu.vars.dom.view["emuCanvas"]             .addEventListener("dblclick", emu.vars.innerEmu.emuFullscreen, false);
@@ -212,27 +254,8 @@ emu.funcs        = {
 		}
 
 	},
-	//
-	emu_rotate: function() {
-		return;
-		// emu_rotate
-		var canvas = emu.vars.dom.view.emuCanvas;
-		var container = emu.vars.dom.view.emscripten_emu_container;
-
-		emu.vars.rotateDeg = 0;
-		emu.vars.rotateDeg = 90;
-		emu.vars.rotateDeg = 180;
-		emu.vars.rotateDeg = 270;
-		emu.vars.rotateDeg = 360;
-		// Get current rotation value.
-		// 90  // aspect ratio needs to 1:1.
-		// 180 // aspect ratio 8:7 (normal)
-		// 270 // aspect ratio needs to be 1:1.
-		// 360 // aspect ratio 8:7 (normal)
-	},
-
 	// * Stops the Emscripten instance.
-	stopEmu: function(showStoppedText) {
+	stopEmu               : function(showStoppedText) {
 		// This just removes the Emscripten instance.
 		// The game can be restarted there are still game files loaded.
 		if (emu.vars.gameFiles.length) {
@@ -249,12 +272,19 @@ emu.funcs        = {
 					// Save the CUzeBox eeprom.bin file to localStorage before we end the Emscripten instance?
 					if( Object.keys(emu.vars.innerEmu.Module.FS.root.contents).indexOf("eeprom.bin") !=-1 ){
 						localStorage.setItem("EMU_eeprom.bin", emu.vars.innerEmu.Module.FS.readFile("eeprom.bin") );
-						console.log("Saved eeprom.bin to localStorage.");
+						// console.log("Saved eeprom.bin to localStorage.");
 						emu.funcs.shared.textOnCanvas2({"text":"Saved EEPROM"});
 					}
 
-					// Abort the Emscripten module.
+					// Clear the displayed CUzeBox flags.
+					emu.vars.innerEmu.clearDisplayedCUzeBox_flags();
+
+					// Clear the displayed pressed keys.
+					emu.vars.innerEmu.clearDisplayedPressedKeys();
+
+					// Abort the Emscripten module. Needs to be the last thing in this "try" since it will trigger the catch.
 					emu.vars.innerEmu.Module.abort();
+
 
 				} catch(e){
 					// The abort always throws an exception so it always catches. This is expected.
@@ -263,7 +293,7 @@ emu.funcs        = {
 
 				// Stop the current gamepad polling if it is running.
 				if(emu.gamepads.enabled==true){
-					console.log("Gamepads were enabled. Disabling them now.");
+					// console.log("Gamepads were enabled. Disabling them now.");
 					emu.gamepads.prev_pollState=true;
 					emu.gamepads.enabled=true;
 					emu.gamepads.init();
@@ -284,7 +314,7 @@ emu.funcs        = {
 		}
 	},
 	// * Will clear the cached game file data. Leaves the Emscripten core intact.
-	emu_reset: function() {
+	emu_reset             : function() {
 		// Stop the emulator if it is active.
 		emu.funcs.stopEmu(false);
 
@@ -299,7 +329,7 @@ emu.funcs        = {
 		document.querySelector("#emu_filesList_links").innerHTML="";
 	},
 	// * Will clear the cached game file data AND put a "GAME NOT LOADED" message on the emu canvas.
-	emu_unload: function() {
+	emu_unload            : function() {
 		// Stop the emulator if it is active.
 		emu.funcs.stopEmu(true);
 
@@ -402,12 +432,12 @@ emu.funcs        = {
 		return prom1;
 	},
 	// * Used by the "PLAY" button in the game files list. Starts the specified game.
-	loadGameFromList: function(game) {
+	loadGameFromList      : function(game) {
 		emu.vars.gameFile = game;
 		emu.funcs.loadGame();
 	},
 	// * Downloads the specified file out of the game files list.
-	downloadFile : function(filename){
+	downloadFile          : function(filename){
 		var file  = emu.vars.gameFiles.filter(function(d,i,a){ if(d.name==filename) {return true;}});
 		var gametitle = emu.vars.dom.view["builtInGames_select"].options[emu.vars.dom.view["builtInGames_select"].selectedIndex].innerText;
 
@@ -430,7 +460,7 @@ emu.funcs        = {
 
 	},
 	// * Downloads all loaded game files as a .zip.
-	downloadZip : function(){
+	downloadZip           : function(){
 		// var datas  = emu.vars.gameFiles.filter(function(d,i,a){ if(d.name==filename) {return true;}});
 		var datas  = emu.vars.gameFiles;
 		var gametitle = emu.vars.dom.view["builtInGames_select"].options[emu.vars.dom.view["builtInGames_select"].selectedIndex].innerText;
@@ -460,7 +490,7 @@ emu.funcs        = {
 		);
 	},
 	// * Retrieves/loads game files.
-	getGameFiles: function(methodType) {
+	getGameFiles          : function(methodType) {
 		// Get DOM handles on the loading inputs.
 		var emu_builtInGames_select1 = emu.vars.dom.view.builtInGames_select;
 		var userFiles = emu.vars.dom.view["emu_FilesFromUser"];
@@ -824,7 +854,7 @@ emu.funcs        = {
 
 	},
 	// * Loads the cached game files into a new Emscripten instance.
-	loadGame : function(){
+	loadGame              : function(){
 		if (!emu.vars.gameFiles.length) {
 			// console.log("No files are loaded.");
 			return;
@@ -839,8 +869,8 @@ emu.funcs        = {
 		// Prevent a game from autoloading when using querystring unless the user has clicked the canvas.
 		if(emu.vars.innerEmu.startEmuAfterUserInput){
 			emu.funcs.shared.clearTheCanvas(emu.vars.dom.view["emuCanvas"]);
-			emu.funcs.shared.textOnCanvas({ "canvas": emu.vars.dom.view["emuCanvas"], "text": "- MOUSE HERE TO START -" });
-			emu.vars.dom.view["emuCanvas"].addEventListener("mousemove", emu.vars.innerEmu.startAfterMouseMove, false);
+			emu.funcs.shared.textOnCanvas({ "canvas": emu.vars.dom.view["emuCanvas"], "text": "- CLICK HERE TO START -" });
+			emu.vars.dom.view["emuCanvas"].addEventListener("mousedown", emu.vars.innerEmu.startAfterMouseClick, false);
 			return;
 		}
 
@@ -854,7 +884,7 @@ emu.funcs        = {
 		emu.vars.innerEmu.UOP( emu.vars.innerEmu.Module );
 	},
 	// * Sets/Clears focus to the emu canvas, pauses/unpauses Emscripten.
-	emu_focusing: function(e, typeOverride) {
+	emu_focusing          : function(e, typeOverride) {
 		// Temp variable.
 		var type = "";
 
@@ -910,56 +940,48 @@ emu.funcs        = {
 		emu.funcs.getGameFiles(2);
 	},
 	// * Just clicks the invisible upload button for game files from the user's computer.
-	emu_clickUserUpload: function(e) {
+	emu_clickUserUpload   : function(e) {
 		emu.vars.dom.view["emu_FilesFromUser"].click();
+	},
+
+	// NOT COMPLETE
+	emu_rotate            : function() {
+		return;
+		// emu_rotate
+		var canvas = emu.vars.dom.view.emuCanvas;
+		var container = emu.vars.dom.view.emscripten_emu_container;
+
+		emu.vars.rotateDeg = 0;
+		emu.vars.rotateDeg = 90;
+		emu.vars.rotateDeg = 180;
+		emu.vars.rotateDeg = 270;
+		emu.vars.rotateDeg = 360;
+		// Get current rotation value.
+		// 90  // aspect ratio needs to 1:1.
+		// 180 // aspect ratio 8:7 (normal)
+		// 270 // aspect ratio needs to be 1:1.
+		// 360 // aspect ratio 8:7 (normal)
 	},
 
 };
 emu.funcs.UAM    = {
 	// * Adds the UAM event listeners.
-	addEventListeners: function() {
-		// UAM JSON load.
-		emu.vars.dom.view["emu_FilesFromJSON_UAM"].addEventListener("change", function() {
-			this.select();
-		}, false);
-		emu.vars.dom.view["emu_FilesFromJSON_UAM_load"].addEventListener("click", function() {
-			let uam_gamelist = emu.vars.dom.view["emu_gameSelect_UAM_select"];
-			emu.vars.dom.view["emu_FilesFromJSON_UAM"].value = uam_gamelist.options[uam_gamelist.selectedIndex].getAttribute("remoteload");
-			emu.funcs.getGameFiles("4");
-		}, false);
+	addEventListeners  : function() {
+		// Permissions are required.
+		// if(emu.vars.UAMDATA.permKeys.indexOf("emu_canCompile") !=-1 ){
+		// }
 
-		// UAM game select menu.
-		emu.vars.dom.view["emu_gameSelect_UAM_select"].addEventListener("change", function() {
-			let uam_gamelist = emu.vars.dom.view["emu_gameSelect_UAM_select"];
-			emu.vars.dom.view["emu_FilesFromJSON_UAM"].value = uam_gamelist.options[uam_gamelist.selectedIndex].getAttribute("remoteload");
-		}, false);
-
-		// UAM compile options.
-		var compileOptions_function = function(e) {
-			// Toggle the enabled class on the "checkbox".
-			let check = this.querySelector(".checkbox");
-			if (check.classList.contains("enabled")) { check.classList.remove("enabled") }
-			else { check.classList.add("enabled") }
-		};
-		var compileOptions = document.querySelectorAll("#emu_view_uam .checkbox_button");
-		compileOptions.forEach(function(d, i, a) {
-			d.addEventListener("click", compileOptions_function, false);
-		});
-
-		// UAM Compile/C2BIN actions.
-		emu.vars.dom.view["emu_compile_UAM"].addEventListener("click", emu.funcs.UAM.compileGameUAM, false);
-		emu.vars.dom.view["emu_c2bin_UAM"].addEventListener("click", emu.funcs.UAM.c2bin_UamGame, false);
-		emu.vars.dom.view["emu_c2bin2_UAM"].addEventListener("click", emu.funcs.UAM.c2bin_UamGame_2, false);
-
-		emu.funcs.db.addEventListeners();
+		// emu.funcs.db.addEventListeners();
 
 		// <iframe src="uamlogin.html" frameBorder="0" style="border: 0; width: 300px; height: 100px; border-radius:5px; "></iframe>
 
 	},
+	// * Opens the UAM main application in a new window.
 	openUamInNewWindow : function(){
 		window.open("../index.php");
 	},
-	openModal : function(whichModal){
+	// * Handles the opening/closing of modals.
+	openModal          : function(whichModal){
 		let onClickListener = function(){ closeAllModals(); };
 		let entireBodyDiv = document.querySelector("#entireBodyDiv");
 		let uamModal = emu.vars.dom.uamLogin["uamModal"];
@@ -1008,33 +1030,132 @@ emu.funcs.UAM    = {
 		iframe.src=url;
 
 	},
-
 	// * Show UAM.
-	enableUAM: function() {
+	enableUAM          : function() {
 		// Get values from UAM.
 		emu.vars.originUAM      = true;
 		emu.vars.UAM_active     = true;
 		emu.vars.user_id        = emu.vars.UAMDATA.user_id;
 
-		// Unhide UAM DOM.
-		document.querySelectorAll(".uamOnly").forEach(function(d, i, a) {
-			d.classList.remove("unavailableView");
-			d.classList.add("enabled");
-		});
+		// Determine what will be visible to the user.
+		if(
+			   emu.vars.UAMDATA.permKeys.indexOf("emu_canCompile")    !=-1
+			&& emu.vars.UAMDATA.permKeys.indexOf("emu_isUamGameUser") !=-1
+		){
+			// Show
+		}
 
-		// Unhide the other nav options.
-		document.querySelectorAll(".sectionDivs_title_options .navOptions.uamOnly").forEach(function(d, i, a) {
-			d.classList.remove("hidden");
-		});
+		if(
+			   emu.vars.UAMDATA.permKeys.indexOf("emu_isDbAdmin") !=-1
+			&& emu.vars.UAMDATA.permKeys.indexOf("emu_isDbUser") !=-1
+		){
 
-		// Make the container wider. Shrink the emu windows.
-		document.querySelector("html").classList.add("wide");
-		document.querySelector("#emu_emulator").classList.add("largerEmuWindow");
-		// emu.vars.dom.view["emuCanvas"].width="640";
-		// emu.vars.dom.view["emuCanvas"].height="560";
+		}
+
+		// // Unhide UAM DOM.
+		// document.querySelectorAll(".uamOnly").forEach(function(d, i, a) {
+		// 	d.classList.remove("unavailableView");
+		// 	d.classList.add("enabled");
+		// });
+
+		// // Unhide the other nav options.
+		// document.querySelectorAll(".sectionDivs_title_options .navOptions.uamOnly").forEach(function(d, i, a) {
+		// 	d.classList.remove("hidden");
+		// });
+
+		// Permissions are required.
+		if(
+			   emu.vars.UAMDATA.permKeys.indexOf("emu_canCompile") !=-1
+			)
+		{
+			// // Make the container wider. Shrink the emu windows.
+			// document.querySelector("html").classList.add("wide");
+			// document.querySelector("#emu_emulator").classList.add("largerEmuWindow");
+
+			// Set the other options.
+			setTimeout(function(){
+				// Show the compile options for the VIEW view.
+				emu.vars.dom.view["emu_view_uam"].classList.add("enabled");
+				emu.vars.dom.view["emu_view_uam"].classList.remove("unavailableView");
+
+				// Show the VIEW nav buttons.
+				document.querySelectorAll(".sectionDivs_title_options .navOptions[newview='VIEW']").forEach(function(d, i, a) {
+					d.classList.remove("hidden");
+					d.classList.remove("uamOnly");
+				});
+				// Show the DEBUG1 nav buttons.
+				document.querySelectorAll(".sectionDivs_title_options .navOptions[newview='DEBUG1']").forEach(function(d, i, a) {
+					d.classList.remove("hidden");
+					d.classList.remove("uamOnly");
+				});
+				// Show the DEBUG2 nav buttons.
+				document.querySelectorAll(".sectionDivs_title_options .navOptions[newview='DEBUG2']").forEach(function(d, i, a) {
+					d.classList.remove("hidden");
+					d.classList.remove("uamOnly");
+				});
+
+				// Add the event listeners for the compile options.
+				// UAM JSON load.
+				emu.vars.dom.view["emu_FilesFromJSON_UAM"].addEventListener("change", function() {
+					this.select();
+				}, false);
+				emu.vars.dom.view["emu_FilesFromJSON_UAM_load"].addEventListener("click", function() {
+					let uam_gamelist = emu.vars.dom.view["emu_gameSelect_UAM_select"];
+					emu.vars.dom.view["emu_FilesFromJSON_UAM"].value = uam_gamelist.options[uam_gamelist.selectedIndex].getAttribute("remoteload");
+					emu.funcs.getGameFiles("4");
+				}, false);
+
+				// UAM game select menu.
+				emu.vars.dom.view["emu_gameSelect_UAM_select"].addEventListener("change", function() {
+					let uam_gamelist = emu.vars.dom.view["emu_gameSelect_UAM_select"];
+					emu.vars.dom.view["emu_FilesFromJSON_UAM"].value = uam_gamelist.options[uam_gamelist.selectedIndex].getAttribute("remoteload");
+				}, false);
+
+				// UAM compile options.
+				var compileOptions_function = function(e) {
+					// Toggle the enabled class on the "checkbox".
+					let check = this.querySelector(".checkbox");
+					if (check.classList.contains("enabled")) { check.classList.remove("enabled") }
+					else { check.classList.add("enabled") }
+				};
+				var compileOptions = document.querySelectorAll("#emu_view_uam .checkbox_button");
+				compileOptions.forEach(function(d, i, a) {
+					d.addEventListener("click", compileOptions_function, false);
+				});
+
+				// UAM Compile/C2BIN actions.
+				emu.vars.dom.view["emu_compile_UAM"].addEventListener("click", emu.funcs.UAM.compileGameUAM, false);
+				emu.vars.dom.view["emu_c2bin_UAM"].addEventListener("click", emu.funcs.UAM.c2bin_UamGame, false);
+				emu.vars.dom.view["emu_c2bin2_UAM"].addEventListener("click", emu.funcs.UAM.c2bin_UamGame_2, false);
+			}, 175);
+
+			// .sectionDivs_title_options newview="TOP"
+			// .sectionDivs_title_options newview="VIEW"
+			// .sectionDivs_title_options newview="DEBUG1"
+			// .sectionDivs_title_options newview="DEBUG2"
+			// .sectionDivs_title_options newview="DB"
+
+		}
+
+		if(	emu.vars.UAMDATA.permKeys.indexOf("emu_isDbAdmin") !=-1 ){
+			// Show the VIEW nav buttons.
+			document.querySelectorAll(".sectionDivs_title_options .navOptions[newview='VIEW']").forEach(function(d, i, a) {
+				d.classList.remove("hidden");
+				d.classList.remove("uamOnly");
+			});
+
+			// Show the DB nav buttons.
+			document.querySelectorAll(".sectionDivs_title_options .navOptions[newview='DB']").forEach(function(d, i, a) {
+				d.classList.remove("hidden");
+				d.classList.remove("uamOnly");
+			});
+
+			// Add the event listeners.
+			emu.funcs.db.addEventListeners();
+		}
 	},
 	// * Hide UAM.
-	disableUAM: function() {
+	disableUAM         : function() {
 		// Unset the values that came from UAM.
 		// emu.vars.originUAM      = false;
 		// emu.vars.UAM_active     = false;
@@ -1086,9 +1207,8 @@ emu.funcs.UAM    = {
 		// Put a default value for user JSON.
 		// emu.vars.dom.view["emu_FilesFromJSON"].value = "https://dev3-nicksen782.c9users.io/non-web/Uzebox/RamTileTest_1/output/remoteload.json";
 	},
-
 	// * Queries the UAM database for games that match the user's user_id.
-	getGamesListUAM: function() {
+	getGamesListUAM    : function() {
 		// Queries the database for the current user's games.
 
 		// Get the current user's user id.
@@ -1146,9 +1266,8 @@ emu.funcs.UAM    = {
 		);
 
 	},
-
 	// * Compiles the selected UAM game.
-	compileGameUAM: function() {
+	compileGameUAM     : function() {
 		// Get the current user's user id.
 		let user_id = emu.vars.user_id;
 		// Prevent this action if the user_id was not found.
@@ -1322,14 +1441,12 @@ emu.funcs.UAM    = {
 
 	},
 
-
-	// Runs the C2BIN script for the selected UAM game.
-	c2bin_UamGame: function() {
+	// NOT COMPLETE Runs the C2BIN script for the selected UAM game.
+	c2bin_UamGame      : function() {
 		console.log("emu_c2bin_UAM");
 	},
-
-	// Runs the C2BIN2 script for the selected UAM game.
-	c2bin_UamGame_2: function() {
+	// NOT COMPLETE Runs the C2BIN2 script for the selected UAM game.
+	c2bin_UamGame_2    : function() {
 		console.log("emu_c2bin2_UAM");
 	},
 
@@ -1342,8 +1459,21 @@ emu.funcs.nav    = {
 		// , block   : "center"  // "start", "center", "end", or "nearest". Defaults to "center".
 		// , inline  : "nearest" // "start", "center", "end", or "nearest". Defaults to "nearest".
 	},
+	// * Resizes the html container.
+	resizeHtmlContainer   : function(size){
+		// console.log("resizeHtmlContainer:", size);
+
+		if(size=="wide"){
+			document.querySelector("html").classList.add("wide");
+			document.querySelector("#emu_emulator").classList.add("largerEmuWindow");
+		}
+		if(size=="narrow"){
+			document.querySelector("html").classList.remove("wide");
+			document.querySelector("#emu_emulator").classList.remove("largerEmuWindow");
+		}
+	},
 	// * Changes the main application views.
-	changeView: function(newview) {
+	changeView            : function(newview) {
 		var allSectionDivs = document.querySelectorAll(".sectionDivs");
 		var bodyHeader = document.querySelector("#bodyHeader");
 
@@ -1379,6 +1509,11 @@ emu.funcs.nav    = {
 				emu_view.classList.add   ("active");
 				emu_view.classList.remove("hidden");
 				emu_view_nav.forEach(function(d,i,a){ d.classList.add   ("active"); });
+
+				// Resize the html container.
+				if( emu.vars.UAMDATA.permKeys.indexOf("emu_canCompile") !=-1 ){ emu.funcs.nav.resizeHtmlContainer("wide"); }
+				else{ emu.funcs.nav.resizeHtmlContainer("narrow"); }
+
 				break;
 			}
 			case "DEBUG1":{
@@ -1387,6 +1522,11 @@ emu.funcs.nav    = {
 				emu_debug1.classList.add   ("active");
 				emu_debug1.classList.remove("hidden");
 				emu_debug1_nav.forEach(function(d,i,a){ d.classList.add   ("active"); });
+
+				// Resize the html container.
+				if( emu.vars.UAMDATA.permKeys.indexOf("emu_canCompile") !=-1 ){ emu.funcs.nav.resizeHtmlContainer("wide"); }
+				else{ emu.funcs.nav.resizeHtmlContainer("narrow"); }
+
 				break;
 			}
 			case "DEBUG2":{
@@ -1395,6 +1535,11 @@ emu.funcs.nav    = {
 				emu_debug2.classList.add   ("active");
 				emu_debug2.classList.remove("hidden");
 				emu_debug2_nav.forEach(function(d,i,a){ d.classList.add   ("active"); });
+
+				// Resize the html container.
+				if( emu.vars.UAMDATA.permKeys.indexOf("emu_canCompile") !=-1 ){ emu.funcs.nav.resizeHtmlContainer("wide"); }
+				else{ emu.funcs.nav.resizeHtmlContainer("narrow"); }
+
 				break;
 			}
 			case "DB":{
@@ -1403,6 +1548,10 @@ emu.funcs.nav    = {
 				emu_db.classList.add   ("active");
 				emu_db.classList.remove("hidden");
 				emu_db_nav.forEach(function(d,i,a){ d.classList.add   ("active"); });
+
+				// Resize the html container.
+				emu.funcs.nav.resizeHtmlContainer("narrow");
+
 				break;
 			}
 			default:{
@@ -1412,7 +1561,7 @@ emu.funcs.nav    = {
 		};
 	},
 	// * Changes the misc nav views.
-	changeMiscView: function(newview, navButton) {
+	changeMiscView        : function(newview, navButton) {
 		// Remove the active class on all nav buttons and views.
 		emu.vars.dom.view["emu_misc_navs"].forEach(function(d, i, a) {
 			d.classList.remove("active");
@@ -1430,8 +1579,6 @@ emu.funcs.nav    = {
 	},
 };
 
-
-
 window.onload = function() {
 	window.onload = null;
 
@@ -1440,6 +1587,7 @@ window.onload = function() {
 	console.log("****************************************");
 
 	var continueApp = function() {
+		// Do the application init.
 		var formData = {
 			"o": "emu_init",
 			"_config": { "processor": "emu_p.php" }
@@ -1448,6 +1596,9 @@ window.onload = function() {
 			// Set the UAM status.
 			emu.vars.originUAM  = res.UAMFOUND;
 			emu.vars.UAM_active = (res.UAMFOUND && res.UAMDATA.hasActiveLogin);
+
+			// Add the returned data into the local cache.
+			emu.vars.UAMDATA   = res.UAMDATA;
 
 			// Populate the DOM handle caches.
 			emu.funcs.domHandleCache_populate();
@@ -1465,9 +1616,6 @@ window.onload = function() {
 
 				// Put the user's name in the status.
 				document.querySelector("#UAM_status_username").innerHTML = res.UAMDATA.username;
-
-				// Add the returned data into the local cache.
-				emu.vars.UAMDATA   = res.UAMDATA;
 
 				emu.funcs.UAM.setupUAM();
 
@@ -1597,10 +1745,12 @@ window.onload = function() {
 		"getQueryStringAsObj"    ,
 		"crossBrowser_initKeyboardEvent",
 	];
+
 	// Load these files also:
 	// featureDetection.config.userFiles = [
 	// 	"js/gamepad.js",
 	// ];
+
 	// Feature detect/replace.
 	featureDetection.funcs.init(continueApp);
 

@@ -24,12 +24,12 @@
 
 emu.funcs.shared = {
 	// * Sets the canvas dimensions back to default.
-	resetCanvasDimensions : function(){
+	resetCanvasDimensions   : function(){
 		emu.vars.dom.view["emuCanvas"].width="310";
 		emu.vars.dom.view["emuCanvas"].height="228";
 	},
-	// * Display message on the canvas in the top-left corner.
-	textOnCanvas: function(obj) {
+	// * Display message on the canvas in the center.
+	textOnCanvas            : function(obj) {
 		// ctx.fillRect(0,0, Math.floor(ctx.measureText(obj.text).width), 48);
 
 		// Set any not-set values in the obj.
@@ -75,7 +75,8 @@ emu.funcs.shared = {
 		ctx.fillStyle = obj.fontColor;
 		ctx.fillText(obj.text , rectX+(rectW/2),rectY+(rectH/2));
 	},
-	textOnCanvas2: function(obj) {
+	// * Display message on the canvas in the top-left corner.
+	textOnCanvas2           : function(obj) {
 		let getMaxFontSize = function(text, font, ctx){
 			let fontsize=22;
 			do{
@@ -99,7 +100,7 @@ emu.funcs.shared = {
 		ctx.fillStyle="white";
 		ctx.fillText(obj.text, 0 , parseInt(ctx.font));
 
-		console.log(ctx.font);
+		// console.log(ctx.font);
 
 		hoverCanvas.style["z-index"]         = "99999999";
 		hoverCanvas.style["position"]        = "absolute";
@@ -137,7 +138,7 @@ emu.funcs.shared = {
 
 	},
 	// * Turns the canvas image to gray-scale.
-	grayTheCanvas: function(canvas) {
+	grayTheCanvas           : function(canvas) {
 		var ctx = canvas.getContext("2d");
 		var buff = ctx.getImageData(
 			0, 0,
@@ -160,14 +161,14 @@ emu.funcs.shared = {
 		ctx.putImageData(buff, 0, 0);
 	},
 	// * Performs a fillRect on the specified canvas. (BLACK)
-	clearTheCanvas: function(canvas) {
+	clearTheCanvas          : function(canvas) {
 		var ctx = canvas.getContext("2d");
 		// ctx.clearRect(0,0, canvas.width, canvas.height);
 		ctx.fillStyle = "#000000";
 		ctx.fillRect(0, 0, canvas.width, canvas.height);
 	},
 	// * Make an AJAX request.
-	serverRequest: function(formData) {
+	serverRequest           : function(formData) {
 		// Make sure that a ._config key exists and that it has values.
 		if (typeof formData._config == "undefined") { formData._config = {}; }
 		if (typeof formData._config.responseType == "undefined") { formData._config.responseType = "json"; }
@@ -315,68 +316,7 @@ emu.funcs.shared = {
 
 	},
 	// * Show/hide the progress bar. Used by serverRequest.
-	// activateProgressBar: function(turnItOn) {
-	// 	return;
-	// 	let onClickListener = function(){ emu.funcs.shared.activateProgressBar(false); };
-
-	// 	// Activate the progress bar and screen darkener.
-	// 	if (turnItOn === true) {
-	// 		// Create the entire body div.
-	// 		let entireBodyDiv = document.createElement("div");
-	// 		entireBodyDiv.id="entireBodyDiv";
-	// 		entireBodyDiv.addEventListener("click", onClickListener, false);
-	// 		entireBodyDiv.style["position"]        = "fixed";
-	// 		entireBodyDiv.style["top"]             = "0px";
-	// 		entireBodyDiv.style["left"]            = "0px";
-	// 		entireBodyDiv.style["width"]           = "100vw";
-	// 		entireBodyDiv.style["height"]          = "100vh";
-	// 		entireBodyDiv.style["background-color"]= "rgba(0, 0, 0, 0.15)";
-	// 		entireBodyDiv.style["z-index"]         = "5000";
-	// 		entireBodyDiv.style["opacity"]         = "1";
-	// 		entireBodyDiv.style["display"]         = "block";
-	// 		entireBodyDiv.style["transition"]      = "opacity .25s ease-in-out";
-
-	// 		let progressbarDiv = document.createElement("div");
-	// 		progressbarDiv.id="progressbarDiv";
-	// 		progressbarDiv.style["border"]           = "2px solid rgb(83, 94, 135)";
-	// 		progressbarDiv.style["border"]           = "2px solid rgba(255, 224, 0, 0.7)";
-	// 		progressbarDiv.style["border-radius"]    = "5px";
-	// 		progressbarDiv.style["background-image"] = "url(img/ProgressBar.gif)";
-	// 		progressbarDiv.style["background-repeat"]= "no-repeat";
-	// 		progressbarDiv.style["background-size"]  = "100% 100%";
-	// 		progressbarDiv.style["display"]          = "block";
-	// 		progressbarDiv.style["z-index"]          = "5001";
-	// 		progressbarDiv.style["position"]         = "fixed";
-	// 		progressbarDiv.style["left"]             = "50%";
-	// 		// progressbarDiv.style["top"]              = "10px";
-	// 		progressbarDiv.style["bottom"]           = "10px";
-	// 		progressbarDiv.style["transform"]        = "translate(-50%, 0%)";
-	// 		progressbarDiv.style["width"]            = "90%";
-	// 		progressbarDiv.style["height"]           = "10px";
-	// 		entireBodyDiv.style["transition"]        = "opacity .15s ease-in-out";
-
-	// 		document.body.appendChild(entireBodyDiv);
-	// 		document.body.appendChild(progressbarDiv);
-	// 	}
-	// 	// De-activate the progress bar and screen darkener.
-	// 	else if (turnItOn === false) {
-	// 		let progressbarDiv = document.querySelector("#progressbarDiv");
-	// 		let entireBodyDiv  = document.querySelector("#entireBodyDiv");
-
-	// 		if(progressbarDiv && entireBodyDiv){
-	// 			setTimeout(function() {
-	// 				document.querySelector("#progressbarDiv").style.opacity = "0";
-	// 				document.querySelector("#entireBodyDiv").style.opacity = "0";
-	// 				document.querySelector("#entireBodyDiv").removeEventListener("click", onClickListener, false);
-
-	// 				document.querySelector("#progressbarDiv").remove();
-	// 				document.querySelector("#entireBodyDiv").remove();
-	// 			}, 100);
-	// 		}
-	// 	}
-	// },
-	// * Show/hide the progress bar. Used by serverRequest.
-	activateProgressBar: function(turnItOn) {
+	activateProgressBar     : function(turnItOn) {
 		let onClickListener = function(){ emu.funcs.shared.activateProgressBar(false); };
 
 		let progressbarDiv = document.querySelector("#progressbarDiv");
@@ -396,11 +336,11 @@ emu.funcs.shared = {
 		}
 	},
 	// * Used for rejected promises. Generic. Just displays the error to the console.
-	rejectedPromise: function(error) {
+	rejectedPromise         : function(error) {
 		console.log("ERROR", error);
 	},
 	// * Removes the pixel smoothing settings on the specified canvas.
-	setpixelated: function(canvas) {
+	setpixelated            : function(canvas) {
 		// https://stackoverflow.com/a/13294650
 		canvas.getContext("2d").mozImageSmoothingEnabled = false; // Firefox
 		canvas.getContext("2d").imageSmoothingEnabled = false; // Firefox
@@ -408,8 +348,8 @@ emu.funcs.shared = {
 		canvas.getContext("2d").webkitImageSmoothingEnabled = false; //
 		canvas.getContext("2d").msImageSmoothingEnabled = false; //
 	},
-	//
-	arrayToArrayBuffer : function (array){
+	// * Helper function that converts an array to an array buffer.
+	arrayToArrayBuffer      : function (array){
 		// https://stackoverflow.com/q/34089569
 		var length = array.length;
 		var buffer = new ArrayBuffer( length );
@@ -419,8 +359,19 @@ emu.funcs.shared = {
 		}
 		return buffer;
 	},
-	//
+	// * Used by resizeEmuCanvas to determine the new width/height/aspect ratio when resizing the emu canvas.
+	calculateAspectRatioFit : function(srcWidth, srcHeight, maxWidth, maxHeight) {
+		// https://stackoverflow.com/a/14731922
+		var newRatio = Math.min(maxWidth / srcWidth, maxHeight / srcHeight);
+		return {
+			width : Math.floor(srcWidth  * newRatio) ,
+			height: Math.floor(srcHeight * newRatio) ,
+			ratio : newRatio
+		};
+	},
+
 	/*
+	// NOT COMPLETE
 	scaleThePage : function(){
 		let dims_window = emu.funcs.shared.getWindowDimensions();
 		let dims_body   = document.querySelector("body").getBoundingClientRect();
@@ -471,14 +422,4 @@ emu.funcs.shared = {
 	},
 	*/
 
-	// * Used by resizeEmuCanvas to determine the new width/height/aspect ratio when resizing the emu canvas.
-	calculateAspectRatioFit : function(srcWidth, srcHeight, maxWidth, maxHeight) {
-		// https://stackoverflow.com/a/14731922
-		var newRatio = Math.min(maxWidth / srcWidth, maxHeight / srcHeight);
-		return {
-			width : Math.floor(srcWidth  * newRatio) ,
-			height: Math.floor(srcHeight * newRatio) ,
-			ratio : newRatio
-		};
-	},
 };

@@ -222,7 +222,6 @@
 				<input type="button" class="debugButtons uamOnly hidden" value="Reload"     onclick="document.location.href = document.location.href;">
 				<input type="button" class="debugButtons uamOnly hidden" value="New Window" onclick="window.open(document.location.href);">
 
-				<div class="navOptions uamOnly hidden" newview="TOP"   >TOP</div>
 				<div class="navOptions uamOnly hidden" newview="VIEW"  >VIEW</div>
 				<div class="navOptions uamOnly hidden" newview="DEBUG1">DEBUG1</div>
 				<div class="navOptions uamOnly hidden" newview="DEBUG2">DEBUG2</div>
@@ -463,7 +462,7 @@
 		</div>
 
 		<div id="emu_view_uam" class="uamOnly">
-			<div id="emu_gameSelector_uam" class="sectionWindow uamOnly">
+			<div id="emu_gameSelector_uam" class="sectionWindow">
 				<div class="sectionWindow_title">Game Selection (UAM)</div>
 				<div class="sectionWindow_content">
 					<table class="table1">
@@ -497,14 +496,14 @@
 				</div>
 			</div>
 
-			<div id="emu_miniOutput1_uam" class="sectionWindow uamOnly">
+			<div id="emu_miniOutput1_uam" class="sectionWindow">
 				<div class="sectionWindow_title">Compile Output (last)</div>
 				<div class="sectionWindow_content">
 					<div id="emu_latestCompile" class="dataHolder EMULATOR_protected_Controls"><pre style="overflow: hidden;"></pre></div>
 				</div>
 			</div>
 
-			<div id="emu_miniOutput2_uam" class="sectionWindow uamOnly">
+			<div id="emu_miniOutput2_uam" class="sectionWindow">
 				<div class="sectionWindow_title">Compile Output (previous)</div>
 				<div class="sectionWindow_content">
 					<div id="emu_previousCompile" class="dataHolder EMULATOR_protected_Controls"><pre style="overflow: hidden;"></pre></div>
@@ -514,14 +513,13 @@
 		</div>
 
 	</div>
-	<div id="emu_debug1" class="sectionDivs uamOnly hidden">
+	<div id="emu_debug1" class="sectionDivs hidden">
 		<div class="sectionDivs_title">
 			<div class="sectionDivs_title_text">
 				DEBUG PANEL #1
 			</div>
 
 			<div class="sectionDivs_title_options">
-				<div class="navOptions uamOnly hidden" newview="TOP"   >TOP</div>
 				<div class="navOptions uamOnly hidden" newview="VIEW"  >VIEW</div>
 				<div class="navOptions uamOnly hidden" newview="DEBUG1">DEBUG1</div>
 				<div class="navOptions uamOnly hidden" newview="DEBUG2">DEBUG2</div>
@@ -529,7 +527,7 @@
 			</div>
 		</div>
 
-		<div id="emu_debug1_output1" class="sectionWindow uamOnly">
+		<div id="emu_debug1_output1" class="sectionWindow">
 			<div class="sectionWindow_title">
 				Full Compile Output
 					<input type="button" onclick="document.querySelector('#emu_compile_UAM').click();" value="COMPILE">
@@ -542,14 +540,13 @@
 		</div>
 
 	</div>
-	<div id="emu_debug2" class="sectionDivs uamOnly hidden">
+	<div id="emu_debug2" class="sectionDivs hidden">
 		<div class="sectionDivs_title">
 			<div class="sectionDivs_title_text">
 				DEBUG PANEL #2
 			</div>
 
 			<div class="sectionDivs_title_options">
-				<div class="navOptions uamOnly hidden" newview="TOP"   >TOP</div>
 				<div class="navOptions uamOnly hidden" newview="VIEW"  >VIEW</div>
 				<div class="navOptions uamOnly hidden" newview="DEBUG1">DEBUG1</div>
 				<div class="navOptions uamOnly hidden" newview="DEBUG2">DEBUG2</div>
@@ -557,7 +554,7 @@
 			</div>
 		</div>
 
-		<div id="emu_debug2_output1" class="sectionWindow uamOnly">
+		<div id="emu_debug2_output1" class="sectionWindow">
 			<div class="sectionWindow_title">
 				DEBUG #2
 				<input type="button" onclick="document.querySelector('#emu_compile_UAM').click();" value="COMPILE">
@@ -571,7 +568,7 @@
 		</div>
 
 	</div>
-	<div id="emu_db"     class="sectionDivs uamOnly hidden">
+	<div id="emu_db"     class="sectionDivs hidden">
 		<div class="sectionDivs_title">
 			<div class="sectionDivs_title_text">
 				DATABASE EDITOR
@@ -581,7 +578,6 @@
 				<input type="button" class="debugButtons uamOnly hidden" value="Reload"     onclick="document.location.href = document.location.href;">
 				<input type="button" class="debugButtons uamOnly hidden" value="New Window" onclick="window.open(document.location.href);">
 
-				<div class="navOptions uamOnly hidden" newview="TOP"   >TOP</div>
 				<div class="navOptions uamOnly hidden" newview="VIEW"  >VIEW</div>
 				<div class="navOptions uamOnly hidden" newview="DEBUG1">DEBUG1</div>
 				<div class="navOptions uamOnly hidden" newview="DEBUG2">DEBUG2</div>
@@ -589,16 +585,22 @@
 			</div>
 		</div>
 
-		<div id="emu_db_gameChoice"   class="sectionWindow uamOnly">
+		<div id="emu_db_gameChoice"   class="sectionWindow">
 			<div class="sectionWindow_title">Game Select</div>
 			<div class="sectionWindow_content">
-				<select id="db_gameSelect" class="myButton" >
-					<option value="">Choose a game</option>
-				</select>
-				<input type="button" class="myButton" id="db_gameSelect_load"   value="Re-load selected game data">
+				<table class="table2">
+					<tr>
+						<td> <select id="db_gameSelect" class="myButton" ><option value="">Choose a game</option> </select> </td>
+						<td> <input type="button" class="myButton" id="db_gameSelect_load"   value="Re-load game data"> </td>
+					</tr>
+					<tr>
+						<td></td>
+						<td> <input type="button" class="myButton" id="db_gameSelect_update" value="Update selected game"> </td>
+					</tr>
+				</table>
 			</div>
 		</div>
-		<div id="emu_db_gameMetadata" class="sectionWindow uamOnly">
+		<div id="emu_db_gameMetadata" class="sectionWindow">
 			<div class="sectionWindow_title">Game Data</div>
 			<div class="sectionWindow_content">
 				<table class="table1">
@@ -615,7 +617,7 @@
 				<textarea id="db_dataField_description"></textarea>
 			</div>
 		</div>
-		<div id="emu_db_files"        class="sectionWindow uamOnly">
+		<div id="emu_db_files"        class="sectionWindow">
 			<div class="sectionWindow_title">GAME FILES</div>
 			<div class="sectionWindow_content">
 				<!--These are the files that the database says this game has. Additionally, a list of all files in the game directory.-->
@@ -633,14 +635,15 @@
 				</div>
 			</div>
 		</div>
-		<div id="emu_db_options"      class="sectionWindow uamOnly">
+		<div id="emu_db_options"      class="sectionWindow">
 			<div class="sectionWindow_title">OPTIONS</div>
 			<div class="sectionWindow_content">
-			<table class="table1">
-					<caption>Options</caption>
-					<tr> <td> <input type="button" class="myButton" id="db_gameSelect_update" value="Update selected game"> </td> </tr>
-					<tr> <td> <input type="button" class="myButton" id="db_gameSelect_create" value="Create new game"> </td> </tr>
-					<tr> <td> <input type="button" class="myButton" id="db_gameSelect_delete" value="Delete selected game"> </td> </tr>
+			<table class="table2">
+					<!--<caption>Options</caption>-->
+					<tr>
+						<td> <input type="button" class="myButton" id="db_gameSelect_create" value="Create new game"> </td>
+						<td> <input type="button" class="myButton" id="db_gameSelect_delete" value="Delete selected game"> </td>
+					</tr>
 				</table>
 
 			</div>

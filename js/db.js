@@ -59,12 +59,12 @@ emu.funcs.db     = {
 			emu.funcs.db.gameDb_updateGameData();
 		}, false);
 
-		//
+		// New game.
 		emu.vars.dom.db["gameSelect_create"].addEventListener("click", function() {
 			emu.funcs.db.gameDb_newGame();
 		}, false);
 
-		//
+		// Delete game.
 		emu.vars.dom.db["gameSelect_delete"].addEventListener("click", function() {
 			emu.funcs.db.gameDb_deleteGame();
 		}, false);

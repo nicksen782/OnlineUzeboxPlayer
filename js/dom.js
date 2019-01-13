@@ -129,6 +129,8 @@ emu.funcs.domHandleCache_populate_UAM = function(){
 
 		// UAM DOM: VIEW
 		// UAM JSON load.
+		emu.vars.dom.view["emu_view_uam"] = document.querySelector("#emu_view_uam");
+
 		emu.vars.dom.view["emu_FilesFromJSON_UAM"]       = document.querySelector("#emu_FilesFromJSON_UAM");
 		emu.vars.dom.view["emu_FilesFromJSON_UAM_load"]  = document.querySelector("#emu_FilesFromJSON_UAM_load");
 		// UAM game select menu.

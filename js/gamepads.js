@@ -441,7 +441,7 @@ emu.gamepads     = {
 				input=null;
 				// Parse the JSON.
 				let newJSON = JSON.parse(res);
-				console.log(newJSON);
+				// console.log(newJSON);
 
 				let keys = Object.keys(newJSON);
 				// Go through all the new gamepad JSON.

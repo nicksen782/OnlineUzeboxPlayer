@@ -46,8 +46,8 @@ var emu          = {};
 emu.vars         = {
 	// * UAM vars.
 	originUAM      : false     ,
-	uamwindow      : undefined ,
-	UAMisReady     : undefined ,
+	UAM_active     : false     ,
+	UAMDATA        : undefined ,
 	user_id        : undefined ,
 
 	// * Holds the DOM cache.
@@ -201,6 +201,16 @@ emu.funcs        = {
 			emu.vars.dom.view["emuCore_switch"]  .addEventListener("click" , emu.vars.innerEmu.toggleCore, false);
 		};
 		EL_view();
+
+		// UAM login, logout, open buttons.
+		if(emu.vars.originUAM==true){
+			emu.vars.dom.uamLogin["uam_login"] .addEventListener("click", function(){ emu.funcs.UAM.openModal("uamlogin" ); }, false);
+			emu.vars.dom.uamLogin["uam_logout"].addEventListener("click", function(){ emu.funcs.UAM.openModal("uamlogout"); }, false);
+			emu.vars.dom.uamLogin["openUAM"].forEach(function(d, i, a) {
+				d.addEventListener("click", emu.funcs.UAM.openUamInNewWindow, false);
+			});
+		}
+
 	},
 	//
 	emu_rotate: function() {
@@ -371,7 +381,7 @@ emu.funcs        = {
 				if (d.data.length) { addGamesByCategory(d, emu_builtInGames_select1); }
 			});
 
-			if(emu.vars.originUAM){
+			if(emu.vars.UAM_active){
 				// Get handle on select menu DOM.
 				var emu_builtInGames_select2 = emu.vars.dom.db["gameSelect"];
 				// Clear the options.
@@ -942,14 +952,69 @@ emu.funcs.UAM    = {
 		emu.vars.dom.view["emu_c2bin2_UAM"].addEventListener("click", emu.funcs.UAM.c2bin_UamGame_2, false);
 
 		emu.funcs.db.addEventListeners();
+
+		// <iframe src="uamlogin.html" frameBorder="0" style="border: 0; width: 300px; height: 100px; border-radius:5px; "></iframe>
+
+	},
+	openUamInNewWindow : function(){
+		window.open("../index.php");
+	},
+	openModal : function(whichModal){
+		let onClickListener = function(){ closeAllModals(); };
+		let entireBodyDiv = document.querySelector("#entireBodyDiv");
+		let uamModal = emu.vars.dom.uamLogin["uamModal"];
+		let oldiframe = document.querySelector("#uamIframe");
+		if(oldiframe){ oldiframe.remove(); }
+		let iframe = document.createElement("iframe");
+		iframe.id="uamIframe";
+		iframe.setAttribute("frameBorder","0");
+
+
+		let url="";
+
+		// Closes all modals.
+		function closeAllModals(){
+			// Hide the entireBodyDiv.
+			let entireBodyDiv = document.querySelector("#entireBodyDiv");
+			entireBodyDiv.removeEventListener("click", onClickListener, false);
+			entireBodyDiv.classList.remove("active");
+
+			// Hide all the modals.
+			var allModals = document.querySelectorAll(".modals");
+			allModals.forEach(function(d,i,a){ d.classList.remove("active"); });
+		};
+
+		// Close all modals.
+		closeAllModals();
+
+		// Open which modal?
+		switch(whichModal){
+			case "closeAllModals" : { return; break; }
+			case "uamlogin"       : { url="../uamlogin.html?view=loginDIV" ; break; }
+			case "uamlogout"      : { url="../uamlogin.html?view=logoutDIV"; break; }
+			default               : { return; break; }
+		};
+
+		// Add screen darkener and event listener.
+		entireBodyDiv.classList.add("active");
+		entireBodyDiv.addEventListener("click", onClickListener, false);
+
+		// Show the specified modal.
+		uamModal.appendChild(iframe);
+		iframe.onload=function(){
+			iframe.onload=null;
+			emu.vars.dom.uamLogin["uamModal"].classList.add("active");
+		};
+		iframe.src=url;
+
 	},
 
 	// * Show UAM.
 	enableUAM: function() {
 		// Get values from UAM.
 		emu.vars.originUAM      = true;
-		emu.vars.uamwindow      = window.top;
-		emu.vars.user_id        = emu.vars.uamwindow.shared.user_id;
+		emu.vars.UAM_active     = true;
+		emu.vars.user_id        = emu.vars.UAMDATA.user_id;
 
 		// Unhide UAM DOM.
 		document.querySelectorAll(".uamOnly").forEach(function(d, i, a) {
@@ -971,9 +1036,9 @@ emu.funcs.UAM    = {
 	// * Hide UAM.
 	disableUAM: function() {
 		// Unset the values that came from UAM.
-		emu.vars.originUAM      = false;
-		emu.vars.uamwindow      = undefined;
-		emu.vars.user_id        = undefined;
+		// emu.vars.originUAM      = false;
+		// emu.vars.UAM_active     = false;
+		// emu.vars.user_id        = undefined;
 
 		// Hide UAM DOM.
 		document.querySelectorAll(".uamOnly").forEach(function(d, i, a) {
@@ -997,34 +1062,29 @@ emu.funcs.UAM    = {
 		// Show UAM, set some variables.
 		emu.funcs.UAM.enableUAM();
 
-		// Wait for UAM to finish loading... then continue.
-		emu.vars.uamwindow.shared.UAMisReady.then(function() {
-			// Hide the header and the footer then scroll the bodyContainer into view.
-			// document.querySelector("#bodyHeader").style.display = "none";
-			// document.querySelector("#bodyFooter").style.display = "none";
-			document.getElementById('bodyContainer').scrollIntoView(emu.funcs.nav.scrollIntoView_options);
+		// Scroll the bodyHeader into view.
+		document.getElementById('bodyHeader').scrollIntoView(emu.funcs.nav.scrollIntoView_options);
 
-			// Set up the UAM DOM.
-			emu.funcs.domHandleCache_populate_UAM();
+		// Set up the UAM DOM.
+		// emu.funcs.domHandleCache_populate_UAM();
 
-			// Add the UAM event listeners.
-			emu.funcs.UAM.addEventListeners();
+		// Add the UAM event listeners.
+		emu.funcs.UAM.addEventListeners();
 
-			// Set the initial state of the auto-pause checkbox.
-			emu.vars.dom.view["emuControls_autopause_chk"].classList.add("enabled");
+		// Set the initial state of the auto-pause checkbox.
+		emu.vars.dom.view["emuControls_autopause_chk"].classList.add("enabled");
 
-			// Refresh the UAM games list data and auto-select the user's default game.
-			emu.funcs.UAM.getGamesListUAM();
+		// Refresh the UAM games list data and auto-select the user's default game.
+		emu.funcs.UAM.getGamesListUAM();
 
-			// DB: Populate the status select menu with values.
-			emu.funcs.db.gameDb_populateStatusSelectMenu();
+		// DB: Populate the status select menu with values.
+		emu.funcs.db.gameDb_populateStatusSelectMenu();
 
-			// Switch to the main emulator view.
-			emu.funcs.nav.changeView("VIEW");
+		// Switch to the main emulator view.
+		emu.funcs.nav.changeView("VIEW");
 
-			// Put a default value for user JSON.
-			// emu.vars.dom.view["emu_FilesFromJSON"].value = "https://dev3-nicksen782.c9users.io/non-web/Uzebox/RamTileTest_1/output/remoteload.json";
-		});
+		// Put a default value for user JSON.
+		// emu.vars.dom.view["emu_FilesFromJSON"].value = "https://dev3-nicksen782.c9users.io/non-web/Uzebox/RamTileTest_1/output/remoteload.json";
 	},
 
 	// * Queries the UAM database for games that match the user's user_id.
@@ -1285,7 +1345,7 @@ emu.funcs.nav    = {
 	// * Changes the main application views.
 	changeView: function(newview) {
 		var allSectionDivs = document.querySelectorAll(".sectionDivs");
-		var bodyContainer = document.querySelector("#bodyContainer");
+		var bodyHeader = document.querySelector("#bodyHeader");
 
 		var emu_view   = emu.vars.dom.views["view_VIEW"  ] ;
 		var emu_debug1 = emu.vars.dom.views["view_DEBUG1"] ;
@@ -1297,7 +1357,7 @@ emu.funcs.nav    = {
 		var emu_debug2_nav = document.querySelectorAll('.navOptions[newview="DEBUG2"]');
 		var emu_db_nav     = document.querySelectorAll('.navOptions[newview="DB"]');
 
-		bodyContainer.scrollIntoView(emu.funcs.nav.scrollIntoView_options);
+		bodyHeader.scrollIntoView(emu.funcs.nav.scrollIntoView_options);
 
 		var hideSections = function() {
 			allSectionDivs.forEach(function(d, i, a) {
@@ -1385,125 +1445,143 @@ window.onload = function() {
 			"_config": { "processor": "emu_p.php" }
 		};
 		emu.funcs.shared.serverRequest(formData).then(function(res){
-			console.log("emu_init:", res);
+			// Set the UAM status.
+			emu.vars.originUAM  = res.UAMFOUND;
+			emu.vars.UAM_active = (res.UAMFOUND && res.UAMDATA.hasActiveLogin);
 
-		}, emu.funcs.shared.rejectedPromise);
-
-
-		// Add the emulation core before continuing.
-		new Promise(function(resolve,reject){
-			let qs=getQueryStringAsObj();
-			let core="";
-			let browserHasWebAssembly = (typeof WebAssembly == "object" && typeof WebAssembly.instantiate == "function");
-
-			if      (qs["core"]=="WASM") { core="WASM";  }
-			else if (qs["core"]=="ASMJS"){ core="ASMJS";  }
-
-			// Was core specified on the query string?
-			if(core){
-				// Was core "WASM" and is Web Assembly available?
-				if(core=="WASM" && (browserHasWebAssembly) ){ core="WASM"; }
-				// Was core "ASMJS" or is Web Assembly NOT available?
-				else if(core=="ASMJS"){ core="ASMJS"; }
-			}
-
-			// No? Can we use Web Assembly?
-			else if( (browserHasWebAssembly) ){ core="WASM"; }
-			// No? Then use ASM.js
-			else{ core="ASMJS"; }
-
-			emu.vars.core = core;
-			var newJs=document.createElement("script");
-			newJs.onload = function(){ resolve(); };
-
-			// Load the Web Assemby version?
-			if(core=="WASM"){
-				// console.log("Using Web Assembly");
-				document.querySelector("#coresetting #coresetting_text").innerHTML="Using Web ASM";
-				document.querySelector("#coresetting #coresetting_toggle").classList.remove("hidden");
-				newJs.src = "CUzeBox_emu_core/emu_core_WASM.js";
-			}
-			// Load the ASMJS version instead.
-			else{
-				// console.log("Using asm.js");
-				document.querySelector("#coresetting #coresetting_text").innerHTML="Using ASM.JS";
-				document.querySelector("#coresetting #coresetting_toggle").classList.remove("hidden");
-				newJs.src = "CUzeBox_emu_core/emu_core_ASMJS.js";
-			}
-
-			// Append the new script element.
-			document.body.appendChild(newJs);
-
-		}).then( function(){
 			// Populate the DOM handle caches.
 			emu.funcs.domHandleCache_populate();
 
-			// Add the event listeners.
-			emu.funcs.addAllListeners();
-
-			// Check if this application has been loaded under UAM.
-			try {
-				// Loaded via iframe?
-				if (window.self !== window.top) {
-					// Can the originUAM key be detected?
-					if (window.top.shared.originUAM == true) { emu.funcs.UAM.setupUAM(); }
-					else                                     { emu.funcs.UAM.disableUAM(); }
-				}
-				else {
-					emu.funcs.UAM.disableUAM();
-				}
+			// ** HANDLE UAM INTEGRATION **
+			// If no UAM was found then show nothing for UAM (Dialog A).
+			if(!res.UAMFOUND){
+				document.querySelector("#UAM_status_A").classList.add("show");
+				emu.funcs.UAM.disableUAM();
 			}
-			catch (e) { emu.funcs.UAM.disableUAM(); }
+			// If UAM and there is an active login then show dialog B.
+			else if(res.UAMDATA.hasActiveLogin==1){
+				// Populate the UAM DOM handle caches.
+				emu.funcs.domHandleCache_populate_UAM();
 
-			// Put a default value for user JSON.
-			if(window.location.host=="dev3-nicksen782.c9users.io"){
-				emu.vars.dom.view["emu_FilesFromJSON"].value = "https://dev3-nicksen782.c9users.io/non-web/Uzebox/RamTileTest_1/output/remoteload.json";
+				// Put the user's name in the status.
+				document.querySelector("#UAM_status_username").innerHTML = res.UAMDATA.username;
+
+				// Add the returned data into the local cache.
+				emu.vars.UAMDATA   = res.UAMDATA;
+
+				emu.funcs.UAM.setupUAM();
+
+				// Show the dialog.
+				document.querySelector("#UAM_status_B").classList.add("show");
+
+			}
+			// If UAM and there is not an active login then show dialog C.
+			else if(res.UAMDATA.hasActiveLogin==0){
+				// Populate the UAM DOM handle caches.
+				emu.funcs.domHandleCache_populate_UAM();
+
+				document.querySelector("#UAM_status_C").classList.add("show");
 			}
 
-			// Get the build-in games list.
-			emu.funcs.emu_getBuiltInGamelist().then(
-				function(){
-					emu.funcs.shared.clearTheCanvas(emu.vars.dom.view["emuCanvas"]);
-					emu.funcs.shared.textOnCanvas({ "canvas": emu.vars.dom.view["emuCanvas"], "text": " - GAME NOT LOADED - " });
+			// ** HANDLE WASM/ASMJS **
+			// Add the emulation core before continuing.
+			new Promise(function(resolve,reject){
+				let qs=getQueryStringAsObj();
+				let core="";
+				let browserHasWebAssembly = (typeof WebAssembly == "object" && typeof WebAssembly.instantiate == "function");
 
-					// Adjust the canvas output.
-					document.querySelectorAll('canvas').forEach(function(d, i) {
-						emu.funcs.shared.setpixelated(d);
-					});
+				if      (qs["core"]=="WASM") { core="WASM";  }
+				else if (qs["core"]=="ASMJS"){ core="ASMJS";  }
 
-					// Switch to the default view.
-					emu.funcs.nav.changeView("VIEW");
-
-					if(!emu.vars.originUAM){
-						// Look for settings provided via query string.
-						let qs=getQueryStringAsObj();
-
-						if     (qs["gameid"]){
-							// Select this game in the menu
-							emu.vars.innerEmu.startEmuAfterUserInput = true;
-							emu.vars.dom.view["builtInGames_select"].value=qs["gameid"];
-							emu.funcs.getGameFiles(1);
-						}
-						else if(qs["url"]){
-							emu.vars.innerEmu.startEmuAfterUserInput = true;
-							emu.vars.dom.view["emu_FilesFromJSON"].value = qs["url"];
-							emu.funcs.getGameFiles(3);
-						}
-
-					}
-					else{
-						// emu.funcs.nav.changeView("DB");
-					}
+				// Was core specified on the query string?
+				if(core){
+					// Was core "WASM" and is Web Assembly available?
+					if(core=="WASM" && (browserHasWebAssembly) ){ core="WASM"; }
+					// Was core "ASMJS" or is Web Assembly NOT available?
+					else if(core=="ASMJS"){ core="ASMJS"; }
 				}
-			);
 
-			// Turn on the gamepad polling.
-			// document.querySelector("#gamepadIcon_container1").click();
-			emu.vars.dom.view["gamepadIcon_poll"].click();
+				// No? Can we use Web Assembly?
+				else if( (browserHasWebAssembly) ){ core="WASM"; }
+				// No? Then use ASM.js
+				else{ core="ASMJS"; }
 
-			// Ensure the emu canvas has a good size fit.
-			emu.vars.innerEmu.resizeEmuCanvas();
-		});
+				emu.vars.core = core;
+				var newJs=document.createElement("script");
+				newJs.onload = function(){ resolve(); };
+
+				// Load the Web Assemby version?
+				if(core=="WASM"){
+					// console.log("Using Web Assembly");
+					document.querySelector("#coresetting #coresetting_text").innerHTML="Using Web ASM";
+					document.querySelector("#coresetting #coresetting_toggle").classList.remove("hidden");
+					newJs.src = "CUzeBox_emu_core/emu_core_WASM.js";
+				}
+				// Load the ASMJS version instead.
+				else{
+					// console.log("Using asm.js");
+					document.querySelector("#coresetting #coresetting_text").innerHTML="Using ASM.JS";
+					document.querySelector("#coresetting #coresetting_toggle").classList.remove("hidden");
+					newJs.src = "CUzeBox_emu_core/emu_core_ASMJS.js";
+				}
+
+				// Append the new script element.
+				document.body.appendChild(newJs);
+
+			}).then( function(){
+				// Add the event listeners.
+				emu.funcs.addAllListeners();
+
+				// Put a default value for user JSON.
+				if(window.location.host=="dev3-nicksen782.c9users.io"){
+					emu.vars.dom.view["emu_FilesFromJSON"].value = "https://dev3-nicksen782.c9users.io/non-web/Uzebox/RamTileTest_1/output/remoteload.json";
+				}
+
+				// Get the build-in games list.
+				emu.funcs.emu_getBuiltInGamelist().then(
+					function(){
+						emu.funcs.shared.clearTheCanvas(emu.vars.dom.view["emuCanvas"]);
+						emu.funcs.shared.textOnCanvas({ "canvas": emu.vars.dom.view["emuCanvas"], "text": " - GAME NOT LOADED - " });
+
+						// Adjust the canvas output.
+						document.querySelectorAll('canvas').forEach(function(d, i) {
+							emu.funcs.shared.setpixelated(d);
+						});
+
+						// Switch to the default view.
+						emu.funcs.nav.changeView("VIEW");
+
+						if(!emu.vars.UAM_active){
+							// Look for settings provided via query string.
+							let qs=getQueryStringAsObj();
+
+							if     (qs["gameid"]){
+								// Select this game in the menu
+								emu.vars.innerEmu.startEmuAfterUserInput = true;
+								emu.vars.dom.view["builtInGames_select"].value=qs["gameid"];
+								emu.funcs.getGameFiles(1);
+							}
+							else if(qs["url"]){
+								emu.vars.innerEmu.startEmuAfterUserInput = true;
+								emu.vars.dom.view["emu_FilesFromJSON"].value = qs["url"];
+								emu.funcs.getGameFiles(3);
+							}
+
+						}
+						else{
+							// emu.funcs.nav.changeView("DB");
+						}
+					}
+				);
+
+				// Turn on the gamepad polling.
+				emu.vars.dom.view["gamepadIcon_poll"].click();
+
+				// Ensure the emu canvas has a good size fit.
+				emu.vars.innerEmu.resizeEmuCanvas();
+			});
+
+		}, emu.funcs.shared.rejectedPromise);
 
 	};
 

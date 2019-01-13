@@ -226,7 +226,7 @@ WHERE
 
 	global $_appdir;
 	global $_db;
-	$dbhandle = new sqlite3_DB_PDO__UAM5($_db) or exit("cannot open the database");
+	$dbhandle = new sqlite3_DB_PDO__EMU($_db) or exit("cannot open the database");
 	$s_SQL1  ="
 		SELECT
 			(
@@ -271,7 +271,7 @@ WHERE
 function getData_oneGame(){
 	global $_appdir;
 	// global $_db;
-	$dbhandle = new sqlite3_DB_PDO__UAM5($_appdir.'_sys/eud.db') or exit("cannot open the database");
+	$dbhandle = new sqlite3_DB_PDO__EMU($_appdir.'_sys/eud.db') or exit("cannot open the database");
 	$gameid = intval($_POST['gameid']);
 	$s_SQL1   =
 '
@@ -336,7 +336,7 @@ function gameDb_addFiles(){
 
 	global $_appdir;
 	global $emu_dir;
-	$dbhandle = new sqlite3_DB_PDO__UAM5($_appdir.'_sys/eud.db') or exit("cannot open the database");
+	$dbhandle = new sqlite3_DB_PDO__EMU($_appdir.'_sys/eud.db') or exit("cannot open the database");
 	$s_SQL1   =
 "
 SELECT
@@ -391,7 +391,7 @@ function gameDb_deleteFile(){
 
 	global $_appdir;
 	global $emu_dir;
-	$dbhandle = new sqlite3_DB_PDO__UAM5($_appdir.'_sys/eud.db') or exit("cannot open the database");
+	$dbhandle = new sqlite3_DB_PDO__EMU($_appdir.'_sys/eud.db') or exit("cannot open the database");
 	$s_SQL1   =
 "
 SELECT
@@ -446,7 +446,7 @@ function gameDb_updateGameData(){
 
 	global $_appdir;
 	global $_db;
-	$dbhandle = new sqlite3_DB_PDO__UAM5($_appdir.'_sys/eud.db') or exit("cannot open the database");
+	$dbhandle = new sqlite3_DB_PDO__EMU($_appdir.'_sys/eud.db') or exit("cannot open the database");
 	$s_SQL1  =
 "
 UPDATE 'gamelist'
@@ -490,7 +490,7 @@ function gameDb_newGame(){
 	global $_appdir;
 	global $_db;
 	global $emu_dir;
-	$dbhandle = new sqlite3_DB_PDO__UAM5($_appdir.'_sys/eud.db') or exit("cannot open the database");
+	$dbhandle = new sqlite3_DB_PDO__EMU($_appdir.'_sys/eud.db') or exit("cannot open the database");
 
 // Create an entry for the game. Get the new game id.
 	$s_SQL1  =
@@ -584,7 +584,7 @@ function gameDb_deleteGame(){
 
 	global $_appdir;
 	global $emu_dir;
-	$dbhandle = new sqlite3_DB_PDO__UAM5($_appdir.'_sys/eud.db') or exit("cannot open the database");
+	$dbhandle = new sqlite3_DB_PDO__EMU($_appdir.'_sys/eud.db') or exit("cannot open the database");
 	$s_SQL1   =
 "
 SELECT gamedir

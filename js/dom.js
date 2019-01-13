@@ -121,7 +121,8 @@ emu.funcs.domHandleCache_populate = function(){
 };
 
 emu.funcs.domHandleCache_populate_UAM = function(){
-	if( emu.vars.originUAM == true ){
+	// If logged in to UAM.
+	if( emu.vars.UAM_active == true ){
 		emu.vars.dom.debug1 = {};
 		emu.vars.dom.debug2 = {};
 		emu.vars.dom.db     = {};
@@ -179,5 +180,16 @@ emu.funcs.domHandleCache_populate_UAM = function(){
 		emu.vars.dom.db["db_builtInGames_fileUpload_visible"] = document.querySelector("#db_builtInGames_fileUpload_visible");
 
 	}
-}
+
+	// If UAM was found.
+	if(emu.vars.originUAM==true){
+		emu.vars.dom.uamLogin     = {};
+		emu.vars.dom.uamLogin["uamModal"]   = document.querySelector("#uamModal");   //
+		emu.vars.dom.uamLogin["uam_login"]  = document.querySelector("#uam_login");  //
+		emu.vars.dom.uamLogin["uam_logout"] = document.querySelector("#uam_logout"); //
+		emu.vars.dom.uamLogin["openUAM"]    = document.querySelectorAll(".openUAM"); //
+		emu.vars.dom.uamLogin["uamIframe"]  = document.querySelector("#uamIframe");  //
+
+	}
+};
 

@@ -1,3 +1,139 @@
+/* MODALS AND FADE ANIMATION KEYFRAMES */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+		visibility       : visible;
+    }
+
+    100% {
+        opacity: 1;
+		visibility       : visible;
+    }
+}
+@keyframes fadeOut {
+    0% {
+        opacity: 1;
+		visibility       : visible;
+    }
+
+    100% {
+        opacity: 0;
+		visibility       : hidden;
+    }
+}
+#entireBodyDiv{
+	position         : fixed;
+	top              : 0px;
+	left             : 0px;
+	width            : 100vw;
+	height           : 100vh;
+	background-color : rgba(0, 0, 0, 0.40);
+
+	opacity          : 0;
+	visibility       : hidden;
+	z-index:-1;
+
+	animation: fadeOut .25s;
+}
+#entireBodyDiv.active{
+	z-index          : 4999;
+	visibility       : visible;
+	opacity          : 1;
+	animation: fadeIn .25s;
+}
+#progressbarDiv{
+	border            : 2px solid rgb(83, 94, 135);
+	border-radius     : 5px;
+	background-image  : url(../img/ProgressBar.gif);
+	background-repeat : no-repeat;
+	background-size   : 100% 100%;
+	position          : fixed;
+	left              : 50%;
+	top               : 10px;
+	bottom            : 10px;
+	transform         : translate(-50%, 0%);
+	width             : 90%;
+	height            : 10px;
+
+	opacity          : 0;
+	visibility       : hidden;
+	z-index:-1;
+	animation: fadeOut .25s;
+
+}
+#progressbarDiv.active{
+	z-index          : 5000;
+	visibility       : visible;
+	opacity          : 1;
+	animation: fadeIn .25s;
+}
+.modals{
+	position      : fixed;
+	left          : 50%;
+	top           : 50%;
+	transform     : translate(-50%, -50%);
+	border        : 2px solid rgb(83, 94, 135);
+	border-radius : 5px;
+	background-color: lightgray;
+	min-height: 100px;
+	min-width:  100px;
+	padding: 10px;
+
+	opacity          : 0;
+	visibility       : hidden;
+	z-index:-1;
+	animation: fadeOut .25s;
+}
+.modals.active{
+	z-index          : 5000;
+	visibility       : visible;
+	opacity          : 1;
+	animation: fadeIn .25s;
+}
+
+#uamModal{
+	position: fixed;
+	left: 50%;
+	top: 10px;
+	transform: translate(-50%, 0%);
+	height: 150px;
+	width: 300px;
+}
+#uamIframe{
+	border: 0;
+	width: 300px;
+	height: 160px;
+	border-radius:5px;
+}
+
+#UAM_status{
+	/* background-color: #b9c6d0; */
+	/* width: 330px; */
+	position: absolute;
+	right: 5px;
+	top: 0px;
+	line-height: 26px;
+	font-size: 16px;
+	text-align: right;
+	padding-right: 5px;
+}
+.UAM_statuses{
+	display: none;
+}
+.UAM_statuses.show{
+	display:block;
+}
+
+#UAM_status_A{
+}
+#UAM_status_B{
+}
+#UAM_status_C{
+}
+
+
+
+
 .unavailableView {
     /*cursor: not-allowed !important;*/
 	pointer-events: none;
@@ -80,6 +216,8 @@ body {
 	background-color: #b9c6d0;
 	border: 1px solid black;
 	border-radius: 5px;
+	position: relative;
+	overflow: hidden;
 }
 #bodyContainer {
 	min-height: 400px;

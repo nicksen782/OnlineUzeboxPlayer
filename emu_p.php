@@ -14,22 +14,28 @@ ini_set("display_errors", 1);
 define('TIMEZONE', 'America/Detroit');
 date_default_timezone_set(TIMEZONE);
 
-$_appdir      = getcwd().'/'                    ;
-$_db_file     = $_appdir."../sys_files/UAM5.db" ;
-$_emu_db_file = $_appdir."_sys/eud.db"          ;
-$_db          = $_db_file                       ;
+$_appdir      = getcwd().'/'                  ;
+$_db_file     = $_appdir . "../_sys/UAM5b.db" ;
+$_emu_db_file = $_appdir . "_sys/eud.db"      ;
+$_db          = $_db_file                     ;
 
-$dev=0;
-if ( strpos($_SERVER['SERVER_NAME'], "-nicksen782.c9users.io") !== false ) { $dev=1; }
-else { $dev=0; }
-
-$emu_dir = './';
+$emu_dir = __DIR__ . '/';
 $emu_games_dir = $emu_dir . '/games/';
 
 // Look for UAM. It should be one directory back.
 $filename = "../UAMVER.TXT";
 $UAMFOUND = false;
 if (file_exists($filename)) { $UAMFOUND = true; }
+
+$dev=0;
+
+if($UAMFOUND){
+	require_once("../basics_p.php");
+}
+else{
+	if ( strpos($_SERVER['SERVER_NAME'], "-nicksen782.c9users.io") !== false ) { $dev=1; }
+	else { $dev=0; }
+}
 
 require_once("emu_uam_p.php");
 
@@ -54,19 +60,48 @@ function API_REQUEST( $api, $type ){
 	$stats = array(
 		'error'      => false ,
 		'error_text' => ""    ,
+		'thisUser'   => []    ,
 	);
 
-	// Get permissions.
-	// startSession();	// sessions_s.php
-	// $perms    = users_sessionAndPermissions_internal();
-	// $_SESSION['o_api']    = $api  ;
-	// $_SESSION['via_type'] = $type ;
-	// $loggedIn = $_SESSION['hasActiveLogin']                            ? 1 : 0;
-	// $admin    = in_array( $_SESSION['username'], array('nicksen782') ) ? 1 : 0;
+	if($UAMFOUND){
+		startSession();
+		$perms         = users_sessionAndPermissions_internal();
+		$thisUserPerms = $_SESSION['permKeys'];
+		$loggedIn      = $_SESSION['hasActiveLogin']                        ? 1 : 0;
+		$admin         = in_array("isFullAdmin" , $thisUserPerms) !== false ? 1:0;
+		$public        = 1 ;
+		$thisUser = [
+			"settings"      => $perms         ,
+			"thisUserPerms" => $thisUserPerms ,
+		];
+	}
+	else{
+		$perms         = [];
+		$thisUserPerms = [];
+		$loggedIn      = 0;
+		$admin         = 0;
+		$public        = 1;
+		$thisUser      = [];
+	}
 
 	// Rights.
 	$public = 1        ; // No rights required.
 	$UAM    = $UAMFOUND; // Requires UAM.
+
+	// Create flags that will be used for permission checks in this function.
+	$isFullAdmin       = in_array("isFullAdmin"       , $thisUserPerms) !== false ? 1:0;
+	$emu_canCompile    = in_array("emu_canCompile"    , $thisUserPerms) !== false ? 1:0;
+	$emu_isUamGameUser = in_array("emu_isUamGameUser" , $thisUserPerms) !== false ? 1:0;
+	$emu_isDbAdmin     = in_array("emu_isDbAdmin"     , $thisUserPerms) !== false ? 1:0;
+	$emu_isDbUser      = in_array("emu_isDbUser"      , $thisUserPerms) !== false ? 1:0;
+
+	$stats["thisUser"] = $thisUser;
+	$stats["__isFullAdmin"]       = $isFullAdmin      ;
+	$stats["__emu_canCompile"]    = $emu_canCompile   ;
+	$stats["__emu_isUamGameUser"] = $emu_isUamGameUser;
+	$stats["__emu_isDbAdmin"]     = $emu_isDbAdmin    ;
+	$stats["__emu_isDbUser"]      = $emu_isDbUser     ;
+	$stats["___thisUserPerms"]    = $thisUserPerms    ;
 
 	$o_values=array();
 
@@ -75,23 +110,23 @@ function API_REQUEST( $api, $type ){
 	// $o_values["gameman_manifest_all"]      = [ "p"=>( ( $loggedIn && $admin) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
 
 	// EMULATOR FUNCTIONS - VIEW (NON-UAM)
-	$o_values["emu_getBuiltInGamelist"]  = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
-	$o_values["emu_returnJSON_byGameId"] = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
-	$o_values["emu_init"]                = [ "p"=>( ( $public) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
+	$o_values["emu_getBuiltInGamelist"]  = [ "p"=>( ( $public) ? 1 : 0 ), "args"=>[] ] ;
+	$o_values["emu_returnJSON_byGameId"] = [ "p"=>( ( $public) ? 1 : 0 ), "args"=>[] ] ;
+	$o_values["emu_init"]                = [ "p"=>( ( $public) ? 1 : 0 ), "args"=>[] ] ;
 
 	// EMULATOR FUNCTIONS - VIEW (UAM)
-	$o_values["gameman_manifest_user"] = [ "p"=>( ( $UAM) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
-	$o_values["c2bin_UamGame"]         = [ "p"=>( ( $UAM) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
-	$o_values["compile_UamGame"]       = [ "p"=>( ( $UAM) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
-	$o_values["c2bin_UamGame_2"]       = [ "p"=>( ( $UAM) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
+	$o_values["gameman_manifest_user"] = [ "p"=>( ( $UAM && ($isFullAdmin) ) ? 1 : 0 ), "args"=>[] ] ;
+	$o_values["c2bin_UamGame"]         = [ "p"=>( ( $UAM && ($isFullAdmin||$emu_canCompile) ) ? 1 : 0 ), "args"=>[] ] ;
+	$o_values["compile_UamGame"]       = [ "p"=>( ( $UAM && ($isFullAdmin||$emu_canCompile) ) ? 1 : 0 ), "args"=>[] ] ;
+	$o_values["c2bin_UamGame_2"]       = [ "p"=>( ( $UAM && ($isFullAdmin||$emu_canCompile) ) ? 1 : 0 ), "args"=>[] ] ;
 
 	// EMULATOR FUNCTIONS - GAMES DB (UAM)
-	$o_values["getData_oneGame"]       = [ "p"=>( ( $UAM) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
-	$o_values["gameDb_addFiles"]       = [ "p"=>( ( $UAM) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
-	$o_values["gameDb_deleteFile"]     = [ "p"=>( ( $UAM) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
-	$o_values["gameDb_updateGameData"] = [ "p"=>( ( $UAM) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
-	$o_values["gameDb_newGame"]        = [ "p"=>( ( $UAM) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
-	$o_values["gameDb_deleteGame"]     = [ "p"=>( ( $UAM) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
+	$o_values["getData_oneGame"]       = [ "p"=>( ( $UAM && ($isFullAdmin)) ? 1 : 0 ), "args"=>[] ] ;
+	$o_values["gameDb_addFiles"]       = [ "p"=>( ( $UAM && ($isFullAdmin)) ? 1 : 0 ), "args"=>[] ] ;
+	$o_values["gameDb_deleteFile"]     = [ "p"=>( ( $UAM && ($isFullAdmin)) ? 1 : 0 ), "args"=>[] ] ;
+	$o_values["gameDb_updateGameData"] = [ "p"=>( ( $UAM && ($isFullAdmin)) ? 1 : 0 ), "args"=>[] ] ;
+	$o_values["gameDb_newGame"]        = [ "p"=>( ( $UAM && ($isFullAdmin)) ? 1 : 0 ), "args"=>[] ] ;
+	$o_values["gameDb_deleteGame"]     = [ "p"=>( ( $UAM && ($isFullAdmin)) ? 1 : 0 ), "args"=>[] ] ;
 
 	// DETERMINE IF THE API IS AVAILABLE TO THE USER.
 
@@ -103,11 +138,11 @@ function API_REQUEST( $api, $type ){
 	}
 
 	// Is the API allowed to be called this way?
-	else if( ! $o_values[ $api ][ $type ] ){
-		$stats['error']=true;
-		$stats['error_text']="Invalid access type";
-		// audit_API_newRecord( $_SESSION['user_id'], $_SESSION['o_api'], $_SESSION['via_type'], 0, $stats['error_text'] );
-	}
+	// else if( ! $o_values[ $api ][ $type ] ){
+	// 	$stats['error']=true;
+	// 	$stats['error_text']="Invalid access type";
+	// 	// audit_API_newRecord( $_SESSION['user_id'], $_SESSION['o_api'], $_SESSION['via_type'], 0, $stats['error_text'] );
+	// }
 
 	// Does the user have sufficient permissions?
 	else if( ! $o_values[ $api ]['p'] ){
@@ -119,7 +154,7 @@ function API_REQUEST( $api, $type ){
 	// Can the function be run?
 	if(! $stats['error']){
 		// GOOD! Allow the API call.
-		call_user_func_array( $api, array() );
+		call_user_func_array( $api, array( $o_values[ $api ]["args"]) );
 	}
 
 	// Was there an error?
@@ -132,7 +167,7 @@ function API_REQUEST( $api, $type ){
 
 
 
-class sqlite3_DB_PDO__UAM5{
+class sqlite3_DB_PDO__EMU{
 	public $dbh;              // The DB handle.
 	public $statement;        // The prepared statement handle.
 
@@ -233,18 +268,12 @@ function emu_init(){
 
 	// If yes then return the base session information including permissions list.
 	if($UAMFOUND){
-		// Get permissions.
-		// $perms    = users_sessionAndPermissions_internal();
-		// $_SESSION['o_api']    = $api  ;
-		// $_SESSION['via_type'] = $type ;
-		// $loggedIn = $_SESSION['hasActiveLogin']                              ? 1 : 0;
-		// $admin    = in_array( $_SESSION['username'], array('nicksen782') ) ? 1 : 0;
-
 		$UAMDATA = $_SESSION;
 	}
 	// If no, then that's it. No UAM.
-	// else{
-	// }
+	else{
+		$UAMDATA = [];
+	}
 
 	echo json_encode(array(
 		'data'       => []        ,
@@ -262,7 +291,7 @@ function emu_init(){
 function emu_getBuiltInGamelist(){
 	global $_appdir;
 	// global $_db;
-	$dbhandle = new sqlite3_DB_PDO__UAM5($_appdir.'_sys/eud.db') or exit("cannot open the database");
+	$dbhandle = new sqlite3_DB_PDO__EMU($_appdir.'_sys/eud.db') or exit("cannot open the database");
 	$s_SQL1   =
 '
 SELECT
@@ -298,7 +327,7 @@ function emu_returnJSON_byGameId(){
 
 	global $_appdir;
 	// global $_db;
-	$dbhandle = new sqlite3_DB_PDO__UAM5($_appdir.'_sys/eud.db') or exit("cannot open the database");
+	$dbhandle = new sqlite3_DB_PDO__EMU($_appdir.'_sys/eud.db') or exit("cannot open the database");
 	$s_SQL1   =
 "
 SELECT
@@ -323,7 +352,8 @@ ORDER BY id
 	$thisGame = $results1[0];
 
 	global $emu_dir;
-	$directory = $emu_dir . $thisGame['gamedir'];
+	// $directory = $emu_dir . $thisGame['gamedir'];
+	$directory = $thisGame['gamedir'];
 
 	$filelist  = array();
 	$gamefiles = array();
@@ -337,6 +367,7 @@ ORDER BY id
 				[
 					"filename"         => $gamefiles[$i]               ,
 					"completefilepath" => $directory.''.$gamefiles[$i] ,
+					// "completefilepath" => './' . $thisGame['gamedir'] . '' . $gamefiles[$i] ,
 				]
 			);
 		}
@@ -353,12 +384,16 @@ ORDER BY id
 		'gamefile' => $thisGame['gamefile'] ,
 		'title'    => $thisGame['title']    ,
 		'baseURL'  => $directory            ,
+		// 'baseURL'  => './' . $thisGame['gamedir']            ,
 	);
 
 	echo json_encode(array(
 		'data'       => $results1   ,
 		'success'    => true        ,
 		'remoteload' => $remoteload ,
+		// '__directory' => $directory ,
+		// '__emu_dir'   => $emu_dir ,
+		// '__gamedir'   => $thisGame['gamedir'] ,
 
 		// DEBUG
 		// '$_POST'     => $_POST      ,

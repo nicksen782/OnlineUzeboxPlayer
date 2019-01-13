@@ -315,63 +315,84 @@ emu.funcs.shared = {
 
 	},
 	// * Show/hide the progress bar. Used by serverRequest.
+	// activateProgressBar: function(turnItOn) {
+	// 	return;
+	// 	let onClickListener = function(){ emu.funcs.shared.activateProgressBar(false); };
+
+	// 	// Activate the progress bar and screen darkener.
+	// 	if (turnItOn === true) {
+	// 		// Create the entire body div.
+	// 		let entireBodyDiv = document.createElement("div");
+	// 		entireBodyDiv.id="entireBodyDiv";
+	// 		entireBodyDiv.addEventListener("click", onClickListener, false);
+	// 		entireBodyDiv.style["position"]        = "fixed";
+	// 		entireBodyDiv.style["top"]             = "0px";
+	// 		entireBodyDiv.style["left"]            = "0px";
+	// 		entireBodyDiv.style["width"]           = "100vw";
+	// 		entireBodyDiv.style["height"]          = "100vh";
+	// 		entireBodyDiv.style["background-color"]= "rgba(0, 0, 0, 0.15)";
+	// 		entireBodyDiv.style["z-index"]         = "5000";
+	// 		entireBodyDiv.style["opacity"]         = "1";
+	// 		entireBodyDiv.style["display"]         = "block";
+	// 		entireBodyDiv.style["transition"]      = "opacity .25s ease-in-out";
+
+	// 		let progressbarDiv = document.createElement("div");
+	// 		progressbarDiv.id="progressbarDiv";
+	// 		progressbarDiv.style["border"]           = "2px solid rgb(83, 94, 135)";
+	// 		progressbarDiv.style["border"]           = "2px solid rgba(255, 224, 0, 0.7)";
+	// 		progressbarDiv.style["border-radius"]    = "5px";
+	// 		progressbarDiv.style["background-image"] = "url(img/ProgressBar.gif)";
+	// 		progressbarDiv.style["background-repeat"]= "no-repeat";
+	// 		progressbarDiv.style["background-size"]  = "100% 100%";
+	// 		progressbarDiv.style["display"]          = "block";
+	// 		progressbarDiv.style["z-index"]          = "5001";
+	// 		progressbarDiv.style["position"]         = "fixed";
+	// 		progressbarDiv.style["left"]             = "50%";
+	// 		// progressbarDiv.style["top"]              = "10px";
+	// 		progressbarDiv.style["bottom"]           = "10px";
+	// 		progressbarDiv.style["transform"]        = "translate(-50%, 0%)";
+	// 		progressbarDiv.style["width"]            = "90%";
+	// 		progressbarDiv.style["height"]           = "10px";
+	// 		entireBodyDiv.style["transition"]        = "opacity .15s ease-in-out";
+
+	// 		document.body.appendChild(entireBodyDiv);
+	// 		document.body.appendChild(progressbarDiv);
+	// 	}
+	// 	// De-activate the progress bar and screen darkener.
+	// 	else if (turnItOn === false) {
+	// 		let progressbarDiv = document.querySelector("#progressbarDiv");
+	// 		let entireBodyDiv  = document.querySelector("#entireBodyDiv");
+
+	// 		if(progressbarDiv && entireBodyDiv){
+	// 			setTimeout(function() {
+	// 				document.querySelector("#progressbarDiv").style.opacity = "0";
+	// 				document.querySelector("#entireBodyDiv").style.opacity = "0";
+	// 				document.querySelector("#entireBodyDiv").removeEventListener("click", onClickListener, false);
+
+	// 				document.querySelector("#progressbarDiv").remove();
+	// 				document.querySelector("#entireBodyDiv").remove();
+	// 			}, 100);
+	// 		}
+	// 	}
+	// },
+	// * Show/hide the progress bar. Used by serverRequest.
 	activateProgressBar: function(turnItOn) {
 		let onClickListener = function(){ emu.funcs.shared.activateProgressBar(false); };
 
+		let progressbarDiv = document.querySelector("#progressbarDiv");
+		let entireBodyDiv  = document.querySelector("#entireBodyDiv");
+
 		// Activate the progress bar and screen darkener.
 		if (turnItOn === true) {
-			// Create the entire body div.
-			let entireBodyDiv = document.createElement("div");
-			entireBodyDiv.id="entireBodyDiv";
+			entireBodyDiv.classList.add("active");
+			progressbarDiv.classList.add("active");
 			entireBodyDiv.addEventListener("click", onClickListener, false);
-			entireBodyDiv.style["position"]        = "fixed";
-			entireBodyDiv.style["top"]             = "0px";
-			entireBodyDiv.style["left"]            = "0px";
-			entireBodyDiv.style["width"]           = "100vw";
-			entireBodyDiv.style["height"]          = "100vh";
-			entireBodyDiv.style["background-color"]= "rgba(0, 0, 0, 0.15)";
-			entireBodyDiv.style["z-index"]         = "5000";
-			entireBodyDiv.style["opacity"]         = "1";
-			entireBodyDiv.style["display"]         = "block";
-			entireBodyDiv.style["transition"]      = "opacity .25s ease-in-out";
-
-			let progressbarDiv = document.createElement("div");
-			progressbarDiv.id="progressbarDiv";
-			progressbarDiv.style["border"]           = "2px solid rgb(83, 94, 135)";
-			progressbarDiv.style["border"]           = "2px solid rgba(255, 224, 0, 0.7)";
-			progressbarDiv.style["border-radius"]    = "5px";
-			progressbarDiv.style["background-image"] = "url(img/ProgressBar.gif)";
-			progressbarDiv.style["background-repeat"]= "no-repeat";
-			progressbarDiv.style["background-size"]  = "100% 100%";
-			progressbarDiv.style["display"]          = "block";
-			progressbarDiv.style["z-index"]          = "5001";
-			progressbarDiv.style["position"]         = "fixed";
-			progressbarDiv.style["left"]             = "50%";
-			// progressbarDiv.style["top"]              = "10px";
-			progressbarDiv.style["bottom"]           = "10px";
-			progressbarDiv.style["transform"]        = "translate(-50%, 0%)";
-			progressbarDiv.style["width"]            = "90%";
-			progressbarDiv.style["height"]           = "10px";
-			entireBodyDiv.style["transition"]        = "opacity .15s ease-in-out";
-
-			document.body.appendChild(entireBodyDiv);
-			document.body.appendChild(progressbarDiv);
 		}
 		// De-activate the progress bar and screen darkener.
 		else if (turnItOn === false) {
-			let progressbarDiv = document.querySelector("#progressbarDiv");
-			let entireBodyDiv  = document.querySelector("#entireBodyDiv");
-
-			if(progressbarDiv && entireBodyDiv){
-				setTimeout(function() {
-					document.querySelector("#progressbarDiv").style.opacity = "0";
-					document.querySelector("#entireBodyDiv").style.opacity = "0";
-					document.querySelector("#entireBodyDiv").removeEventListener("click", onClickListener, false);
-
-					document.querySelector("#progressbarDiv").remove();
-					document.querySelector("#entireBodyDiv").remove();
-				}, 100);
-			}
+			entireBodyDiv.classList.remove("active");
+			progressbarDiv.classList.remove("active");
+			entireBodyDiv.removeEventListener("click", onClickListener, false);
 		}
 	},
 	// * Used for rejected promises. Generic. Just displays the error to the console.

@@ -44,7 +44,14 @@
 
 <div id="bodyHeader">
 	ONLINE UZEBOX EMULATOR V2B
-
+	<div id="UAM_status">
+		<div class="modals" id="uamModal">
+			<!--<iframe id="uamIframe" src="about:blank" frameBorder="0"></iframe>-->
+		</div>
+		<div class="UAM_statuses" id="UAM_status_A">--</div>
+		<div class="UAM_statuses" id="UAM_status_B">Hello, <span id="UAM_status_username"></span> <button id="uam_logout">Logout</button> <button class="openUAM">UAM</button></div>
+		<div class="UAM_statuses" id="UAM_status_C">Hello, GUEST <button id="uam_login">Login</button> <button class="openUAM">UAM</button></div>
+	</div>
 </div>
 
 <div id="bodyContainer">
@@ -686,8 +693,8 @@
 	</table>
 </div>
 
-<!--<div id="entireBodyDiv" onclick="emu.funcs.shared.activateProgressBar(false);"></div>-->
-<!--<div id="progressbarDiv"></div>-->
+<div id="entireBodyDiv"></div>
+<div id="progressbarDiv"></div>
 
 </body>
 

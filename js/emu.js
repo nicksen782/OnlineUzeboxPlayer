@@ -109,36 +109,39 @@ emu.funcs        = {
 				});
 			});
 
-			// VIEW: Fullscreen mode.
-			document                                   .addEventListener("fullscreenchange", function(e) {
+			// VIEW: Fullscreen mode. (Multiple listeners to cover multiple browsers.)
+			var on_fullscreenchange = function(){
 				if( emu.vars.innerEmu.emulatorIsReady !== false ) {
 					// Get the current CUzeBox value for GUICORE_SMALL.
 					let GUICORE_SMALL      = emu.vars.innerEmu.Module._NRA_returnFlags(3) ? true : false; // Small view or larger view
-//
+
 					// Is this fullscreen now? (Occurs right after the change to fullscreen.)
-					if(document.fullscreen){
-						// console.log("is fullscreen now");
-						setTimeout(function(){
-							if(GUICORE_SMALL){
-								console.log("Switching to increased resolution.");
-								emu.vars.innerEmu.emu_sendKeyEvent("keydown", "key_F2" , 1);
-								emu.vars.innerEmu.emu_sendKeyEvent("keyup", "key_F2" , 1);
-								emu.vars.innerEmu.displayCUzeBox_flags();
-							}
-						}, 60);
+					if(
+						   document.fullscreen              // Chrome
+						|| document.fullscreenElement       // Chrome
+						|| document.webkitFullscreenElement // Chrome
+						|| window  .fullScreen              // Firefox
+						|| document.mozFullScreenElement    // Firefox
+						|| document.msFullscreenElement     // Edge
+					){
+						// console.log("is fullscreen now", GUICORE_SMALL);
+						if(GUICORE_SMALL){
+							// console.log("Switching to increased resolution.");
+							emu.vars.innerEmu.emu_sendKeyEvent("keydown", "key_F2" , 1);
+							emu.vars.innerEmu.emu_sendKeyEvent("keyup"  , "key_F2" , 1);
+							emu.vars.innerEmu.displayCUzeBox_flags();
+						}
 					}
 
 					// Is this NOT fullscreen now? (Occurs right after the change from fullscreen.)
 					else{
-						// console.log("is NOT fullscreen now");
-						setTimeout(function(){
-							if(!GUICORE_SMALL){
-								console.log("Switching to reduced resolution.");
-								emu.vars.innerEmu.emu_sendKeyEvent("keydown", "key_F2" , 1);
-								emu.vars.innerEmu.emu_sendKeyEvent("keyup", "key_F2" , 1);
-								emu.vars.innerEmu.displayCUzeBox_flags();
-							}
-						}, 60);
+						// console.log("is NOT fullscreen now", GUICORE_SMALL);
+						if(!GUICORE_SMALL){
+							// console.log("Switching to reduced resolution.");
+							emu.vars.innerEmu.emu_sendKeyEvent("keydown", "key_F2" , 1);
+							emu.vars.innerEmu.emu_sendKeyEvent("keyup"  , "key_F2" , 1);
+							emu.vars.innerEmu.displayCUzeBox_flags();
+						}
 					}
 
 					// Resize the canvas to fit.
@@ -147,9 +150,16 @@ emu.funcs        = {
 					// Make sure the full screen has focus.
 					emu.funcs.emu_focusing(null, "mouseenter");
 				}
-			}, false);
-			emu.vars.dom.view["emuControls_FULLSCREEN"].addEventListener("click"   , emu.vars.innerEmu.emuFullscreen, false);
-			emu.vars.dom.view["emuCanvas"]             .addEventListener("dblclick", emu.vars.innerEmu.emuFullscreen, false);
+			};
+			document.addEventListener("fullscreenchange"      , on_fullscreenchange, false);
+			document.addEventListener("webkitfullscreenchange", on_fullscreenchange, false);
+			document.addEventListener("mozfullscreenchange"   , on_fullscreenchange, false);
+			document.addEventListener("MSFullscreenChange"    , on_fullscreenchange, false);
+
+			// These will toggle fullscreen.
+			emu.vars.dom.view["emuControls_FULLSCREEN"]  .addEventListener("click"   , emu.vars.innerEmu.emuFullscreen, false);
+			emu.vars.dom.view["emuCanvas"]               .addEventListener("dblclick", emu.vars.innerEmu.emuFullscreen, false);
+			emu.vars.dom.view["emscripten_emu_container"].addEventListener("dblclick", emu.vars.innerEmu.emuFullscreen, false);
 
 			// VIEW: File loading.
 			emu.vars.dom.view["emu_FilesFromJSON"]            .addEventListener("click", function() { this.select(); }, false);
@@ -641,16 +651,28 @@ emu.funcs        = {
 
 					// JSON downloads.
 					if (methodType == 1 || methodType == 3 || methodType == 4) {
+						// Put the remoteload.json data into the settings window.
+						emu.settings.funcs.displayRemoteLoadText(res.remoteload);
+
 						// Get the gamefile name.
 						emu.vars.gameFile = res.remoteload.gamefile;
 
 						// Games are loaded. Make sure we can continue.
 						var doWeLoadTheGame = true;
-						if (!emu.vars.gameFile.length) { console.log("No gamefile in emu.gameFile!");
-							doWeLoadTheGame = false; }
-						if (!emu.vars.gameFiles.length) { console.log("No game files in emu.gameFiles!");
-							doWeLoadTheGame = false; }
 
+						// Is there any game files?
+						if (!emu.vars.gameFiles.length) {
+							console.log("No game files in emu.gameFiles!");
+							doWeLoadTheGame = false;
+						}
+
+						// Is there a gamefile?
+						if (!emu.vars.gameFile.length) {
+							console.log("No gamefile in emu.gameFile!");
+							doWeLoadTheGame = false;
+						}
+
+						// Tests passed?
 						if (doWeLoadTheGame) {
 							setTimeout(function() {
 
@@ -671,6 +693,9 @@ emu.funcs        = {
 
 					// User-supplied files downloads.
 					else if (methodType == 2) {
+						// Clear the contents of the remoteload.json data in the settings view.
+						emu.settings.funcs.displayRemoteLoadText(null);
+
 						// Clear the file uploads from the file input.
 						userFiles.value = "";
 
@@ -1643,6 +1668,19 @@ emu.funcs.nav    = {
 				emu_settings.classList.add   ("active");
 				emu_settings.classList.remove("hidden");
 				emu_settings_nav.forEach(function(d,i,a){ d.classList.add   ("active"); });
+
+				// Refresh the Emscripten file list.
+				if(emu.vars.innerEmu.emulatorIsReady==true){
+					emu.settings.funcs.getEmscriptenFileList();
+				}
+				// Clear the list if the emu is not ready.
+				else{
+					let emscriptenFileListTable = document.querySelector("#emscriptenFileListTable");
+					emscriptenFileListTable.querySelectorAll("tr").forEach(function(d,i,a){if(i!=0){ d.remove();}});
+				}
+
+				emu.settings.funcs.getLocalStorageFileList();
+
 
 				// Resize the html container.
 				emu.funcs.nav.resizeHtmlContainer("narrow");

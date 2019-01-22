@@ -25,13 +25,13 @@
 // * Object that contains the flags/functions for the Emscripten instance.
 emu.vars.innerEmu = {
 	// * Contains the active Emscripten instance.
-	Module                  : { },
+	Module                 : { },
 	// * Indicates if the Emscripten instance has finished loading.
-	emulatorIsReady         : false,
+	emulatorIsReady        : false,
 	// * Indicates that the Emscripten instance should not load until some user input (mousemove on the emu canvas.)
-	startEmuAfterUserInput  : false,
+	startEmuAfterUserInput : false,
 	// * Used as a template to create a new Emscripten module.
-	createDefaultModule     : function(){
+	createDefaultModule         : function(){
 		// Tells Emscripten what DOM element that it should be listening to for keyboard input.
 		this["keyboardListeningElement"] = (function() { return emu.vars.dom.view["emuCanvas"] })();
 
@@ -151,7 +151,7 @@ emu.vars.innerEmu = {
 		};
 	},
 	// * Resizes the emu canvas to fit in its container.
-	resizeEmuCanvas         : function(){
+	resizeEmuCanvas             : function(){
 		var canvas        = emu.vars.dom.view["emuCanvas"];
 		var Container     = document.querySelector("#emscripten_emu_container");
 		var ContainerDims = Container.getBoundingClientRect();
@@ -166,7 +166,7 @@ emu.vars.innerEmu = {
 		canvas.style.height = newDims.height +"px";
 	},
 	// * Runs after the Emscripten instance is fully loaded. Sets flags, resizes the emu canvas.
-	emuIsReady              : function(){
+	emuIsReady                  : function(){
 		emu.vars.innerEmu.emulatorIsReady = true;
 		emu.vars.gameAllowedToLoad        = true;
 		emu.vars.innerEmu.resizeEmuCanvas();
@@ -181,7 +181,7 @@ emu.vars.innerEmu = {
 		}
 	},
 	// * Sends keyboard events to the Emscripten emulator.
-	emu_sendKeyEvent        : function(type, key, gamePadNumber) {
+	emu_sendKeyEvent            : function(type, key, gamePadNumber) {
 		// Get DOM handle to the emu canvas.
 		var target = emu.vars.dom.view.emuCanvas;
 
@@ -279,7 +279,7 @@ emu.vars.innerEmu = {
 
 	},
 	// * Allows the Emscripten instance to start. Used with Direct Play links since audio will not play unless initiated by user input.
-	startAfterMouseClick    : function(){
+	startAfterMouseClick        : function(){
 		// Remove the temporary listener.
 		emu.vars.dom.view["emuCanvas"].removeEventListener("mousedown", emu.vars.innerEmu.startAfterMouseClick, false);
 		// Clear the flag.
@@ -288,7 +288,7 @@ emu.vars.innerEmu = {
 		emu.funcs.loadGame();
 	} ,
 	// * Queries CUzeBox for and then displays the status of the active buttons. Uses _NRA_returnController
-	showPressedKey          : function(){
+	showPressedKey              : function(){
 		// A bit of delay is required otherwise the displayed gamepad states will not update properly.
 		if( emu.vars.innerEmu.emulatorIsReady == false ) {
 			// console.log("1 showPressedKey: The emu is not ready.");
@@ -347,7 +347,7 @@ emu.vars.innerEmu = {
 		}, 25);
 	},
 	// * Clears the displayed pressed keys on the gamepad.
-	clearDisplayedPressedKeys          : function(){
+	clearDisplayedPressedKeys   : function(){
 		// Gamepad #1
 		emu.vars.dom.view["p1_key_A"]     .classList.remove("active");
 		emu.vars.dom.view["p1_key_Q"]     .classList.remove("active");
@@ -377,31 +377,39 @@ emu.vars.innerEmu = {
 		emu.vars.dom.view["p2_key_RSHIFT"].classList.remove("active");
 	},
 	// * Toggles full screen on the emulator canvas.
-	emuFullscreen           : function(){
+	emuFullscreen               : function(){
 		// The Emscripten way.
-		// emu.vars.innerEmu.Module.requestFullscreen()
+		// emu.vars.innerEmu.Module.requestFullscreen();
 
 		// The standard way.
 		var canvas = emu.vars.dom.view["emscripten_emu_container"]
 
 		// Go to fullscreen.
-		if(!document.fullscreen){
-			if      (canvas.requestFullscreen      ) { canvas.requestFullscreen();       }
-			else if (canvas.webkitRequestFullscreen) { canvas.webkitRequestFullscreen(); }
-			else if (canvas.mozRequestFullScreen   ) { canvas.mozRequestFullScreen();    }
-			else if (canvas.msRequestFullscreen    ) { canvas.msRequestFullscreen();     }
+		if(!(
+			   document.fullscreen              // Chrome
+			|| document.fullscreenElement       // Chrome
+			|| document.webkitFullscreenElement // Chrome
+			|| window  .fullScreen              // Firefox
+			|| document.mozFullScreenElement    // Firefox
+			|| document.msFullscreenElement     // Edge
+		))
+		{
+			if      (canvas.requestFullscreen      ) { canvas.requestFullscreen();       } // Standard
+			else if (canvas.webkitRequestFullscreen) { canvas.webkitRequestFullscreen(); } // Chrome
+			else if (canvas.mozRequestFullScreen   ) { canvas.mozRequestFullScreen();    } // Firefox
+			else if (canvas.msRequestFullscreen    ) { canvas.msRequestFullscreen();     } // IE11
 		}
 
-		// Exit to fullscreen.
+		// Exit fullscreen.
 		else{
-			if      (document.exitFullscreen         ) { document.exitFullscreen();          }
-			else if (document.webkitFullscreenElement) { document.webkitFullscreenElement(); }
-			else if (document.mozFullScreenElement   ) { document.mozFullScreenElement();    }
-			else if (document.msFullscreenElement    ) { document.msFullscreenElement();     }
+			if     (document.exitFullscreen     )  {document.exitFullscreen();       } // Standard
+			else if(document.webkitExitFullscreen) {document.webkitExitFullscreen(); } // Chrome
+			else if(document.mozCancelFullScreen)  {document.mozCancelFullScreen();  } // Firefox
+			else if(document.msExitFullscreen)     {document.msExitFullscreen();     } // IE11
 		}
 	},
 	// * Queries CUzeBox for and then displays the status of certain CUzeBox flags. Uses _NRA_returnFlags
-	displayCUzeBox_flags    : function (){
+	displayCUzeBox_flags        : function (){
 		// console.log("displayCUzeBox_flags");
 		if( emu.vars.innerEmu.emulatorIsReady == false ) {
 			// console.log("1 displayCUzeBox_flags: The emu is not ready.");
@@ -441,7 +449,7 @@ emu.vars.innerEmu = {
 		},50);
 	},
 	// * Clears the displayed CUzeBox flags.
-	clearDisplayedCUzeBox_flags    : function (){
+	clearDisplayedCUzeBox_flags : function (){
 		setTimeout(function(){
 			emu.vars.dom.view["emuControls_QUALITY"].classList.remove('activated');
 			emu.vars.dom.view["emuControls_DEBUG"]  .classList.remove('activated');
@@ -452,7 +460,7 @@ emu.vars.innerEmu = {
 		},50);
 	},
 	// * Reloads the application and specifies the alternate Emscripten emu core.
-	toggleCore              : function(){
+	toggleCore                  : function(){
 		// Get a copy of the queryString data.
 		let qs=getQueryStringAsObj();
 

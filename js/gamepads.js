@@ -395,7 +395,7 @@ emu.gamepads     = {
 
 	},
 	// * Updates the local gamepad mapping object for the displayed active gamepads.
-	saveChanges : function(){
+	saveChanges          : function(){
 		// Go through all the new gamepad JSON.
 		for(let i=0; i<emu.gamepads.mapping_newGamepads.length; i+=1){
 			// Get the key.
@@ -421,7 +421,7 @@ emu.gamepads     = {
 		}
 	},
 	// * Reads from the gp_config_mappings in RAM and provides a JSON download of the data.
-	download    : function(){
+	download             : function(){
 		// var EMU_gp_config_mappingsuser = JSON.parse(localStorage.getItem("EMU_gp_config_mappings"));
 		var EMU_gp_config_mappingsuser = emu.gamepads.gp_config_mappings;
 
@@ -440,7 +440,7 @@ emu.gamepads     = {
 		}
 	},
 	// * Reads from a user-supplied gp_config_mappings file then integrates it and updates localStorage.
-	upload      : function(){
+	upload               : function(){
 		// Create a temporary input button.
 		let input  = document.createElement("input");
 		input.type = "file";
@@ -501,12 +501,12 @@ emu.gamepads     = {
 		// Integrate the file into the current game mappings.
 	},
 	// * Clears the maps that are saved in local storage. (Copy still remains in RAM.)
-	clearSavedMaps : function(){
+	clearSavedMaps       : function(){
 		let conf = confirm("Are you sure that you want to clear the gamepad mappings that are stored in local storage?\n\nNOTE: The settings will remain in RAM until you refresh the browser window.");
 		if(conf){ localStorage.removeItem("EMU_gp_config_mappings"); }
 	},
 	//
-	swap_p1_p2 : function(){
+	swap_p1_p2           : function(){
 		let activeGamepads = emu.gamepads.gamepads.map(function(d,i,a){
 			if(d!=undefined){ return d; }
 		});

@@ -7,25 +7,22 @@
 /* global emu */
 
 emu.funcs.domHandleCache_populate = function(){
+	//
 	emu.vars.dom.views   = {};
 	emu.vars.dom.view    = {};
 	emu.vars.dom.gamepad = {};
 
 	emu.vars.dom.gamepad["openBtn" ] = document.querySelector("#gamepadConfig_openBtn");
 	emu.vars.dom.gamepad["closeBtn"] = document.querySelector("#gamepadConfig_closeBtn");
-
 	emu.vars.dom.gamepad["gamepadConfigDiv"]             = document.querySelector("#gamepadConfigDiv");
 	emu.vars.dom.gamepad["gamepadConfigDiv_mappings_P1"] = document.querySelector("#gamepadConfigDiv_mappings_P1");
 	emu.vars.dom.gamepad["gamepadConfigDiv_mappings_P2"] = document.querySelector("#gamepadConfigDiv_mappings_P2");
 	emu.vars.dom.gamepad["gp_cfg_setBtns"]               = document.querySelectorAll(".gp_cfg_set");
-
 	emu.vars.dom.gamepad["gp1_status"] = document.querySelector("#emu_gamepadConfig_P1_status");
 	emu.vars.dom.gamepad["gp2_status"] = document.querySelector("#emu_gamepadConfig_P2_status");
 	emu.vars.dom.gamepad["gp1_setAll"] = document.querySelector("#gp1_setAll");
 	emu.vars.dom.gamepad["gp2_setAll"] = document.querySelector("#gp2_setAll");
-
 	emu.vars.dom.gamepad["resetGamepadStates"] = document.querySelector("#resetGamepadStates");
-
 	emu.vars.dom.gamepad["saveChanges"]      = document.querySelector("#gpmap_saveChanges");
 	emu.vars.dom.gamepad["download"]         = document.querySelector("#gpmap_download_maps");
 	emu.vars.dom.gamepad["upload"]           = document.querySelector("#gpmap_upload_maps");
@@ -127,7 +124,11 @@ emu.funcs.domHandleCache_populate = function(){
 	emu.vars.dom.view["p2_key_LSHIFT"] = document.querySelector("#emuGamepad_2_key_LSHIFT"); // BTN_SL
 	emu.vars.dom.view["p2_key_RSHIFT"] = document.querySelector("#emuGamepad_2_key_RSHIFT"); // BTN_SR
 
-
+	// SETTINGS VIEW:
+	emu.vars.dom.settings={};
+	emu.vars.dom.settings["localStorageFileListTable"] = document.querySelector("#localStorageFileListTable");
+	emu.vars.dom.settings["emscriptenFileListTable"]   = document.querySelector("#emscriptenFileListTable");
+	emu.vars.dom.settings["remoteloadJson_container"]   = document.querySelector("#remoteloadJson_container");
 };
 
 emu.funcs.domHandleCache_populate_UAM = function(){

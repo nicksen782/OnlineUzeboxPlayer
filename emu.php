@@ -15,12 +15,13 @@
 	<link rel="stylesheet" type="text/css" href="css/emu.css">
 
 	<script src="_featureLoader/js/featureLoader.js"></script>
-	<script src="js/emu.js"></script>
-	<script src="js/shared.js"></script>
+	<script src="js/emu.js"     ></script>
+	<script src="js/dom.js"     ></script>
+	<script src="js/shared.js"  ></script>
 	<script src="js/gamepads.js"></script>
-	<script src="js/db.js"></script>
+	<script src="js/db.js"      ></script>
 	<script src="js/innerEmu.js"></script>
-	<script src="js/dom.js"></script>
+	<script src="js/settings.js"></script>
 
 <script>
 
@@ -214,9 +215,7 @@
 
 	</div>
 
-
-
-
+	<!--VIEWS-->
 	<div id="emu_view"   class="sectionDivs">
 		<div class="sectionDivs_title">
 			<div class="sectionDivs_title_text">
@@ -227,11 +226,11 @@
 				<input type="button" class="debugButtons uamOnly hidden" value="Reload"     onclick="document.location.href = document.location.href;">
 				<input type="button" class="debugButtons uamOnly hidden" value="New Window" onclick="window.open(document.location.href);">
 
-				<div class="navOptions uamOnly hidden" newview="VIEW"  >VIEW</div>
-				<div class="navOptions uamOnly hidden" newview="DEBUG1">DEBUG1</div>
-				<div class="navOptions uamOnly hidden" newview="DEBUG2">DEBUG2</div>
-				<div class="navOptions uamOnly hidden" newview="DB"    >DB</div>
-				<div class="navOptions"                newview="SETTINGS"    >SETTINGS</div>
+				<div class="navOptions"                newview="VIEW"    >VIEW</div>
+				<div class="navOptions"                newview="SETTINGS">SETTINGS</div>
+				<div class="navOptions uamOnly hidden" newview="DEBUG1"  >DEBUG1</div>
+				<div class="navOptions uamOnly hidden" newview="DEBUG2"  >DEBUG2</div>
+				<div class="navOptions uamOnly hidden" newview="DB"      >DB</div>
 			</div>
 		</div>
 		<div id="emu_gameSelector" class="sectionWindow">
@@ -274,7 +273,7 @@
 			</div>
 		</div>
 		<div id="emu_gameFiles" class="sectionWindow">
-			<div class="sectionWindow_title">Game Files</div>
+			<div class="sectionWindow_title">Loaded Game Files</div>
 			<div class="sectionWindow_content">
 				<div id="emu_filesList_div">
 					No files are loaded.
@@ -514,11 +513,11 @@
 			</div>
 
 			<div class="sectionDivs_title_options">
-				<div class="navOptions uamOnly hidden" newview="VIEW"  >VIEW</div>
-				<div class="navOptions uamOnly hidden" newview="DEBUG1">DEBUG1</div>
-				<div class="navOptions uamOnly hidden" newview="DEBUG2">DEBUG2</div>
-				<div class="navOptions uamOnly hidden" newview="DB"    >DB</div>
-				<div class="navOptions"                newview="SETTINGS"    >SETTINGS</div>
+				<div class="navOptions"                newview="VIEW"    >VIEW</div>
+				<div class="navOptions"                newview="SETTINGS">SETTINGS</div>
+				<div class="navOptions uamOnly hidden" newview="DEBUG1"  >DEBUG1</div>
+				<div class="navOptions uamOnly hidden" newview="DEBUG2"  >DEBUG2</div>
+				<div class="navOptions uamOnly hidden" newview="DB"      >DB</div>
 			</div>
 		</div>
 
@@ -542,11 +541,11 @@
 			</div>
 
 			<div class="sectionDivs_title_options">
-				<div class="navOptions uamOnly hidden" newview="VIEW"  >VIEW</div>
-				<div class="navOptions uamOnly hidden" newview="DEBUG1">DEBUG1</div>
-				<div class="navOptions uamOnly hidden" newview="DEBUG2">DEBUG2</div>
-				<div class="navOptions uamOnly hidden" newview="DB"    >DB</div>
-				<div class="navOptions"                newview="SETTINGS"    >SETTINGS</div>
+				<div class="navOptions"                newview="VIEW"    >VIEW</div>
+				<div class="navOptions"                newview="SETTINGS">SETTINGS</div>
+				<div class="navOptions uamOnly hidden" newview="DEBUG1"  >DEBUG1</div>
+				<div class="navOptions uamOnly hidden" newview="DEBUG2"  >DEBUG2</div>
+				<div class="navOptions uamOnly hidden" newview="DB"      >DB</div>
 			</div>
 		</div>
 
@@ -574,11 +573,11 @@
 				<input type="button" class="debugButtons uamOnly hidden" value="Reload"     onclick="document.location.href = document.location.href;">
 				<input type="button" class="debugButtons uamOnly hidden" value="New Window" onclick="window.open(document.location.href);">
 
-				<div class="navOptions uamOnly hidden" newview="VIEW"  >VIEW</div>
-				<div class="navOptions uamOnly hidden" newview="DEBUG1">DEBUG1</div>
-				<div class="navOptions uamOnly hidden" newview="DEBUG2">DEBUG2</div>
-				<div class="navOptions uamOnly hidden" newview="DB"    >DB</div>
-				<div class="navOptions"                newview="SETTINGS"    >SETTINGS</div>
+				<div class="navOptions"                newview="VIEW"    >VIEW</div>
+				<div class="navOptions"                newview="SETTINGS">SETTINGS</div>
+				<div class="navOptions uamOnly hidden" newview="DEBUG1"  >DEBUG1</div>
+				<div class="navOptions uamOnly hidden" newview="DEBUG2"  >DEBUG2</div>
+				<div class="navOptions uamOnly hidden" newview="DB"      >DB</div>
 			</div>
 		</div>
 
@@ -655,29 +654,55 @@
 			</div>
 
 			<div class="sectionDivs_title_options">
-				<div class="navOptions uamOnly hidden" newview="VIEW"  >VIEW</div>
-				<div class="navOptions uamOnly hidden" newview="DEBUG1">DEBUG1</div>
-				<div class="navOptions uamOnly hidden" newview="DEBUG2">DEBUG2</div>
-				<div class="navOptions uamOnly hidden" newview="DB"    >DB</div>
-				<div class="navOptions"                newview="SETTINGS"    >SETTINGS</div>
+				<div class="navOptions"                newview="VIEW"    >VIEW</div>
+				<div class="navOptions"                newview="SETTINGS">SETTINGS</div>
+				<div class="navOptions uamOnly hidden" newview="DEBUG1"  >DEBUG1</div>
+				<div class="navOptions uamOnly hidden" newview="DEBUG2"  >DEBUG2</div>
+				<div class="navOptions uamOnly hidden" newview="DB"      >DB</div>
 			</div>
 		</div>
 
 		<div id="emu_settings_1"   class="sectionWindow">
+			<div class="sectionWindow_title">DOWNLOAD (Local Storage)</div>
+			<div class="sectionWindow_content">
+
+				<div id="localStorageFileListTable_container">
+					<table id="localStorageFileListTable" class="settingsTable1">
+						<tr>
+							<th>File name</th>
+							<th>File size</th>
+						</tr>
+					</table>
+				</div>
+
+			</div>
+		</div>
+
+		<div id="emu_settings_2"   class="sectionWindow">
+			<div class="sectionWindow_title">DOWNLOAD (Active Emscripten)</div>
+			<div class="sectionWindow_content">
+				<div id="emscriptenFileListTable_container">
+					<table id="emscriptenFileListTable" class="settingsTable1">
+						<tr>
+							<th>File name</th>
+							<th>File size</th>
+						</tr>
+					</table>
+				</div>
+
+			</div>
+		</div>
+		<div id="emu_settings_3"   class="sectionWindow">
+			<div class="sectionWindow_title">VIEW REMOTELOAD.JSON</div>
+			<div class="sectionWindow_content">
+
+				<div id="remoteloadJson_container">
+				</div>
+			</div>
+		</div>
+		<div id="emu_settings_4"   class="sectionWindow">
 			<div class="sectionWindow_title">DOWNLOAD</div>
 			<div class="sectionWindow_content">
-<pre>
-DOWNLOAD (from local storage):
-FILE: EMU_eeprom.bin
-JSON: EMU_gp_config_mappings
-</pre>
-<br>
-<pre>
-DOWNLOAD (from Emscripten):
-FILE: EMU_eeprom.bin
-JSON: EMU_gp_config_mappings
-</pre>
-
 			</div>
 		</div>
 
@@ -693,13 +718,13 @@ JSON: EMU_gp_config_mappings
 	</div>
 
 	<div id="gamepadIcon_container_p1" class="gamepadIcon_container2 gamepadsStatus neverConnected">
-		<div id="p1_gamepad_status" class="p_gamepad_status">P1</div>
+		<div id="p1_gamepad_status" class="p_gamepad_status">Player 1</div>
 		<div id="p1_gamepad_status2" class="p_gamepad_status2"></div>
 		<div class="gamepadIcon smaller"></div>
 	</div>
 
 	<div id="gamepadIcon_container_p2" class="gamepadIcon_container2 gamepadsStatus neverConnected">
-		<div id="p2_gamepad_status" class="p_gamepad_status">P2</div>
+		<div id="p2_gamepad_status" class="p_gamepad_status">Player 2</div>
 		<div id="p2_gamepad_status2" class="p_gamepad_status2"></div>
 		<div class="gamepadIcon smaller"></div>
 	</div>

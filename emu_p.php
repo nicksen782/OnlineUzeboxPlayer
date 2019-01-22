@@ -128,6 +128,8 @@ function API_REQUEST( $api, $type ){
 	$o_values["gameDb_newGame"]        = [ "p"=>( ( $UAM && ($isFullAdmin)) ? 1 : 0 ), "args"=>[] ] ;
 	$o_values["gameDb_deleteGame"]     = [ "p"=>( ( $UAM && ($isFullAdmin)) ? 1 : 0 ), "args"=>[] ] ;
 
+	$o_values["getDataFromUzeboxGamesAndDemos"] = [ "p"=>( ( $UAM && ($isFullAdmin)) ? 1 : 0 ), "args"=>[] ] ;
+
 	// DETERMINE IF THE API IS AVAILABLE TO THE USER.
 
 	// Is this a known API?
@@ -165,6 +167,16 @@ function API_REQUEST( $api, $type ){
 
 }
 
+function getDataFromUzeboxGamesAndDemos(){
+	$data = file_get_contents("http://uzebox.org/wiki/Games_and_Demos");
+	echo json_encode(array(
+		'data'       => $data        ,
+		'success'    => true      ,
+
+		// DEBUG
+		// '$_POST'     => $_POST      ,
+	) );
+}
 
 
 class sqlite3_DB_PDO__EMU{

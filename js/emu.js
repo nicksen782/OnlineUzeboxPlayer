@@ -90,7 +90,7 @@ emu.funcs        = {
 					if( Object.keys(emu.vars.innerEmu.Module.FS.root.contents).indexOf("eeprom.bin") != -1 ){
 						localStorage.setItem("EMU_eeprom.bin", emu.vars.innerEmu.Module.FS.readFile("eeprom.bin") );
 						// console.log("Saved eeprom.bin to localStorage.");
-						emu.funcs.shared.textOnCanvas2({"Saved EEPROM":""});
+						emu.funcs.shared.textOnCanvas2({"text":"Saved EEPROM"});
 					}
 				}
 				return;
@@ -112,36 +112,33 @@ emu.funcs        = {
 			// VIEW: Fullscreen mode.
 			document                                   .addEventListener("fullscreenchange", function(e) {
 				if( emu.vars.innerEmu.emulatorIsReady !== false ) {
-					// console.log("1 fullscreen: The emu is not ready.");
-					// Determine which quality mode CUzeBox was in.
+					// Get the current CUzeBox value for GUICORE_SMALL.
 					let GUICORE_SMALL      = emu.vars.innerEmu.Module._NRA_returnFlags(3) ? true : false; // Small view or larger view
-
-
-					// If small then make big.
-					if(GUICORE_SMALL){
-						// Save the previous GUICORE_SMALL value.
-						emu.vars.prev_GUICORE_SMALL = GUICORE_SMALL;
-
+//
+					// Is this fullscreen now? (Occurs right after the change to fullscreen.)
+					if(document.fullscreen){
+						// console.log("is fullscreen now");
 						setTimeout(function(){
-							// console.log("Switching to increased resolution.");
-							emu.vars.innerEmu.emu_sendKeyEvent("keydown", "key_F2" , 1);
-							emu.vars.innerEmu.emu_sendKeyEvent("keyup", "key_F2" , 1);
-							emu.vars.innerEmu.displayCUzeBox_flags();
-						}, 25);
-					}
-					// If big then return the resolution to the previous state.
-					else{
-						if(emu.vars.prev_GUICORE_SMALL){
-							setTimeout(function(){
-								// console.log("returning to previous resolution");
+							if(GUICORE_SMALL){
+								console.log("Switching to increased resolution.");
 								emu.vars.innerEmu.emu_sendKeyEvent("keydown", "key_F2" , 1);
 								emu.vars.innerEmu.emu_sendKeyEvent("keyup", "key_F2" , 1);
 								emu.vars.innerEmu.displayCUzeBox_flags();
-							}, 25);
-						}
-						else{
-							// console.log("Already at increased resolution.");
-						}
+							}
+						}, 60);
+					}
+
+					// Is this NOT fullscreen now? (Occurs right after the change from fullscreen.)
+					else{
+						// console.log("is NOT fullscreen now");
+						setTimeout(function(){
+							if(!GUICORE_SMALL){
+								console.log("Switching to reduced resolution.");
+								emu.vars.innerEmu.emu_sendKeyEvent("keydown", "key_F2" , 1);
+								emu.vars.innerEmu.emu_sendKeyEvent("keyup", "key_F2" , 1);
+								emu.vars.innerEmu.displayCUzeBox_flags();
+							}
+						}, 60);
 					}
 
 					// Resize the canvas to fit.
@@ -168,7 +165,13 @@ emu.funcs        = {
 
 				// Handles auto-resizing of the emulator canvas when certain functions resize the canvas.
 				switch(e.code){
-					case 'F2'  : { setTimeout(function(){ emu.vars.innerEmu.resizeEmuCanvas(); }, 50); break; } // Quality
+					case 'F2'  : {
+						// Quality
+						setTimeout(function(){
+							emu.vars.innerEmu.displayCUzeBox_flags();
+							emu.vars.innerEmu.resizeEmuCanvas();
+						}, 50); break;
+						}
 					case 'F3'  : { setTimeout(function(){ emu.vars.innerEmu.resizeEmuCanvas(); }, 50); break; } // Debug
 					case 'F4'  : { setTimeout(function(){ emu.vars.innerEmu.resizeEmuCanvas(); }, 50); break; } // Vsync limiter
 					case 'F12' : { setTimeout(function(){ emu.vars.innerEmu.resizeEmuCanvas(); }, 50); break; }
@@ -192,21 +195,42 @@ emu.funcs        = {
 			emu.vars.dom.view["emuControls_reload"].addEventListener("click", emu.funcs.loadGame, false);
 			emu.vars.dom.view["emuControls_unload"].addEventListener("click", emu.funcs.emu_unload, false);
 			emu.vars.dom.view["emuControls_rotate"].addEventListener("click", emu.funcs.emu_rotate, false);
-			emu.vars.dom.view["emuControls_autopause_btn"].addEventListener("click", function() {
-				// Get a handle on the DOM element.
-				let autopause_chk = emu.vars.dom.view["emuControls_autopause_chk"];
 
-				// Toggle the enabled class.
-				autopause_chk.classList.toggle("enabled");
+			// emu.vars.dom.view["emuControls_autopause_btn"].addEventListener("click", function() {
+			// 	// Get a handle on the DOM element.
+			// 	let autopause_chk = emu.vars.dom.view["emuControls_autopause_chk"];
 
-				// Determine if the emu should be paused or unpaused.
-				if (autopause_chk.classList.contains("enabled")) { emu.funcs.emu_focusing(null, "mouseenter"); }
-				else { emu.funcs.emu_focusing(null, "mouseleave"); }
-			}, false);
+			// 	// Toggle the enabled class.
+			// 	autopause_chk.classList.toggle("enabled");
+
+			// 	// Determine if the emu should be paused or unpaused.
+			// 	if (autopause_chk.classList.contains("enabled")) { emu.funcs.emu_focusing(null, "mouseenter"); }
+			// 	else { emu.funcs.emu_focusing(null, "mouseleave"); }
+			// }, false);
+
+				// // UAM compile options.
+				// var compileOptions_function = function(e) {
+				// 	// Toggle the enabled class on the "checkbox".
+				// 	let check = this.querySelector(".checkbox");
+				// 	if (check.classList.contains("enabled")) { check.classList.remove("enabled") }
+				// 	else { check.classList.add("enabled") }
+				// };
+				// var compileOptions = document.querySelectorAll("#emu_view_uam .checkbox_button");
+				// compileOptions.forEach(function(d, i, a) {
+				// 	d.addEventListener("click", compileOptions_function, false);
+				// });
+
 
 			// VIEW: Emulator controls (SECOND ROW)
-			emu.vars.dom.view["emuControls_QUALITY"].addEventListener("mousedown", function() { emu.vars.innerEmu.emu_sendKeyEvent("keydown", "key_F2" , 1); emu.vars.innerEmu.displayCUzeBox_flags(); }, false);
-			emu.vars.dom.view["emuControls_QUALITY"].addEventListener("mouseup"  , function() { emu.vars.innerEmu.emu_sendKeyEvent("keyup"  , "key_F2" , 1); emu.vars.innerEmu.displayCUzeBox_flags(); }, false);
+			emu.vars.dom.view["emuControls_QUALITY"].addEventListener("mousedown", function() {
+				emu.vars.innerEmu.emu_sendKeyEvent("keydown", "key_F2" , 1);
+				// emu.vars.innerEmu.displayCUzeBox_flags();
+			}, false);
+
+			emu.vars.dom.view["emuControls_QUALITY"].addEventListener("mouseup"  , function() {
+				emu.vars.innerEmu.emu_sendKeyEvent("keyup"  , "key_F2" , 1);
+				emu.vars.innerEmu.displayCUzeBox_flags();
+			}, false);
 			emu.vars.dom.view["emuControls_DEBUG"]  .addEventListener("mousedown", function() { emu.vars.innerEmu.emu_sendKeyEvent("keydown", "key_F3" , 1); emu.vars.innerEmu.displayCUzeBox_flags(); }, false);
 			emu.vars.dom.view["emuControls_DEBUG"]  .addEventListener("mouseup"  , function() { emu.vars.innerEmu.emu_sendKeyEvent("keyup"  , "key_F3" , 1); emu.vars.innerEmu.displayCUzeBox_flags(); }, false);
 			emu.vars.dom.view["emuControls_FLICKER"].addEventListener("mousedown", function() { emu.vars.innerEmu.emu_sendKeyEvent("keydown", "key_F7" , 1); emu.vars.innerEmu.displayCUzeBox_flags(); }, false);
@@ -797,12 +821,27 @@ emu.funcs        = {
 			returnJSON_byGameId(gameid).then(
 				function(res) {
 					if(typeof res=="string"){ res = JSON.parse(res); } // IE11 Fix:
+
+					// Games that were not loaded as a result of a compile should have the auto-pause OFF.
+					emu.vars.dom.view["emuControls_autopause_chk"].classList.remove("enabled");
+					// Games that were not loaded as a result of a compile should have the autoDebug disabled.
+					emu.vars.dom.view["emu_compileOptions_UAM_autoDebug"].classList.remove("enabled");
+
 					downloadFilesFromList(res);
 				}, emu.funcs.shared.rejectedPromise);
 		}
 
 		// Method #2 - User-supplied files.
 		else if (methodType == 2) {
+			// Games that were not loaded as a result of a compile should have the auto-pause OFF.
+			emu.vars.dom.view["emuControls_autopause_chk"].classList.remove("enabled");
+
+			// Enable the auto-pause.
+			// emu.vars.dom.view["emuControls_autopause_chk"].classList.add("enabled");
+
+			// Enable the auto debug.
+			emu.vars.dom.view["emu_compileOptions_UAM_autoDebug"].classList.add("enabled");
+
 			loadUserFilelist();
 		}
 
@@ -824,6 +863,13 @@ emu.funcs        = {
 					res.remoteload.files.map(function(d, i, a) {
 						d.completefilepath = baseURL + "/" + d.completefilepath;
 					});
+
+					// Games that were not loaded as a result of a compile should have the auto-pause OFF.
+					emu.vars.dom.view["emuControls_autopause_chk"].classList.remove("enabled");
+
+					// Disable the auto debug.
+					emu.vars.dom.view["emu_compileOptions_UAM_autoDebug"].classList.remove("enabled");
+
 					downloadFilesFromList(res);
 				}, emu.funcs.shared.rejectedPromise
 			);
@@ -833,7 +879,7 @@ emu.funcs        = {
 		else if (methodType == 4) {
 			// Get the specified remoteload.json file.
 			let getRemoteLoadJson = emu.funcs.shared.serverRequest({
-				"o": "",
+				"o": "getRemoteLoadJson_UAM",
 				"_config": { "responseType": "json", "processor": jsonInputUAM.value }
 			});
 
@@ -847,6 +893,13 @@ emu.funcs        = {
 					res.remoteload.files.map(function(d, i, a) {
 						d.completefilepath = baseURL + "/" + d.completefilepath;
 					});
+
+					// Enable the auto-pause.
+					emu.vars.dom.view["emuControls_autopause_chk"].classList.add("enabled");
+
+					// Enable the auto debug.
+					emu.vars.dom.view["emu_compileOptions_UAM_autoDebug"].classList.add("enabled");
+
 					downloadFilesFromList(res);
 				}, emu.funcs.shared.rejectedPromise
 			);
@@ -1193,7 +1246,7 @@ emu.funcs.UAM    = {
 		emu.funcs.UAM.addEventListeners();
 
 		// Set the initial state of the auto-pause checkbox.
-		emu.vars.dom.view["emuControls_autopause_chk"].classList.add("enabled");
+		// emu.vars.dom.view["emuControls_autopause_chk"].classList.add("enabled");
 
 		// Refresh the UAM games list data and auto-select the user's default game.
 		emu.funcs.UAM.getGamesListUAM();
@@ -1252,6 +1305,7 @@ emu.funcs.UAM    = {
 					option.setAttribute("remoteload", window.location.origin + "/" + d.gamedir + "/output/remoteload.json");
 					option.value = d.gameId;
 					option.text = d.gameName;
+					// option.text = d.title;
 					frag.appendChild(option);
 				});
 				// Add the fragment to the select.
@@ -1269,9 +1323,8 @@ emu.funcs.UAM    = {
 	// * Compiles the selected UAM game.
 	compileGameUAM     : function() {
 		// Get the current user's user id.
-		let user_id = emu.vars.user_id;
 		// Prevent this action if the user_id was not found.
-		if (!user_id) {
+		if (!emu.vars.user_id) {
 			console.log("No user_id. Are you logged into UAM?");
 			alert      ("No user_id. Are you logged into UAM?");
 			return;
@@ -1289,17 +1342,21 @@ emu.funcs.UAM    = {
 		let gamename = emu_gameSelect_UAM_select.options[emu_gameSelect_UAM_select.selectedIndex].text;
 		let UAM_chk1 = emu.vars.dom.view["emu_compileOptions_UAM_chk1"].querySelector(".checkbox").classList.contains("enabled");
 		let UAM_chk2 = emu.vars.dom.view["emu_compileOptions_UAM_chk2"].querySelector(".checkbox").classList.contains("enabled");
-		let UAM_chk3 = emu.vars.dom.view["emu_compileOptions_UAM_chk3"].querySelector(".checkbox").classList.contains("enabled");
+		// let UAM_chk3 = emu.vars.dom.view["emu_compileOptions_UAM_chk3"].querySelector(".checkbox").classList.contains("enabled");
 		let UAM_chk4 = emu.vars.dom.view["emu_compileOptions_UAM_chk4"].querySelector(".checkbox").classList.contains("enabled");
 
 		var formData = {
 			"o": "compile_UamGame",
 			"gameId": gameid,
-			"user_id": user_id,
 			"_config": { "processor": "emu_p.php" }
 		};
 		emu.funcs.shared.serverRequest(formData).then(
 			function(res) {
+				if(res.success !=true){
+					console.log("An error has occurred. This is the error from the server:\n\n"+res.data+"");
+					alert      ("An error has occurred. This is the error from the server:\n\n"+res.data+"");
+					return;
+				}
 				// console.log(res);
 				let compileCount = res.c2binCount;
 				let c2binCount = res.compileCount;
@@ -1323,7 +1380,12 @@ emu.funcs.UAM    = {
 				var errorstring = " font-weight: bolder;background-color: black;color: red;border:2px solid ghostwhite;";
 				var warningstring = " font-weight: bolder;background-color: black;color: yellow;border:2px solid ghostwhite;";
 				// Check the response for errors and warnings. Replace each instance with some much more noticable HTML/CSS.
+
+				// encodeURIComponent(res.execResults);
+
 				var thestring2 = res.execResults
+				// var thestring2 = decodeURIComponent(res.execResults2)
+				// var thestring2 = (res.execResults4)
 					.split("error:").join("<span class='emu_errors'   style='" + errorstring + "'> ERROR:   </span>")
 					.split("warning:").join("<span class='emu_warnings' style='" + warningstring + "'> WARNING: </span>")
 					.split("make: *** ").join("<br><br><span class='emu_failures' style='" + errorstring + "'> FAILURE! </span> make: *** ");
@@ -1331,7 +1393,7 @@ emu.funcs.UAM    = {
 				var count_failures = thestring2.split("<br><br><span class='emu_failures' style='" + errorstring + "'> FAILURE! </span> make: *** ").length - 1;
 				var count_errors = thestring2.split("<span class='emu_errors'   style='" + errorstring + "'> ERROR:   </span>").length - 1;
 				var count_warnings = thestring2.split("<span class='emu_warnings' style='" + warningstring + "'> WARNING: </span>").length - 1;
-				output1.innerHTML = "<div style='color:greenyellow;'><pre style=\"" + preStyle + ">" + thestring2 + "</pre><br>";
+				output1.innerHTML = "<div style='color:greenyellow;'> <pre>" + thestring2 + "</pre> <br>";
 
 				// Work with debug output 2
 				var table_from_Obj = function(dat, caption) {
@@ -1392,6 +1454,7 @@ emu.funcs.UAM    = {
 
 				// Work with emu_latestCompile
 				var consoleOutputString = thestring2.split("--STARTLASTBUILD.TXT--");
+				console.log("consoleOutputString", consoleOutputString.length, consoleOutputString);
 				consoleOutputString = consoleOutputString[1];
 				consoleOutputString = consoleOutputString.substr(0, consoleOutputString.indexOf("---ENDLASTBUILD.TXT---"));
 				consoleOutputString += "\n";
@@ -1416,21 +1479,20 @@ emu.funcs.UAM    = {
 					.trim();
 				emu_latestCompile.innerHTML = consoleOutputString;
 
-				// Start after compile
+				// Start after compile?
 				if (UAM_chk1) {
+					emu.funcs.nav.changeView("VIEW");
+
+					// Load the game from the JSON url.
 					emu.funcs.getGameFiles("4");
 				}
-				// Debug on failures
-				if (UAM_chk2 && count_failures) {
+				// Debug on failures or errors?
+				if (UAM_chk2 && (count_failures || count_errors)) {
 					emu.funcs.nav.changeView("DEBUG1");
-					output1.scrollTop = output1.querySelector(".emu_failures").offsetTop - 15;
-				}
-				// Debug on errors
-				if (UAM_chk3 && count_errors) {
-					emu.funcs.nav.changeView("DEBUG1");
+					// output1.scrollTop = output1.querySelector(".emu_failures").offsetTop - 15;
 					output1.scrollTop = output1.querySelector(".emu_errors").offsetTop - 15;
 				}
-				// Debug on warnings
+				// Debug on warnings?
 				if (UAM_chk4 && count_warnings) {
 					emu.funcs.nav.changeView("DEBUG1");
 					output1.scrollTop = output1.querySelector(".emu_warnings").offsetTop - 15;
@@ -1444,10 +1506,23 @@ emu.funcs.UAM    = {
 	// NOT COMPLETE Runs the C2BIN script for the selected UAM game.
 	c2bin_UamGame      : function() {
 		console.log("emu_c2bin_UAM");
+		alert("Not ready yet!");
+		// if(res.success !=true){
+		// 	console.log("An error has occurred. This is the error from the server:\n\n"+res.data+"");
+		// 	alert      ("An error has occurred. This is the error from the server:\n\n"+res.data+"");
+		// 	return;
+		// }
+
 	},
 	// NOT COMPLETE Runs the C2BIN2 script for the selected UAM game.
 	c2bin_UamGame_2    : function() {
 		console.log("emu_c2bin2_UAM");
+		alert("Not ready yet!");
+		// if(res.success !=true){
+		// 	console.log("An error has occurred. This is the error from the server:\n\n"+res.data+"");
+		// 	alert      ("An error has occurred. This is the error from the server:\n\n"+res.data+"");
+		// 	return;
+		// }
 	},
 
 };
@@ -1477,15 +1552,17 @@ emu.funcs.nav    = {
 		var allSectionDivs = document.querySelectorAll(".sectionDivs");
 		var bodyHeader = document.querySelector("#bodyHeader");
 
-		var emu_view   = emu.vars.dom.views["view_VIEW"  ] ;
-		var emu_debug1 = emu.vars.dom.views["view_DEBUG1"] ;
-		var emu_debug2 = emu.vars.dom.views["view_DEBUG2"] ;
-		var emu_db     = emu.vars.dom.views["view_DB"    ] ;
+		var emu_view     = emu.vars.dom.views["view_VIEW"  ] ;
+		var emu_debug1   = emu.vars.dom.views["view_DEBUG1"] ;
+		var emu_debug2   = emu.vars.dom.views["view_DEBUG2"] ;
+		var emu_db       = emu.vars.dom.views["view_DB"    ] ;
+		var emu_settings = emu.vars.dom.views["view_SETTINGS" ] ;
 
-		var emu_view_nav   = document.querySelectorAll('.navOptions[newview="VIEW"]');
-		var emu_debug1_nav = document.querySelectorAll('.navOptions[newview="DEBUG1"]');
-		var emu_debug2_nav = document.querySelectorAll('.navOptions[newview="DEBUG2"]');
-		var emu_db_nav     = document.querySelectorAll('.navOptions[newview="DB"]');
+		var emu_view_nav      = document.querySelectorAll('.navOptions[newview="VIEW"]');
+		var emu_debug1_nav    = document.querySelectorAll('.navOptions[newview="DEBUG1"]');
+		var emu_debug2_nav    = document.querySelectorAll('.navOptions[newview="DEBUG2"]');
+		var emu_db_nav        = document.querySelectorAll('.navOptions[newview="DB"]');
+		var emu_settings_nav  = document.querySelectorAll('.navOptions[newview="SETTINGS"]');
 
 		bodyHeader.scrollIntoView(emu.funcs.nav.scrollIntoView_options);
 
@@ -1513,6 +1590,12 @@ emu.funcs.nav    = {
 				// Resize the html container.
 				if( emu.vars.UAMDATA.permKeys.indexOf("emu_canCompile") !=-1 ){ emu.funcs.nav.resizeHtmlContainer("wide"); }
 				else{ emu.funcs.nav.resizeHtmlContainer("narrow"); }
+
+				// If the emu canvas is resized when the main view is not active then it will be resized to 0.
+				// This will fix it when coming back to the VIEW view.
+				setTimeout(function(){
+					emu.vars.innerEmu.resizeEmuCanvas();
+				}, 250);
 
 				break;
 			}
@@ -1548,6 +1631,18 @@ emu.funcs.nav    = {
 				emu_db.classList.add   ("active");
 				emu_db.classList.remove("hidden");
 				emu_db_nav.forEach(function(d,i,a){ d.classList.add   ("active"); });
+
+				// Resize the html container.
+				emu.funcs.nav.resizeHtmlContainer("narrow");
+
+				break;
+			}
+			case "SETTINGS":{
+				hideSections();
+				hideNavs();
+				emu_settings.classList.add   ("active");
+				emu_settings.classList.remove("hidden");
+				emu_settings_nav.forEach(function(d,i,a){ d.classList.add   ("active"); });
 
 				// Resize the html container.
 				emu.funcs.nav.resizeHtmlContainer("narrow");
@@ -1682,7 +1777,7 @@ window.onload = function() {
 
 				// Put a default value for user JSON.
 				if(window.location.host=="dev3-nicksen782.c9users.io"){
-					emu.vars.dom.view["emu_FilesFromJSON"].value = "https://dev3-nicksen782.c9users.io/non-web/Uzebox/RamTileTest_1/output/remoteload.json";
+					emu.vars.dom.view["emu_FilesFromJSON"].value = "https://dev3-nicksen782.c9users.io/non-web/Uzebox/ControllerTester2/output/remoteload.json";
 				}
 
 				// Get the build-in games list.

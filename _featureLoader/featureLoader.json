@@ -213,7 +213,7 @@
  "requestFullScreen" : {
   "type"        : "polyfill",
   "text"        : "Polyfill for browser prefixes for the fullscreen api. (Supports IE11)",
-  "req"         : true,
+  "req"         : false,
   "have"        : null,
   "hadNatively" : null,
   "url"         : "_featureLoader/polyfills/requestFullScreen.js",

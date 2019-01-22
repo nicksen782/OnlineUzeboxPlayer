@@ -114,37 +114,36 @@ emu.vars.innerEmu = {
 
 			// Focus on the emu canvas.
 			function(){
-				// Don't pause if the auto-pause checkbox is checked.
-				if (
-					emu.vars.dom.view["emuControls_autopause_chk"].classList.contains("enabled") &&
-					(
-						emu.vars.dom.view["emu_misc_gamepads"]   .classList.contains("hovered") ||
-						emu.vars.dom.view["emu_emulator_window"] .classList.contains("hovered")
-					)
-				) {
-					setTimeout(function(){ emu.funcs.emu_focusing(null, "mouseenter"); }, 2000);
-				}
-				else{
-					setTimeout(function(){ emu.funcs.emu_focusing(null, "mouseleave"); }, 2000);
-				}
+
+				// Activate the CUzeBox debug?
+				setTimeout(function(){
+					if( emu.vars.dom.view["emu_compileOptions_UAM_autoDebug"].classList.contains("enabled") ){
+						emu.vars.innerEmu.emu_sendKeyEvent("keydown", "key_F3" , 1);
+						emu.vars.innerEmu.emu_sendKeyEvent("keyup"  , "key_F3" , 1);
+						emu.vars.innerEmu.displayCUzeBox_flags();
+					}
+				}, 750);
+
+				// Pause the Emscripten instance?
+				setTimeout(function(){
+						// Pause the emu if the auto-pause checkbox is checked and one of the specified regions are NOT hovered.
+					if (
+						emu.vars.dom.view["emuControls_autopause_chk"].classList.contains("enabled") &&
+						(
+							emu.vars.dom.view["emu_misc_gamepads"]   .classList.contains("hovered") ||
+							emu.vars.dom.view["emu_emulator_window"] .classList.contains("hovered")
+						)
+					) {
+						// console.log("is hovered");
+						emu.funcs.emu_focusing(null, "mouseenter");
+					}
+					else{
+						// console.log("is NOT hovered");
+						emu.funcs.emu_focusing(null, "mouseleave");
+					}
+				}, 1500);
 			}
 
-			// Enable or disable the CUzeBox debug mode.
-			,function(){
-				// If this is NOT a UAM instance then auto-click the debug button which should turn off the debug bars.
-				if(
-					emu.vars.originUAM
-					&& emu.vars.UAM_active
-					// && emu.vars.UAMDATA.permKeys.indexOf("emu_canCompile")!=-1
-				){
-					// if(emu.vars.UAMDATA.permKeys.indexOf("emu_canCompile")!=-1 ){
-					setTimeout(function(){
-						emu.vars.innerEmu.emu_sendKeyEvent("keydown", "key_F3" , 1);
-						emu.vars.innerEmu.emu_sendKeyEvent("keyup", "key_F3" , 1);
-						emu.vars.innerEmu.displayCUzeBox_flags();
-					}, 50);
-				}
-			}
 		];
 		this["printErr"]  = function(text) {
 			if (arguments.length > 1) { text = Array.prototype.slice.call(arguments).join(' '); }
@@ -403,6 +402,7 @@ emu.vars.innerEmu = {
 	},
 	// * Queries CUzeBox for and then displays the status of certain CUzeBox flags. Uses _NRA_returnFlags
 	displayCUzeBox_flags    : function (){
+		// console.log("displayCUzeBox_flags");
 		if( emu.vars.innerEmu.emulatorIsReady == false ) {
 			// console.log("1 displayCUzeBox_flags: The emu is not ready.");
 			return;
@@ -411,11 +411,11 @@ emu.vars.innerEmu = {
 		setTimeout(function(){
 			// var flags = emu.vars.innerEmu.Module._guicore_getflags();
 
-			let GUICORE_SMALL      = emu.vars.innerEmu.Module._NRA_returnFlags(3) ? true : false; // Small view or larger view
-			let GUICORE_GAMEONLY   = emu.vars.innerEmu.Module._NRA_returnFlags(4) ? true : false; // Game-only or Debug
-			let main_fmerge        = emu.vars.innerEmu.Module._NRA_returnFlags(5) ? true : false; // Flicker
-			let main_ispause       = emu.vars.innerEmu.Module._NRA_returnFlags(6) ? true : false; // Pause
-			let main_isadvfr       = emu.vars.innerEmu.Module._NRA_returnFlags(7) ? true : false; // Step
+			let GUICORE_SMALL      = emu.vars.innerEmu.Module._NRA_returnFlags(3) ? 1 : 0; // Small view or larger view
+			let GUICORE_GAMEONLY   = emu.vars.innerEmu.Module._NRA_returnFlags(4) ? 1 : 0; // Game-only or Debug
+			let main_fmerge        = emu.vars.innerEmu.Module._NRA_returnFlags(5) ? 1 : 0; // Flicker
+			let main_ispause       = emu.vars.innerEmu.Module._NRA_returnFlags(6) ? 1 : 0; // Pause
+			let main_isadvfr       = emu.vars.innerEmu.Module._NRA_returnFlags(7) ? 1 : 0; // Step
 			// let GUICORE_NOVSYNC    = emu.vars.innerEmu.Module._NRA_returnFlags(2) ;
 			// let GUICORE_FULLSCREEN = emu.vars.innerEmu.Module._NRA_returnFlags(1) ;
 
@@ -430,7 +430,15 @@ emu.vars.innerEmu = {
 			if(main_isadvfr      ) { emu.vars.dom.view["emuControls_STEP"]   .classList.add   ('activated'); }
 			else                   { emu.vars.dom.view["emuControls_STEP"]   .classList.remove('activated'); }
 
-		},25);
+			// console.log(
+			// "GUICORE_SMALL"   , GUICORE_SMALL    ,
+			// "GUICORE_GAMEONLY", GUICORE_GAMEONLY ,
+			// "main_fmerge"     , main_fmerge      ,
+			// "main_ispause"    , main_ispause     ,
+			// "main_isadvfr"    , main_isadvfr     ,
+			// "");
+
+		},50);
 	},
 	// * Clears the displayed CUzeBox flags.
 	clearDisplayedCUzeBox_flags    : function (){
@@ -441,7 +449,7 @@ emu.vars.innerEmu = {
 			emu.vars.dom.view["emuControls_PAUSE"]  .classList.remove('activated');
 			emu.vars.dom.view["emuControls_STEP"]   .classList.remove('activated');
 
-		},25);
+		},50);
 	},
 	// * Reloads the application and specifies the alternate Emscripten emu core.
 	toggleCore              : function(){

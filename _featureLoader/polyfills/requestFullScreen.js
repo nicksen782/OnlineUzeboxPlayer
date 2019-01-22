@@ -4,7 +4,11 @@
  * @license MIT
  */
 if (!Element.prototype.requestFullscreen) {
-	Element.prototype.requestFullscreen = Element.prototype.mozRequestFullscreen || Element.prototype.webkitRequestFullscreen || Element.prototype.msRequestFullscreen;
+	Element.prototype.requestFullscreen =
+		Element.prototype.mozRequestFullscreen ||
+		Element.prototype.webkitRequestFullscreen ||
+		Element.prototype.msRequestFullscreen ||
+		Element.prototype.mozFullScreen ;
 }
 
 /**
@@ -13,7 +17,10 @@ if (!Element.prototype.requestFullscreen) {
  * @license MIT
  */
 if (!document.exitFullscreen) {
-	document.exitFullscreen = document.mozExitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+	document.exitFullscreen =
+		document.mozExitFullscreen ||
+		document.webkitExitFullscreen ||
+		document.msExitFullscreen;
 }
 
 /**
@@ -22,17 +29,24 @@ if (!document.exitFullscreen) {
  * @author Chris Ferdinandi
  * @license MIT
  */
+ /*
 if (!document.fullscreenElement) {
+	try{
+		Object.defineProperty(document, 'fullscreenElement', {
+			get: function() {
+				return document.mozFullScreenElement || document.msFullscreenElement || document.webkitFullscreenElement;
+			}
+		});
+	}
+	catch(e){ console.log("Define: fullscreenElement: failure",e); }
 
-	Object.defineProperty(document, 'fullscreenElement', {
-		get: function() {
-			return document.mozFullScreenElement || document.msFullscreenElement || document.webkitFullscreenElement;
-		}
-	});
-
-	Object.defineProperty(document, 'fullscreenEnabled', {
-		get: function() {
-			return document.mozFullScreenEnabled || document.msFullscreenEnabled || document.webkitFullscreenEnabled;
-		}
-	});
+	try{
+		Object.defineProperty(document, 'fullscreenEnabled', {
+			get: function() {
+				return document.mozFullScreenEnabled || document.msFullscreenEnabled || document.webkitFullscreenEnabled;
+			}
+		});
+	}
+	catch(e){ console.log("Define: fullscreenEnabled: failure",e); }
 }
+ */

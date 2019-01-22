@@ -21,7 +21,6 @@
 
 // anthonybrown/JSLint Options Descriptions
 // https://gist.github.com/anthonybrown/9526822
-
 emu.funcs.shared = {
 	// * Sets the canvas dimensions back to default.
 	resetCanvasDimensions   : function(){
@@ -196,28 +195,34 @@ emu.funcs.shared = {
 				}
 			};
 			var transferComplete = function(evt) {
-				// The default responseType is text if it is not specified.
-				// However, this function (serverRequest) defaults it to 'json' if it is not specified.
-				var data = {};
-
-				switch (this.responseType) {
-					case 'text':
-						{ data = this.responseText; break; }
-					case 'arraybuffer':
-						{ data = this.response; break; }
-					case 'blob':
-						{ data = this.response; break; }
-					case 'json':
-						{ data = this.response; break; }
-					default:
-						{ data = this.responseText; break; }
+				if(this.status !=200){
+					console.log(this.status);
+					reject(this.status);
 				}
+				else{
+					// The default responseType is text if it is not specified.
+					// However, this function (serverRequest) defaults it to 'json' if it is not specified.
+					var data = {};
 
-				// console.log("554",this, this.responseType);
-				resolve(data);
+					switch (this.responseType) {
+						case 'text':
+							{ data = this.responseText; break; }
+						case 'arraybuffer':
+							{ data = this.response; break; }
+						case 'blob':
+							{ data = this.response; break; }
+						case 'json':
+							{ data = this.response; break; }
+						default:
+							{ data = this.responseText; break; }
+					}
+
+					resolve(data);
+				}
 			};
 			var transferFailed = function(evt) {
 				console.log("An error occurred during the transfer.");
+				// xhr.onerror = function(){console.log("error" + xhr.status)}
 				reject({
 					'type': evt.type,
 					'xhr': xhr,
@@ -337,8 +342,14 @@ emu.funcs.shared = {
 	},
 	// * Used for rejected promises. Generic. Just displays the error to the console.
 	rejectedPromise         : function(error) {
+		alert("An error has occurred.\n\n" + JSON.stringify(error, null, 1));
 		console.log("ERROR", error);
 	},
+	// * Used with .filter (after .map) to remove undefined arrays from .map.
+	removeUndefines       : function(d,i,a) {
+		if( d != undefined ) { return true; }
+		else{ return false; }
+	}  ,
 	// * Removes the pixel smoothing settings on the specified canvas.
 	setpixelated            : function(canvas) {
 		// https://stackoverflow.com/a/13294650

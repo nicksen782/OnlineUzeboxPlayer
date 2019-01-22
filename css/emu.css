@@ -339,11 +339,11 @@ body {
 
 #emu_view_uam{
 	background-color: rgb(101, 176, 66);
-	left: 925px;
+	left: 920px;
 	top: 40px;
 	/* width: 200px; */
 	/* height: 100px; */
-	width: 240px;
+	width: 245px;
 	height: 564px;
 	position: absolute;
 	font-size: 14px;
@@ -356,11 +356,12 @@ body {
 }
 
 #emu_view_uam .table1{width:100%;margin-bottom: 5px;}
-#emu_view_uam .table1 td {padding: 3px;font-size: 10px;}
+#emu_view_uam .table1 td {padding: 1px 0px 0px 0px;font-size: 12px;}
+#emu_view_uam .table1 td:nth-child(1) {text-align:center;}
 
-#emu_gameSelector_uam{left: 3px;top: 0px;/* width: 200px; *//* height: 100px; */width: 230px;height: 180px;position: absolute;font-size: 12px;padding: 0px;overflow: hidden;}
-#emu_miniOutput1_uam {left: 3px;top: 195px;width: 230px;height: auto;position: absolute;padding: 0px;overflow: hidden;}
-#emu_miniOutput2_uam {left: 3px;top: 380px;width: 230px;height: auto;position: absolute;padding: 0px;overflow: hidden;}
+#emu_gameSelector_uam{left: 3px;top: 0px;/* width: 200px; *//* height: 100px; */width: 235px;height: 205px;position: absolute;font-size: 12px;padding: 0px;overflow: hidden;}
+#emu_miniOutput1_uam {left: 3px;top: 215px;width: 235px;height: auto;position: absolute;padding: 0px;overflow: hidden;}
+#emu_miniOutput2_uam {left: 3px;top: 390px;width: 235px;height: auto;position: absolute;padding: 0px;overflow: hidden;}
 
 #emu_miniOutput1_uam .sectionWindow_content{ padding:0px; }
 #emu_miniOutput2_uam .sectionWindow_content{ padding:0px; }
@@ -370,7 +371,7 @@ body {
 	color: palegoldenrod;
 	width: 280px;
 	width: 100%;
-	height: 140px;
+	height: 132px;
 	text-align: left;
 	overflow: auto;
 	font-family: monospace;
@@ -488,8 +489,9 @@ div#emu_filesList_div .table1 td:nth-child(3) { font-family:monospace; }
 
 /*UAM*/
 #emu_gameSelect_UAM_select{
-	width: 115px;
-	font-size: 12px;
+	/* width: 110px; */
+	width: 95%;
+	font-size: 10px;
 }
 .checkbox_button{
     /*border: 1px solid black;*/
@@ -509,6 +511,7 @@ div#emu_filesList_div .table1 td:nth-child(3) { font-family:monospace; }
 	font-weight: bold;
 	margin: 1px;
 	margin-right: 10px;
+	width: 45px;
 }
 .checkbox_button .checkbox.enabled{
 	background-color: #40cf40;
@@ -529,7 +532,7 @@ div#emu_filesList_div .table1 td:nth-child(3) { font-family:monospace; }
 	background-color: #5babef;
 }
 .emuControls{
-	width: 90px;
+	width: 100px !important;
 	font-size: 10px;
 	margin: 2px auto;
 	border-radius: 5px;
@@ -887,6 +890,9 @@ div#emscripten_emu_container_outer {
 
 input#emu_FilesFromJSON_UAM_load {
     font-size: 14px;
+    /* text-align: center; */
+    /* margin-left: 1em; */
+    width: 45px;
 }
 
 input#emu_compile_UAM {
@@ -1025,19 +1031,10 @@ select#db_gameSelect {
 	height: 20px;
 	background-color: rgba(0, 1, 255, 0.25);
 	background-color: rgb(133, 163, 224);
-	border-radius: 10px;
+	border-radius: 15px;
 	padding: 1px;
 }
-#gamepadIcon_container2{
-	position:absolute;
-	top: 0px;
-	left: 100px;
-	width: 50px;
-	height: 20px;
-	background-color: rgba(0, 1, 255, 0.25);
-	border-radius: 10px;
-	padding: 1px;
-}
+
 .gamepadIcon_container:hover {
 	background-color: rgba(0, 1, 255, 0.25) !important;
 	/* background-color: rgb(133, 163, 224) !important; */
@@ -1047,11 +1044,11 @@ select#db_gameSelect {
 .gamepadIcon{
 	width: 100%;
 	height: 20px;
-	text-align: center;
-	line-height: 20px;
+	/* text-align: center; */
+	/* line-height: 20px; */
 	/* color: red; */
-	font-weight: bold;
-	display: inline-block;
+	/* font-weight: bold; */
+	/* display: inline-block; */
 	background-image: url(../img/CUzeBox_controls_modified.png);
 	background-repeat: no-repeat;
 	background-size: 100% 100%;
@@ -1163,12 +1160,12 @@ select#db_gameSelect {
 	left: 5px;
 	font-size: 14px;
 }
-.modalOpenBtn{
-	position: absolute;
-	top: 5px;
-	right: 70px;
-	font-size: 14px;
-}
+/*.modalOpenBtn{*/
+/*	position: absolute;*/
+/*	top: 5px;*/
+/*	right: 70px;*/
+/*	font-size: 14px;*/
+/*}*/
 
 .horizontalCenter{
 	text-align:center;
@@ -1286,3 +1283,191 @@ input#db_gameSelect_load {
     margin: auto;
     display: block;
 }
+
+
+/* Status indicators for the P1 and P2 gamepads */
+#gamepadIcon_container_p1{
+	position: absolute;
+	top: 1px;
+	right: 460px;
+}
+#gamepadIcon_container_p2{
+	position: absolute;
+	top: 1px;
+	right: 330px;
+}
+.p_gamepad_status {
+	position:absolute;
+	top: 1px;
+	font-size: 8px;
+	left: 5px;
+	/* text-align: center; */
+	/* width: 100%; */
+	font-weight: bold;
+	font-size: 10px;
+	text-decoration: underline;
+}
+.p_gamepad_status2 {
+	position:absolute;
+	bottom: 1px;
+	left: 3px;
+	font-size: 10px;
+	text-align: center;
+	width: 95%;
+	font-size: 8px;
+}
+.gamepadsStatus{
+	opacity: 0.90;
+	border:1px solid darkgray;
+}
+.gamepadsStatus:hover{
+	opacity:1 !important;
+	border:1px solid gray;
+}
+
+
+.gamepadsStatus.neverConnected .p_gamepad_status2::before{ content:"NOT CONNECTED"; }
+.gamepadsStatus.neverConnected .p_gamepad_status2{
+	background-color: rgba(255, 0, 0, 0.50) !important;
+	border-radius: 5px;
+}
+.gamepadsStatus.known .p_gamepad_status2::before{ content:"FOUND - ON STANDBY"; }
+.gamepadsStatus.known .p_gamepad_status2       {
+	background-color: rgba(255, 255, 0, 0.50) !important;
+	border-radius: 5px;
+}
+.gamepadsStatus.unconfigured .p_gamepad_status2::before{ content:"MISSING CONFIG"; }
+.gamepadsStatus.unconfigured .p_gamepad_status2   {
+	background-color: rgba(255, 255, 0, 0.50) !important;
+	border-radius: 5px;
+}
+.gamepadsStatus.connected .p_gamepad_status2::before{ content:"CONNECTED"; }
+.gamepadsStatus.connected .p_gamepad_status2   {
+	background-color: rgba(0, 128, 0, 0.50) !important;
+	border-radius: 5px;
+}
+
+.gamepadIcon.smaller{
+	width: 80px;
+	height: 10px;
+	margin: auto;
+	position: absolute;
+	right: 5px;
+}
+.gamepadIcon_container2{
+	width: 110px;
+	height: 20px;
+	/* background-color: rgba(139, 167, 222, 0.5); */
+	background-color: rgb(105, 148, 233);
+	border-radius: 10px 10px 5px 5px;
+	padding: 1px;
+	padding-left: 5px;
+	padding-right: 5px;
+}
+
+div#gpmap_swap_p1_p2 {
+	position: absolute;
+	top: 2px;
+	right: 5px;
+	background-color:#dddddd;
+	border-radius:5px;
+	padding:3px;
+	padding-left:5px;
+	padding-right:5px;
+	border:1px solid gray;
+	font-size:14px;
+	-webkit-touch-callout: none; /* iOS Safari */
+	-webkit-user-select: none; /* Safari */
+	-khtml-user-select: none; /* Konqueror HTML */
+	-moz-user-select: none; /* Firefox */
+	-ms-user-select: none; /* Internet Explorer/Edge */
+	user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
+
+}
+div#gpmap_swap_p1_p2:hover {
+	border:1px solid black;
+}
+div#gpmap_swap_p1_p2:active {
+	outline:1px solid #85a3e0;
+}
+
+
+
+/*#gamepadIcon_container_p1{*/
+/*	position: absolute;*/
+/*	top: 1px;*/
+/*	right: 330px;*/
+/*}*/
+
+div#resetGamepadStates {
+	position: absolute;
+	top: 2px;
+	right: 200px;
+	/*top: 2px;*/
+	/*right: 5px;*/
+	background-color:#dddddd;
+	border-radius:5px;
+	padding:3px;
+	padding-left:5px;
+	padding-right:5px;
+	border:1px solid gray;
+	font-size:14px;
+	-webkit-touch-callout: none; /* iOS Safari */
+	-webkit-user-select: none; /* Safari */
+	-khtml-user-select: none; /* Konqueror HTML */
+	-moz-user-select: none; /* Firefox */
+	-ms-user-select: none; /* Internet Explorer/Edge */
+	user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
+}
+div#resetGamepadStates:hover {
+	border:1px solid black;
+}
+div#resetGamepadStates:active {
+	outline:1px solid #85a3e0;
+}
+
+#gamepadConfig_openBtn {
+	position: absolute;
+	top: 2px;
+	right: 75px;
+	background-color: #dddddd;
+	border-radius: 5px;
+	padding: 3px;
+	padding-left: 5px;
+	padding-right: 5px;
+	border: 1px solid gray;
+	font-size: 14px;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+div#gamepadConfig_openBtn:hover {
+	border:1px solid black;
+}
+div#gamepadConfig_openBtn:active {
+	outline:1px solid #85a3e0;
+}
+
+#gamepadConfig_closeBtn{
+	position: absolute;
+	top: 2px;
+	right: 5px;
+	background-color: #dddddd;
+	border-radius: 5px;
+	padding: 3px;
+	padding-left: 5px;
+	padding-right: 5px;
+	border: 1px solid gray;
+	font-size: 14px;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+#gamepadConfig_closeBtn:hover{border:1px solid black;}
+#gamepadConfig_closeBtn:active{outline:1px solid #85a3e0;}

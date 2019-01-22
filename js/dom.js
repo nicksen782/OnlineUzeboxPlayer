@@ -24,15 +24,20 @@ emu.funcs.domHandleCache_populate = function(){
 	emu.vars.dom.gamepad["gp1_setAll"] = document.querySelector("#gp1_setAll");
 	emu.vars.dom.gamepad["gp2_setAll"] = document.querySelector("#gp2_setAll");
 
-	emu.vars.dom.gamepad["saveChanges"] = document.querySelector("#gpmap_saveChanges");
-	emu.vars.dom.gamepad["download"]    = document.querySelector("#gpmap_download_maps");
-	emu.vars.dom.gamepad["upload"]      = document.querySelector("#gpmap_upload_maps");
+	emu.vars.dom.gamepad["resetGamepadStates"] = document.querySelector("#resetGamepadStates");
+
+	emu.vars.dom.gamepad["saveChanges"]      = document.querySelector("#gpmap_saveChanges");
+	emu.vars.dom.gamepad["download"]         = document.querySelector("#gpmap_download_maps");
+	emu.vars.dom.gamepad["upload"]           = document.querySelector("#gpmap_upload_maps");
+	emu.vars.dom.gamepad["gpmap_clear_maps"] = document.querySelector("#gpmap_clear_maps");
+	emu.vars.dom.gamepad["gpmap_swap_p1_p2"] = document.querySelector("#gpmap_swap_p1_p2");
 
 	// VIEWS:
-	emu.vars.dom.views["view_VIEW"  ] = document.querySelector("#emu_view");
-	emu.vars.dom.views["view_DEBUG1"] = document.querySelector("#emu_debug1");
-	emu.vars.dom.views["view_DEBUG2"] = document.querySelector("#emu_debug2");
-	emu.vars.dom.views["view_DB"    ] = document.querySelector("#emu_db");
+	emu.vars.dom.views["view_VIEW"    ] = document.querySelector("#emu_view");
+	emu.vars.dom.views["view_DEBUG1"  ] = document.querySelector("#emu_debug1");
+	emu.vars.dom.views["view_DEBUG2"  ] = document.querySelector("#emu_debug2");
+	emu.vars.dom.views["view_DB"      ] = document.querySelector("#emu_db");
+	emu.vars.dom.views["view_SETTINGS"] = document.querySelector("#emu_settings");
 
 	// emu_filesList_div
 	emu.vars.dom.view["emu_filesList_div"] = document.querySelector("#emu_filesList_div");
@@ -75,8 +80,11 @@ emu.funcs.domHandleCache_populate = function(){
 	emu.vars.dom.view["emuControls_reload"]        = document.querySelector("#emuControls_reload");
 	emu.vars.dom.view["emuControls_unload"]        = document.querySelector("#emuControls_unload");
 	emu.vars.dom.view["emuControls_rotate"]        = document.querySelector("#emuControls_rotate");
+
+	// Shown in the UAM section but available without UAM.
 	emu.vars.dom.view["emuControls_autopause_chk"] = document.querySelector("#emuControls_autopause_chk");
 	emu.vars.dom.view["emuControls_autopause_btn"] = document.querySelector("#emuControls_autopause_btn");
+	emu.vars.dom.view["emu_compileOptions_UAM_autoDebug"] = document.querySelector("#emu_compileOptions_UAM_autoDebug");
 
 	emu.vars.dom.view["emuControls_QUALITY"]    = document.querySelector("#emuControls_QUALITY");
 	emu.vars.dom.view["emuControls_DEBUG"]      = document.querySelector("#emuControls_DEBUG");
@@ -84,9 +92,11 @@ emu.funcs.domHandleCache_populate = function(){
 	emu.vars.dom.view["emuControls_PAUSE"]      = document.querySelector("#emuControls_PAUSE");
 	emu.vars.dom.view["emuControls_STEP"]       = document.querySelector("#emuControls_STEP");
 	emu.vars.dom.view["emuControls_FULLSCREEN"] = document.querySelector("#emuControls_FULLSCREEN");
-
 	//
-	emu.vars.dom.view["gamepadIcon_poll"]       = document.querySelector("#gamepadIcon_container1");
+	emu.vars.dom.view["gamepadIcon_poll"]         = document.querySelector("#gamepadIcon_container1");
+	emu.vars.dom.view["gamepadIcon_container_p1"] = document.querySelector("#gamepadIcon_container_p1");
+	emu.vars.dom.view["gamepadIcon_container_p2"] = document.querySelector("#gamepadIcon_container_p2");
+
 	emu.vars.dom.view["emuCore_switch"]         = document.querySelector("#coresetting_toggle");
 
 	// ON-SCREEN GAMEPAD CONTROLS: GAMEPAD #1
@@ -138,7 +148,7 @@ emu.funcs.domHandleCache_populate_UAM = function(){
 		// UAM compile options.
 		emu.vars.dom.view["emu_compileOptions_UAM_chk1"] = document.querySelector("#emu_compileOptions_UAM_chk1");
 		emu.vars.dom.view["emu_compileOptions_UAM_chk2"] = document.querySelector("#emu_compileOptions_UAM_chk2");
-		emu.vars.dom.view["emu_compileOptions_UAM_chk3"] = document.querySelector("#emu_compileOptions_UAM_chk3");
+		// emu.vars.dom.view["emu_compileOptions_UAM_chk3"] = document.querySelector("#emu_compileOptions_UAM_chk3");
 		emu.vars.dom.view["emu_compileOptions_UAM_chk4"] = document.querySelector("#emu_compileOptions_UAM_chk4");
 		// UAM Compile/C2BIN actions.
 		emu.vars.dom.view["emu_compile_UAM"] = document.querySelector("#emu_compile_UAM");

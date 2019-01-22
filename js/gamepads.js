@@ -25,13 +25,15 @@
 "use strict";
 
 emu.gamepads     = {
-	// unmappedGamepads   : 0,
+	//
 	addAllListeners : function(){
 		let EL_gamepads = function(){
 			// GAMEPAD CONFIG: Data Manager
-			emu.vars.dom.gamepad["saveChanges"].addEventListener("click", emu.gamepads.saveChanges, false);
-			emu.vars.dom.gamepad["download"   ].addEventListener("click", emu.gamepads.download, false);
-			emu.vars.dom.gamepad["upload"     ].addEventListener("click", emu.gamepads.upload, false);
+			emu.vars.dom.gamepad["saveChanges"     ].addEventListener("click", emu.gamepads.saveChanges, false);
+			emu.vars.dom.gamepad["download"        ].addEventListener("click", emu.gamepads.download, false);
+			emu.vars.dom.gamepad["upload"          ].addEventListener("click", emu.gamepads.upload, false);
+			emu.vars.dom.gamepad["gpmap_clear_maps"].addEventListener("click", emu.gamepads.clearSavedMaps, false);
+			emu.vars.dom.gamepad["gpmap_swap_p1_p2"].addEventListener("click", emu.gamepads.swap_p1_p2, false);
 
 			// GAMEPAD CONFIG: Open and close buttons for the gamepad config modal.
 			emu.vars.dom.gamepad["openBtn" ].addEventListener("click", emu.gamepads.openGamepadConfig, false);
@@ -46,6 +48,10 @@ emu.gamepads     = {
 			// GAMEPAD CONFIG: "setAll" buttons.
 			emu.vars.dom.gamepad["gp1_setAll"].addEventListener("click", emu.gamepads.mapAllButtons, false);
 			emu.vars.dom.gamepad["gp2_setAll"].addEventListener("click", emu.gamepads.mapAllButtons, false);
+
+			// resetGamepadStates
+			emu.vars.dom.gamepad["resetGamepadStates"].addEventListener("click", function(){ emu.gamepads.resetGamepadStates(); alert("Gamepad states have been reset."); }, false);
+
 		};
 		EL_gamepads();
 
@@ -146,24 +152,29 @@ emu.gamepads     = {
 	mapping_gp_poll_loop : function(){
 		// Generate the controller name ("status") if not already done.
 		let src_gamepads = emu.gamepads.getSrcGamepads();
+
+		// Do we swap the gamepad order?
+		if(emu.gamepads.swapGamepads==1){
+			src_gamepads = src_gamepads.reverse();
+		}
+
 		if(!emu.vars.dom.gamepad["gp1_status"].innerHTML.length && src_gamepads.length>0){
 			// console.log("assigning gamepad name (1)");
-			let obj = emu.gamepads.generateGamepadName(src_gamepads[0]);
-			emu.vars.dom.gamepad["gp1_status"].innerHTML = obj.name + "**"+ obj.vendor+"**"+obj.product;
-			document.querySelector("#emu_gamepadConfig_P1.disconnected").classList.remove("disconnected");
+			let obj = emu.gamepads.generateGamepadKey(src_gamepads[0]);
+			emu.vars.dom.gamepad["gp1_status"].innerHTML = obj.name + "**"+ obj.vendor+"**"+obj.product + " (Index:"+src_gamepads[0].index+")";
+			document.querySelector("#emu_gamepadConfig_P1").classList.remove("disconnected");
 			emu.gamepads.newTemplateMapEntry(obj);
 		}
 		if(!emu.vars.dom.gamepad["gp2_status"].innerHTML.length && src_gamepads.length>1){
 			// console.log("assigning gamepad name (2)");
-			let obj = emu.gamepads.generateGamepadName(src_gamepads[1]);
-			emu.vars.dom.gamepad["gp2_status"].innerHTML = obj.name + "**"+ obj.vendor+"**"+obj.product;
-			document.querySelector("#emu_gamepadConfig_P2.disconnected").classList.remove("disconnected");
+			let obj = emu.gamepads.generateGamepadKey(src_gamepads[1]);
+			emu.vars.dom.gamepad["gp2_status"].innerHTML = obj.name + "**"+ obj.vendor+"**"+obj.product + " (Index:"+src_gamepads[1].index+")";
+			document.querySelector("#emu_gamepadConfig_P2").classList.remove("disconnected");
 			emu.gamepads.newTemplateMapEntry(obj);
 		}
 
 		let buttonWasSet=false;
 		for(let i=0; i<emu.vars.dom.gamepad["gp_cfg_setBtns"].length; i+=1){
-
 			let thisSetButton = emu.vars.dom.gamepad["gp_cfg_setBtns"][i];
 			if(thisSetButton.classList.contains("activeBtnMap")){
 				buttonWasSet = emu.gamepads.map1Button.call( thisSetButton );
@@ -311,8 +322,6 @@ emu.gamepads     = {
 		else{
 			return false;
 		}
-
-
 	},
 	// * Turns off the main polling, opens the config window, handles emulator pause state.
 	openGamepadConfig    : function(){
@@ -338,9 +347,15 @@ emu.gamepads     = {
 		emu.vars.dom.view["emuControls_autopause_chk"].classList.add("enabled");
 		emu.funcs.emu_focusing(null, "mouseleave");
 
+		// Reset the gamepad states. (may be a little redundant here.)
+		emu.gamepads.resetGamepadStates();
+
 		// Turn on very basic polling.
 		emu.gamepads.gamepadMapPolling=true;
 		setTimeout(emu.gamepads.mapping_gp_poll_loop, 100);
+
+		// Switch to the main emulator view.
+		// emu.funcs.nav.changeView("VIEW");
 
 		// Open the gamepad config modal.
 		emu.vars.dom.gamepad["gamepadConfigDiv"].classList.add('showModal');
@@ -351,11 +366,14 @@ emu.gamepads     = {
 		// Clear the flag for the gamepad map polling.
 		emu.gamepads.gamepadMapPolling=false;
 
+		// Close the gamepad config modal.
+		emu.vars.dom.gamepad["gamepadConfigDiv"].classList.remove('showModal');
+
+		// Reset the gamepad states.
+		emu.gamepads.resetGamepadStates();
+
 		// Wait a short bit to make sure any remaining polls complete.
 		setTimeout(function(){
-			// Close the gamepad config modal.
-			emu.vars.dom.gamepad["gamepadConfigDiv"].classList.remove('showModal');
-
 			// Restore the previous gamepad polling if it was enabled before.
 			if(emu.gamepads.prev_pollState){
 				emu.gamepads.enabled=false;
@@ -372,7 +390,7 @@ emu.gamepads     = {
 				emu.funcs.emu_focusing(null, "mouseenter");
 			}
 
-		}, 250);
+		}, 500);
 
 
 	},
@@ -394,12 +412,19 @@ emu.gamepads     = {
 
 		// If the user clicked 'OK' then close the config window.
 		if(conf){
+			// Clear the temp mappings.
+			emu.gamepads.mapping_newGamepads=[];
+			// Clear the settings for the gamepads (they will be re-read right away if normal polling was previously active.)
+			emu.gamepads.gamepads=[];
+			// Close this modal.
 			emu.gamepads.closeGamepadConfig();
 		}
 	},
 	// * Reads from the gp_config_mappings in RAM and provides a JSON download of the data.
 	download    : function(){
-		var EMU_gp_config_mappingsuser = JSON.parse(localStorage.getItem("EMU_gp_config_mappings"));
+		// var EMU_gp_config_mappingsuser = JSON.parse(localStorage.getItem("EMU_gp_config_mappings"));
+		var EMU_gp_config_mappingsuser = emu.gamepads.gp_config_mappings;
+
 		if(EMU_gp_config_mappingsuser){
 			// Load FileSaver if needed.
 			featureDetection.funcs.applyFeatures_fromList([ "FileSaver" ]).then(
@@ -441,9 +466,9 @@ emu.gamepads     = {
 				input=null;
 				// Parse the JSON.
 				let newJSON = JSON.parse(res);
-				// console.log(newJSON);
 
 				let keys = Object.keys(newJSON);
+
 				// Go through all the new gamepad JSON.
 				for(let i=0; i<keys.length; i+=1){
 					// Get the key.
@@ -475,8 +500,39 @@ emu.gamepads     = {
 		// Read the file.
 		// Integrate the file into the current game mappings.
 	},
+	// * Clears the maps that are saved in local storage. (Copy still remains in RAM.)
+	clearSavedMaps : function(){
+		let conf = confirm("Are you sure that you want to clear the gamepad mappings that are stored in local storage?\n\nNOTE: The settings will remain in RAM until you refresh the browser window.");
+		if(conf){ localStorage.removeItem("EMU_gp_config_mappings"); }
+	},
+	//
+	swap_p1_p2 : function(){
+		let activeGamepads = emu.gamepads.gamepads.map(function(d,i,a){
+			if(d!=undefined){ return d; }
+		});
+
+		// Ensure that we have gamepads and that 2 are active.
+		if( (activeGamepads.length==2 && activeGamepads[0]!=undefined && activeGamepads[1]!=undefined) ){
+			// Set the gamepad swap flag. (This will cause the gamepads to be read in reverse order causing the last gamepad to be seen as player 1.)
+			emu.gamepads.swapGamepads=!emu.gamepads.swapGamepads;
+
+			// Reset the gamepad states.
+			emu.gamepads.resetGamepadStates();
+		}
+		else{
+			alert("ERROR: There must be two active gamepads for this feature to work.");
+			return;
+		}
+
+	},
 
 	// MAIN GAMEPAD FUNCTIONS/VARIABLES.
+	swapGamepads : 0,
+	totalNumGamepadsReady  : 0,
+	gamepad_p1_isSet       : 0,
+	gamepad_p2_isSet       : 0,
+	p1_needs_mapping       : 0,
+	p2_needs_mapping       : 0,
 	enabled                : false,     // Saves the status of the main gamepad polling. Used in init to determine to init or de-init.
 	gp_setTimeout_id       : undefined, // Stores the id returned by setTimeout.
 	gp_raf_id              : undefined, // Stores the id returned by requestAnimationFrame.
@@ -497,7 +553,7 @@ emu.gamepads     = {
 		"BTN_SL"     : { "key":"key_RSHIFT", "bitPos":10 },
 		"BTN_SR"     : { "key":"key_LSHIFT", "bitPos":11 },
 	},
-	// * Gamepad button mappings to Uzebox buttons. Specific to the gamepad.
+	// * Gamepad button mappings to Uzebox buttons. Specific to the gamepad. The included ones are gamepads I have.
 	gp_config_mappings     : {
 		// "2820:0009" : {
 		// 	"name":"8Bitdo SNES30 GamePad**2820**0009",
@@ -551,6 +607,64 @@ emu.gamepads     = {
 			}
 		}
 	},
+	//
+	resetGamepadStates : function(){
+		// Does NOT clear the following:
+		//	emu.gamepads.enabled
+		//	emu.gamepads.gp_setTimeout_id
+		//	emu.gamepads.gp_raf_id
+		//	emu.gamepads.gp_poll_freq
+		//	emu.gamepads.uzeBox_gamepad_mapping
+		//	emu.gamepads.gp_config_mappings
+		//	emu.gamepads.swapGamepads
+
+		// Gamepad config screen: Clear the name displayed for the gamepads.
+		emu.vars.dom.gamepad["gp1_status"].innerHTML="";
+		emu.vars.dom.gamepad["gp2_status"].innerHTML="";
+
+		// Gamepad config screen: Set each gamepad to disconnected.
+		emu.vars.dom.gamepad["gp1_status"].classList.add("disconnected");
+		emu.vars.dom.gamepad["gp2_status"].classList.add("disconnected");
+
+		// Clear gamepad Individual "set" buttons.
+		var gpCfgBtns = emu.vars.dom.gamepad["gp_cfg_setBtns"];
+		gpCfgBtns.forEach(function(d, i, a) {
+			d.classList.remove("activeBtnMap");
+		});
+
+		// Clear the gamepad "Set all" buttons.
+		emu.vars.dom.gamepad["gp1_setAll"].remove("active");
+		emu.vars.dom.gamepad["gp2_setAll"].remove("active");
+
+		// Clear the other settings for the "Set all" feature.
+		emu.gamepads.lastAssignedButton="";
+		emu.gamepads.autoSet_buttonsToAssign=[];
+
+		// Clear the temp mappings
+		emu.gamepads.mapping_newGamepads=[];
+
+		// Clear the gamepads.
+		emu.gamepads.gamepads=[];
+
+		// Reset all config flags.
+		emu.gamepads.totalNumGamepadsReady = 0;
+		emu.gamepads.gamepad_p1_isSet      = 0;
+		emu.gamepads.gamepad_p2_isSet      = 0;
+		emu.gamepads.p1_needs_mapping      = 0;
+		emu.gamepads.p2_needs_mapping      = 0;
+
+		// Player 1: Reset the displayed gamepad states.
+		emu.vars.dom.view["gamepadIcon_container_p1"].classList.add("neverConnected");
+		emu.vars.dom.view["gamepadIcon_container_p1"].classList.remove("known");
+		emu.vars.dom.view["gamepadIcon_container_p1"].classList.remove("unconfigured");
+		emu.vars.dom.view["gamepadIcon_container_p1"].classList.remove("connected");
+
+		// Player 2: Reset the displayed gamepad states.
+		emu.vars.dom.view["gamepadIcon_container_p2"].classList.add("neverConnected");
+		emu.vars.dom.view["gamepadIcon_container_p2"].classList.remove("known");
+		emu.vars.dom.view["gamepadIcon_container_p2"].classList.remove("unconfigured");
+		emu.vars.dom.view["gamepadIcon_container_p2"].classList.remove("connected");
+	},
 	// * Gets a raw copy of navigator.gamepads() and strips out any null or blank values.
 	getSrcGamepads      : function(){
 		// Get the gamepad info. There are many different ways. Use the first one that returns data.
@@ -562,15 +676,24 @@ emu.gamepads     = {
 		// Copy the raw_gamepads into src_gamepads.
 		for(let i=0; i<raw_gamepads.length; i+=1){
 			// Is this actually a gamepad object? If not then don't add it.
-			if("undefined"==typeof raw_gamepads[i] || raw_gamepads[i]==null){ continue; }
+			// console.log("typeof raw_gamepads[i]:", typeof raw_gamepads[i], raw_gamepads[i], !raw_gamepads[i]);
+			if("undefined"==typeof raw_gamepads[i]){ continue; }
+			if(raw_gamepads[i]==null)              { continue; }
+			if(!raw_gamepads[i])                   { continue; }
 
 			// Add the gamepad. Use the same index value as indicated by the gamepad data.
-			if(raw_gamepads[i]) { src_gamepads[ raw_gamepads[i].index ] = raw_gamepads[i] ; }
+			// console.log("adding:", raw_gamepads[i], raw_gamepads[i].index);
+			if(raw_gamepads[i]) {
+				src_gamepads[ raw_gamepads[i].index ] = raw_gamepads[i] ;
+			}
 		}
+
+		// Any empty indexes can mess us up. Return an array WITHOUT empty indexes.
+		src_gamepads = src_gamepads.map(function(d,i,a){ return d; }).filter(emu.funcs.shared.removeUndefines);
 		return src_gamepads;
 	},
 	// * Returns an object with the unique identifiers for a specified gamepad instance.
-	generateGamepadName : function(thisPad){
+	generateGamepadKey : function(thisPad){
 		// Get the vendor and product id.
 		let ff_id = thisPad.id.split("-").map(function(d,i,a){ return d.trim();} );
 		let cr_id = thisPad.id.split(":").map(function(d,i,a){ return d.trim();} );
@@ -655,18 +778,39 @@ emu.gamepads     = {
 		// * Update the local cache of gamepad objects.
 		function getNewGamepadStates(){
 			function update_gamepadObj(src_gamepads){
+				// Clear the "active" flag on each of the known gamepads.
+				for(let i=0; i<emu.gamepads.gamepads.length; i+=1){
+					let thisPad=emu.gamepads.gamepads[i];
+					if(thisPad==undefined)         { continue; }
+					if("undefined"==typeof thisPad){ continue; }
+					if(thisPad==null)              { continue; }
+					if(!thisPad)                   { continue; }
+					thisPad.active=0;
+				}
+
+				// Do we swap the gamepad order?
+				if(emu.gamepads.swapGamepads==1){
+					src_gamepads = src_gamepads.reverse();
+				}
+
 				// Create the data for new gamepads or update the gamepad key on the known gamepads.
 				for(let i=0; i<src_gamepads.length; i+=1){
 					let thisPad = src_gamepads[i];
 
-					// Is this an unconfigured gamepad?
+					try{ thisPad.index; }
+					catch(e){ console.log(i, "ERROR:", e); continue;}
+
+					// NEW GAMEPAD: Is this an unconfigured gamepad? Configure it.
 					if(
 						!emu.gamepads.gamepads[thisPad.index] && // No data entry at this index.
-						thisPad.id                                // And the src has data.
+						thisPad.id                               // And the src has data.
 					){
-
 						let newMapping=undefined;
-						let map_key = emu.gamepads.generateGamepadName(thisPad).map_key;
+						let map_obj  = emu.gamepads.generateGamepadKey(thisPad);
+						let map_key  = map_obj.map_key;
+						let map_name = map_obj.name;
+
+						// console.log(emu.gamepads.generateGamepadKey(thisPad));
 
 						// Find the gamepad mapping:
 						if( emu.gamepads.gp_config_mappings.hasOwnProperty(map_key) !=-1){
@@ -677,30 +821,161 @@ emu.gamepads     = {
 						// We don't already have a mapping for this gamepad. Did the user load a mapping?
 						if(newMapping==undefined){
 							// Cannot use this gamepad. A map must be created for it first.
-							// emu.gamepads.unmappedGamepads
-							// alert("test");
+
+							// Which gamepad would this be?
+							let p1=emu.gamepads.gamepads.filter(function(d,i,a){ return d.player==1; });
+							let p2=emu.gamepads.gamepads.filter(function(d,i,a){ return d.player==2; });
+
+							// console.log(
+							// 	"p1 found:", p1.length?"true ":"false",
+							// 	"p2 found:", p2.length?"true ":"false",
+							// );
+
+							if   (!p1.length && emu.gamepads.p1_needs_mapping==false){
+								// console.log("Player 1 gamepad needs mapping.");
+								emu.gamepads.p1_needs_mapping=true;
+								emu.vars.dom.view["gamepadIcon_container_p1"].classList.remove("neverConnected");
+								emu.vars.dom.view["gamepadIcon_container_p1"].classList.add("known");
+								emu.vars.dom.view["gamepadIcon_container_p1"].classList.add("unconfigured");
+								emu.vars.dom.view["gamepadIcon_container_p1"].classList.remove("connected");
+							}
+							// else if(thisPad.index==1){
+							if(!p2.length && emu.gamepads.p2_needs_mapping==false){
+								// console.log("Player 2 gamepad needs mapping.");
+								emu.gamepads.p2_needs_mapping=true;
+								emu.vars.dom.view["gamepadIcon_container_p2"].classList.remove("neverConnected");
+								emu.vars.dom.view["gamepadIcon_container_p2"].classList.add("known");
+								emu.vars.dom.view["gamepadIcon_container_p2"].classList.add("unconfigured");
+								emu.vars.dom.view["gamepadIcon_container_p2"].classList.remove("connected");
+							}
+
+							// Visually indicate this is unconfigured.
+							// gamepadIcon_container_p1 .classList.add("unconfigured");
 						}
 						else{
-							console.log("Gamepad found! Index:", thisPad.index, ", id:", thisPad.id, "map_key:", map_key);
 							// Add the new gamepad.
 							emu.gamepads.gamepads[ thisPad.index ] = {
 								"gamepad"       : thisPad   ,
 								"btnMap"        : newMapping,
 								"btnPrev"       : 0         ,
 								"lastTimestamp" : 0         ,
+								"active"        : 1         ,
+								"prevActive"    : 1         ,
 							};
+
+							let newPlayerNumber = undefined;
+
+							// Configure the displayed gamepad statuses.
+							if      (emu.gamepads.totalNumGamepadsReady==0){
+								emu.gamepads.gamepad_p1_isSet=1;
+								emu.gamepads.gamepads[ thisPad.index ].player=0;
+								emu.gamepads.totalNumGamepadsReady++;
+								newPlayerNumber=1;
+								emu.gamepads.p1_needs_mapping=false;
+								emu.vars.dom.view["gamepadIcon_container_p1"].title = map_name + " ("+map_key+", Index:"+thisPad.index+", Player "+newPlayerNumber+")";
+								emu.vars.dom.view["gamepadIcon_container_p1"].classList.remove("neverConnected");
+								emu.vars.dom.view["gamepadIcon_container_p1"].classList.add("known");
+								emu.vars.dom.view["gamepadIcon_container_p1"].classList.remove("unconfigured");
+								emu.vars.dom.view["gamepadIcon_container_p1"].classList.add("connected");
+							}
+							else if (emu.gamepads.totalNumGamepadsReady==1){
+								emu.gamepads.gamepad_p2_isSet=1;
+								emu.gamepads.gamepads[ thisPad.index ].player=1;
+								emu.gamepads.totalNumGamepadsReady++;
+								newPlayerNumber=2;
+								emu.gamepads.p2_needs_mapping=false;
+								emu.vars.dom.view["gamepadIcon_container_p2"].title = map_name + " ("+map_key+", Index:"+thisPad.index+", Player "+newPlayerNumber+")";
+								emu.vars.dom.view["gamepadIcon_container_p2"].classList.remove("neverConnected");
+								emu.vars.dom.view["gamepadIcon_container_p2"].classList.add("known");
+								emu.vars.dom.view["gamepadIcon_container_p2"].classList.remove("unconfigured");
+								emu.vars.dom.view["gamepadIcon_container_p2"].classList.add("connected");
+							}
+
+							console.log(
+								"Gamepad found!",
+								"||| Index:"  , thisPad.index   ,
+								"||| Player:" , newPlayerNumber ,
+								"||| id:"     , thisPad.id      ,
+								"||| map_key:", map_key         ,
+								" |||"
+							);
+
 						}
 					}
-					// Just update the gamepad data key but make sure that the cached data already exists.
-					else if( emu.gamepads.gamepads[thisPad.id]){
+
+					// UPDATE GAMEPAD: Existing gamepad: Update the gamepad data key and make sure that the cached data already exists.
+					// else if( emu.gamepads.gamepads[thisPad.id]){
+					else if( emu.gamepads.gamepads[thisPad.index] ){
 						// console.log("Updating existing gamepad!", emu.gamepads.gamepads[i].btnPrev);
 						emu.gamepads.gamepads[ thisPad.index ].gamepad = src_gamepads[i];
+
+						// console.log("setting as active!");
+						emu.gamepads.gamepads[ thisPad.index ].active = 1;
+						emu.gamepads.gamepads[ thisPad.index ].prevActive = 1;
+
+						// Configure the displayed gamepad statuses.
+						if   (thisPad.index==0){
+							emu.vars.dom.view["gamepadIcon_container_p1"].classList.remove("neverConnected");
+							emu.vars.dom.view["gamepadIcon_container_p1"].classList.add("known");
+							emu.vars.dom.view["gamepadIcon_container_p1"].classList.remove("unconfigured");
+							emu.vars.dom.view["gamepadIcon_container_p1"].classList.add("connected");
+						}
+						else if(thisPad.index==1){
+							emu.vars.dom.view["gamepadIcon_container_p2"].classList.remove("neverConnected");
+							emu.vars.dom.view["gamepadIcon_container_p2"].classList.add("known");
+							emu.vars.dom.view["gamepadIcon_container_p2"].classList.remove("unconfigured");
+							emu.vars.dom.view["gamepadIcon_container_p2"].classList.add("connected");
+						}
+
 					}
-					else{
-						// Gamepad data is not cached and/or the src has no data.
-						//
+
+				}
+
+				// Find the known gamepads that are still set as active 0.
+				for(let i=0; i<emu.gamepads.gamepads.length; i+=1){
+
+					let thisPad=emu.gamepads.gamepads[i];
+
+					if(thisPad==undefined)         { continue; }
+					if("undefined"==typeof thisPad){ continue; }
+					if(thisPad==null)              { continue; }
+					if(!thisPad)                   { continue; }
+
+					// console.log("thisPad:", "index:", thisPad.gamepad.index, "active:", thisPad.active);
+
+					if( thisPad.prevActive && thisPad.active==0 ){
+						// console.log("gamepad active 0");
+						// Configure the displayed gamepad statuses.
+						if   (thisPad.gamepad.index==0){
+							// console.log("Adjust player1");
+							emu.vars.dom.view["gamepadIcon_container_p1"].classList.remove("neverConnected");
+							emu.vars.dom.view["gamepadIcon_container_p1"].classList.add("known");
+							emu.vars.dom.view["gamepadIcon_container_p1"].classList.remove("unconfigured");
+							emu.vars.dom.view["gamepadIcon_container_p1"].classList.remove("connected");
+							thisPad.prevActive=0;
+						}
+						else if(thisPad.gamepad.index==1){
+							// console.log("Adjust player2");
+							emu.vars.dom.view["gamepadIcon_container_p2"].classList.remove("neverConnected");
+							emu.vars.dom.view["gamepadIcon_container_p2"].classList.add("known");
+							emu.vars.dom.view["gamepadIcon_container_p2"].classList.remove("unconfigured");
+							emu.vars.dom.view["gamepadIcon_container_p2"].classList.remove("connected");
+							thisPad.prevActive=0;
+						}
 					}
 				}
+
+				// Determine which previously connected gamepads are still connected.
+				// Update that status on the known gamepad entry.
+				// Get a list of index values provided by src_gamepads.
+				// let src_ids   = src_gamepads.map(function(d,i,a){ return d.index; }).filter(emu.funcs.shared.removeUndefines);
+				// Get a list of index values provided by emu.gamepads.gamepads.
+				// let known_ids = emu.gamepads.gamepads.map(function(d,i,a){ return d.gamepad.index; }).filter(emu.funcs.shared.removeUndefines);
+
+				// console.log(
+				// 	"Known gamepads        :", emu.gamepads.gamepads.length, emu.gamepads.gamepads,
+				// 	"Gamepads found in poll:", src_gamepads.length, src_gamepads
+				// );
 			}
 			update_gamepadObj( emu.gamepads.getSrcGamepads() );
 		}
@@ -778,18 +1053,29 @@ emu.gamepads     = {
 		// Read the source gamepad data, add to local cache if defined and not null and found button mapping.
 		getNewGamepadStates();
 
-		// var newHTML1="";
-		// var newHTML2="";
-		// var padsUsed=[];
-
 		// Go through the gamepad list.
 		for(let i=0; i<emu.gamepads.gamepads.length; i+=1){
 			// Only two gamepads are allowed for now.
-			if(i>1){ break; }
+			// if(i>1){ break; }
+
+			// Is this gamepad in a valid and connected state? If not, then skip it.
+			if("undefined"==typeof emu.gamepads.gamepads[i]){ continue; }
+			if(emu.gamepads.gamepads[i]==null)              { continue; }
+			if(!emu.gamepads.gamepads[i])                   { continue; }
+
+			// console.log(emu.gamepads.gamepads[i], emu.gamepads.gamepads);
 
 			// Get a handle to this gamepad.
 			let padIndex = emu.gamepads.gamepads[i].gamepad.index;
 			let thisPad   = emu.gamepads.gamepads[ padIndex ] ;
+
+			// Which player uses this gamepad?
+			let playerNumber = thisPad.player;
+
+			if([0,1].indexOf(playerNumber) == -1){
+				// console.log("Only two players are supported.");
+				continue;
+			}
 
 			// First, is the timestamp the same? If so, there has been no new input. Skip!
 			if( thisPad.gamepad.timestamp == thisPad.lastTimestamp ){ continue; }
@@ -819,28 +1105,9 @@ emu.gamepads     = {
 			// padsUsed[i]=true;
 
 			// Send the keys that the user pressed on the the gamepad.
-			sendNewKey(i, btnPressed, btnReleased);
-
-			// Add to the debug info.
-			// let tempHTML = "";
-			// tempHTML+='<table class="table1">';
-			// tempHTML+='	<tr> <td>Map name:   </td> <td style="font-size:75%;"> ' + thisPad.btnMap.name +' </td> </tr>';
-			// tempHTML+='	<tr> <td>btnPrev     </td> <td> ' + btnPrev     .toString(2).padStart(16, "0") +' </td> </tr>';
-			// tempHTML+='	<tr> <td>btnHeld     </td> <td> ' + btnHeld     .toString(2).padStart(16, "0") +' </td> </tr>';
-			// tempHTML+='	<tr> <td>btnPressed  </td> <td> ' + btnPressed  .toString(2).padStart(16, "0") +' </td> </tr>';
-			// tempHTML+='	<tr> <td>btnReleased </td> <td> ' + btnReleased .toString(2).padStart(16, "0") +' </td> </tr>';
-			// tempHTML+='	<tr> <td>pressed     </td> <td> ' + input.uzeKeys.join("<br>")                 +' </td> </tr>';
-			// tempHTML+='</table>';
-			// tempHTML+='<br>';
-
-			// if     (i==0){ newHTML1+=tempHTML; }
-			// else if(i==1){ newHTML2+=tempHTML; }
+			// sendNewKey(i, btnPressed, btnReleased);
+			sendNewKey(playerNumber, btnPressed, btnReleased);
 		}
-
-		// Output some debug info:
-		// document.querySelector("#gamepadConfig #gamepads_count").innerHTML = emu.gamepads.gamepads.length;
-		// if(padsUsed[0]){ document.querySelector("#gamepadConfig #gamepad1_status").innerHTML = newHTML1; }
-		// if(padsUsed[1]){ document.querySelector("#gamepadConfig #gamepad2_status").innerHTML = newHTML2; }
 
 		// Request another animation frame.
 		emu.gamepads.gp_setTimeout_id = setTimeout(function(){

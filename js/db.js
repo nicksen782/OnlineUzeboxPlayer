@@ -461,3 +461,52 @@ emu.funcs.db     = {
 		);
 	}
 };
+
+function getDataFromUzeboxGamesAndDemos(){
+	var formData = {
+		"o": "getDataFromUzeboxGamesAndDemos",
+		"_config": { "processor": "emu_p.php" }
+	};
+	var prom1 = emu.funcs.shared.serverRequest(formData).then(
+		function(res){
+			let doc = new DOMParser().parseFromString(res.data, 'text/html');
+
+			var rows = doc.querySelector("#bodyContent table").querySelectorAll("tr");
+
+			var data = [];
+
+			for(var i=0; i<rows.length; i+=1){
+				if(i==0){continue;}
+				let thisrow=rows[i];
+				let td0=thisrow.querySelectorAll("td")[0];
+				let td1=thisrow.querySelectorAll("td")[1];
+				let td2=thisrow.querySelectorAll("td")[2];
+				let td3=thisrow.querySelectorAll("td")[3];
+				let td4=thisrow.querySelectorAll("td")[4];
+
+				let wikilink = td1.querySelector("a").href;
+				let gamename = td1.querySelector("a").innerText;
+				let genre = td2.innerHTML;
+				let author = td3.innerHTML;
+				let status = td4.innerHTML;
+
+				data.push({
+					"wikilink": wikilink,
+					"gamename": gamename,
+					"genre   ": genre   ,
+					"author  ": author  ,
+					"status  ": status  ,
+				});
+
+			}
+
+			console.log( data );
+			// console.log( (data.sort(function(a, b) {
+			// 	if(a.author < b.author) { return -1; }
+			// 	if(a.author > b.author) { return 1; }
+			// 	return 0;
+			// }))) ;
+
+		}, emu.funcs.shared.rejectedPromise);
+	return prom1;
+}

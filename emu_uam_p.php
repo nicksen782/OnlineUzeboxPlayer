@@ -6,10 +6,10 @@ if(!$securityLoadedFrom_indexp){ exit(); };
 // FINISHED
 function gameman_manifest_user(){
 	// $author_user_id = $_SESSION['user_id'];
-	// $user_id        = $_SESSION['user_id'];
+	// $user_id        = $_POST['user_id'];
 
 	$author_user_id = $_POST['user_id'];
-	$user_id        = $_POST['user_id'];
+	$user_id        = $_SESSION['user_id'];
 
 	global $_appdir;
 	global $_db;
@@ -54,15 +54,13 @@ ORDER BY last_update DESC
 }
 function compile_UamGame(){
 	// We should have a game id. Use it to get the record for the game and then grab the gamedir.
-	// $gameId         = $_POST['gameId'];
-	// $author_user_id = $_SESSION['user_id'];
 	$gameId         = $_POST['gameId'];
-	$author_user_id = $_POST['user_id'];
+	$author_user_id = $_SESSION['user_id'];
 
 	global $_appdir;
 	global $_db;
 	$dbhandle = new sqlite3_DB_PDO__UAM5($_db) or exit("cannot open the database");
-	$s_SQL1  ="
+	$s_SQL0  ="
 SELECT
 	  UAMdir
 	, gamedir
@@ -72,16 +70,35 @@ WHERE
 	AND
 	author_user_id = :author_user_id
 	;";
-	$prp1    = $dbhandle->prepare($s_SQL1);
+	$prp0    = $dbhandle->prepare($s_SQL0);
 	$dbhandle->bind(':gameId'         , $gameId         ) ;
 	$dbhandle->bind(':author_user_id' , $author_user_id ) ;
-	$retval1 = $dbhandle->execute();
-	$results1= $dbhandle->statement->fetchAll(PDO::FETCH_ASSOC) ;
+	$retval0 = $dbhandle->execute();
+	$results0= $dbhandle->statement->fetchAll(PDO::FETCH_ASSOC) ;
+
+	// Was there a result?
+	if(!sizeof($results0)){
+		$error="No match found for game id and user id.";
+		echo json_encode(array(
+			'data'    => $error ,
+			'success' => false  ,
+		));
+		exit();
+	}
 
 	// Do the compile and process some debug data.
-	$path = $_SERVER['DOCUMENT_ROOT'].'/'.$results1[0]['gamedir'].'/'.'build_files' ;
-	if( ! file_exists( $path ) ) { $error="Compile path does not exist.";     }
-	else                         { chdir( $path  ); }
+	$path = $_SERVER['DOCUMENT_ROOT'].'/'.$results0[0]['gamedir'].'/'.'build_files' ;
+
+	// Make sure that the path exists.
+	if( ! file_exists( $path ) ) {
+		$error="Compile path does not exist.";
+		echo json_encode(array(
+			'data'    => $error ,
+			'success' => false  ,
+		));
+		exit();
+	}
+	else { chdir( $path  ); }
 
 	$buildCommand = "make";
 	// file_put_contents( ('avr-nm.txt'), '... LOADING ...' );
@@ -252,18 +269,25 @@ WHERE
 		'data'    => $results1 ,
 		'success' => true      ,
 
+		'json'         => $json         ,
+		'error'        => $error        ,
+		'execResults'  => $execResults  ,
+		'info'         => $info         ,
+		'info2'        => $info2        ,
+		'compileCount' => $compileCount ,
+		'c2binCount'   => $c2binCount   ,
+		'link1'        => $_SERVER['HTTP_HOST'].'/'.$results0[0]['gamedir'].'/'.'build_files'.'/cflow.pdf'       ,
+		'link2'        => $_SERVER['HTTP_HOST'].'/'.$results0[0]['gamedir'].'/'.'build_files'.'/cflow.txt'       ,
+		'link3'        => "",//$_SERVER['HTTP_HOST'].'/'.$results1[0]['gamedir'].'/'.'build_files'.'/lastbuild.txt'       ,
+		// 'cflow'        => htmlspecialchars($cflow)       ,
+
 		// '$_POST'     => $_POST       ,
-		'json'       => $json        ,
-		'error'      => $error       ,
-		'execResults'=> $execResults ,
-		'info'       => $info        ,
-		'info2'      => $info2       ,
-		'compileCount' => $compileCount       ,
-		'c2binCount'   => $c2binCount       ,
-		// 'cflow'      => htmlspecialchars($cflow)       ,
-		'link1'      => $_SERVER['HTTP_HOST'].'/'.$results1[0]['gamedir'].'/'.'build_files'.'/cflow.pdf'       ,
-		'link2'      => $_SERVER['HTTP_HOST'].'/'.$results1[0]['gamedir'].'/'.'build_files'.'/cflow.txt'       ,
-		'link3'      => "",//$_SERVER['HTTP_HOST'].'/'.$results1[0]['gamedir'].'/'.'build_files'.'/lastbuild.txt'       ,
+		// 'execResults2' => urlencode($execResults) ,
+		// 'execResults3' => htmlentities($execResults) ,
+		// 'execResults4' => htmlspecialchars($execResults) ,
+		// 'gamedir' => $results0[0]['gamedir'],
+		// 'results0' => $results0,
+		// 'results1' => $results1,
 	) );
 
 }
@@ -577,8 +601,6 @@ WHERE id = :gameid;
 	) );
 
 }
-
-// UNFINISHED
 function gameDb_deleteGame(){
 	$gameid   = intval($_POST['gameid']);
 
@@ -695,7 +717,7 @@ WHERE id = :gameid
 
 }
 
-
+// UNFINISHED
 function c2bin_UamGame(){
 	// We should have a game id. Use it to get the record for the game and then grab the UAM dir.
 	$gameId         = $_POST['gameId'];
@@ -722,7 +744,15 @@ WHERE
 
 	// Get the path.
 	$path = $_SERVER['DOCUMENT_ROOT'].'/'.$results1[0]['UAMdir'].'/'.'C2BIN' ;
-	if( ! file_exists( $path ) ) { $error="Compile path does not exist.";     }
+	if( ! file_exists( $path ) ) {
+		$error="Compile path does not exist.";
+			$error="Compile path does not exist.";
+			echo json_encode(array(
+				'data'    => $error ,
+				'success' => false  ,
+			));
+			exit();
+	}
 	else                         { chdir( $path  ); }
 
 	$results = shell_exec("./c2bin_runit.sh 2>&1");
@@ -736,6 +766,13 @@ WHERE
 	// audit_API_newRecord( $_SESSION['user_id'], $_SESSION['o_api'], $_SESSION['via_type'], 1, $gameId );
 }
 function c2bin_UamGame_2(){
+	$error="Compile path does not exist.";
+	echo json_encode(array(
+		'data'    => $error ,
+		'success' => false  ,
+	));
+	exit();
+
 	echo json_encode(array(
 		'data'         => []     ,
 		'success'      => true   ,

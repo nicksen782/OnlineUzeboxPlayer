@@ -728,9 +728,9 @@
 		<div id="p2_gamepad_status2" class="p_gamepad_status2"></div>
 		<div class="gamepadIcon smaller"></div>
 	</div>
+
 	<!--resetGamepadStates-->
 	<div id="resetGamepadStates">Reset Gamepads</div>
-
 
 	<!--<span class="hyperlink1 modalOpenBtn" id="gamepadConfig_openBtn">Gamepad Config</span>-->
 	<span class="" id="gamepadConfig_openBtn">Gamepad Config</span>

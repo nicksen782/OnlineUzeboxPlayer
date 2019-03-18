@@ -44,6 +44,7 @@ _gitignoredir
 _management/
 *-error.txt
 TODO.txt
+getfilehashes.php
 
 # MAKE EXECEPTIONS FOR THESE FILES #
 !_sys/eud.db

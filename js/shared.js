@@ -136,6 +136,67 @@ emu.funcs.shared = {
 
 
 	},
+	textOnCanvas3           : function(obj) {
+		let getMaxFontSize = function(text, font, ctx){
+			let fontsize=22;
+			do{
+				fontsize--;
+				ctx.font=fontsize+"px "+font;
+			} while(ctx.measureText(text).width>ctx.canvas.width)
+			return fontsize;
+		};
+
+		let hoverCanvas = document.createElement("canvas");
+		let ctx = hoverCanvas.getContext("2d");
+		hoverCanvas.id="emu_hover_canvas2";
+
+		hoverCanvas.width  = "225";
+		hoverCanvas.height = "24";
+
+		let maxFontSize = getMaxFontSize(obj.text, "monospace", hoverCanvas.getContext("2d"));
+		hoverCanvas.width  = "225";
+		hoverCanvas.height = maxFontSize+5;
+		ctx.font = maxFontSize + "px monospace";
+		ctx.fillStyle="white";
+		ctx.fillText(obj.text, 0 , parseInt(ctx.font));
+
+		// console.log(ctx.font);
+
+		hoverCanvas.style["z-index"]         = "99999999";
+		hoverCanvas.style["position"]        = "absolute";
+		hoverCanvas.style["top"]             = 30+"px";//"525px"     ;
+		hoverCanvas.style["left"]            = 0+"px";//"525px"     ;
+		hoverCanvas.style["opacity"]         = "0";
+		hoverCanvas.style["transition"]      = "opacity .75s ease-in-out";
+		hoverCanvas.style["background-color"]= "rgba(255, 0, 0, 0.40)";
+
+		// Remove the old one if it exists.
+		if(document.querySelector("#emu_hover_canvas2")){
+			document.querySelector("#emu_hover_canvas2").remove();
+		}
+		emu.vars.dom.view["emscripten_emu_container"].appendChild(hoverCanvas);
+
+		// Wait 25 ms to fade in.
+		setTimeout(function(){
+			// Show it via opacity.
+			hoverCanvas.style["opacity"] = "1";
+
+			// Wait another 3 seconds to fade it.
+			setTimeout(function(){
+				// Hide it via opacity.
+				hoverCanvas.style["opacity"] = "0";
+
+				// Remove it right after it fades out.
+				setTimeout(function(){
+					hoverCanvas.remove();
+				}, 450);
+			}, 1500);
+
+		}, 25);
+
+
+
+	},
 	// * Turns the canvas image to gray-scale.
 	grayTheCanvas           : function(canvas) {
 		var ctx = canvas.getContext("2d");
@@ -215,6 +276,11 @@ emu.funcs.shared = {
 							{ data = this.response; break; }
 						default:
 							{ data = this.responseText; break; }
+					}
+
+					// Required for IE.
+					if (formData._config.responseType == "json" && typeof data == "string") {
+						data = JSON.parse(data);
 					}
 
 					resolve(data);
@@ -380,57 +446,85 @@ emu.funcs.shared = {
 			ratio : newRatio
 		};
 	},
+	//
+	add_page_zoom_listener    : function(){
+		// Add the event listener.
+		window.addEventListener("resize", function(){ emu.funcs.shared.page_zoom(false); }, false);
 
-	/*
-	// NOT COMPLETE
-	scaleThePage : function(){
-		let dims_window = emu.funcs.shared.getWindowDimensions();
-		let dims_body   = document.querySelector("body").getBoundingClientRect();
-
-		// var scale = Math.min(
-		// 	availableWidth / contentWidth,
-		// 	availableHeight / contentHeight
-		// );
-
-		var scale = Math.min(
-			(dims_window.width-20)  / dims_body.width,
-			(dims_window.height-20) / dims_body.height
-		);
-
-		document.body.style['transform-origin'] = 'top center' ;
-		document.body.style['-ms-transform']    = 'scale('+scale+')' ;
-		document.body.style['transform']        = 'scale('+scale+')' ;
-
-		var scale2 = emu.funcs.shared.calculateAspectRatioFit(
-			dims_window.width  , dims_body.width,
-			dims_window.height , dims_body.height
-		);
-
-		console.log(scale);
-		console.log(scale2);
-
-		// maxWidth and maxHeight come from dims.
+		// Resize the page.
+		emu.funcs.shared.page_zoom(false);
 	},
-	unScaleThePage : function(){
-		document.body.style['transform-origin'] = '' ;
-		document.body.style['-ms-transform']    = '' ;
-		document.body.style['transform']        = '' ;
+	//
+	remove_page_zoom_listener : function(){
+		// Remove the event listener.
+		window.removeEventListener("resize", function(){ emu.funcs.shared.page_zoom(true); }, false);
+
+		// Resize the page back to a scale of 1.
+		emu.funcs.shared.page_zoom(true);
 	},
-	getWindowDimensions : function(){
-		// https://stackoverflow.com/a/28241682
-		var width = window.innerWidth
-		|| document.documentElement.clientWidth
-		|| document.body.clientWidth;
+	//
+	page_zoom : function(reset){
+		function getViewportSize(w) {
+			// https://stackoverflow.com/a/18284182/2731377
 
-		var height = window.innerHeight
-		|| document.documentElement.clientHeight
-		|| document.body.clientHeight;
+			// Use the specified window or the current window if no argument
+			w = w || window;
 
-		return {
-			"width":width,
-			"height":height
-		};
-	},
-	*/
+			// This works for all browsers except IE8 and before
+			if (w.innerWidth != null) return { w: w.innerWidth, h: w.innerHeight };
 
+			// For IE (or any browser) in Standards mode
+			var d = w.document;
+			if (document.compatMode == "CSS1Compat"){
+				return {
+					w: d.documentElement.clientWidth,
+					h: d.documentElement.clientHeight
+				};
+			}
+
+			// For browsers in Quirks mode
+			return { w: d.body.clientWidth, h: d.body.clientHeight };
+
+		}
+		var vp_dims = getViewportSize(window);
+		var bodyWidth  = document.querySelector("body").clientWidth;
+		var bodyHeight = document.querySelector("body").clientHeight;
+		var scale=1;
+
+		// Is this a scale reset?
+		if(reset){
+			scale=1;
+		}
+
+		// Don't shrink the view. Only enlarge.
+		else if(bodyHeight > vp_dims.h){
+			scale=1;
+			// console.log("No scaling.");
+			// return;
+		}
+
+		// Scaled body cannot go larger than the viewport height.
+		else{
+			while(
+				scale*bodyHeight < vp_dims.h-40 &&
+				scale*bodyWidth < vp_dims.w-40
+			){ scale+=0.05; }
+		}
+
+		// console.log(scale);
+
+		// Req for IE9
+		// setTimeout(function(){
+			// console.log(scale);
+			document.querySelector("body").style['transform-origin'] = 'top';
+			document.querySelector("body").style['-ms-transform']    = 'scale(' + scale + ')';
+			document.querySelector("body").style['-moz-transform']   = 'scale(' + scale + ')';
+			document.querySelector("body").style['transform']        = 'scale(' + scale + ')';
+		// }, 1);
+
+		// window.getComputedStyle(document.querySelector("body"), "")["transform"] ||
+		// window.getComputedStyle(document.querySelector("body"), "")["-moz-transform"] ||
+		// window.getComputedStyle(document.querySelector("body"), "")["-ms-transform"]
+
+	}
 };

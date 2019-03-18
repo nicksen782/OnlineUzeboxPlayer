@@ -92,6 +92,11 @@ emu.funcs        = {
 						// console.log("Saved eeprom.bin to localStorage.");
 						emu.funcs.shared.textOnCanvas2({"text":"Saved EEPROM"});
 					}
+					if( Object.keys(emu.vars.innerEmu.Module.FS.root.contents).indexOf("_HISCORE.DAT") != -1 ){
+						localStorage.setItem("EMU__HISCORE.DAT", emu.vars.innerEmu.Module.FS.readFile("_HISCORE.DAT") );
+						console.log("Saved _HISCORE.DAT to localStorage.");
+						emu.funcs.shared.textOnCanvas3({"text":"Saved _HISCORE.DAT"});
+					}
 				}
 				return;
 			};
@@ -275,6 +280,12 @@ emu.funcs        = {
 			// VIEW: Gamepad polling, Emu core switch
 			emu.vars.dom.view["gamepadIcon_poll"].addEventListener("click" , emu.gamepads.init           , false);
 			emu.vars.dom.view["emuCore_switch"]  .addEventListener("click" , emu.vars.innerEmu.toggleCore, false);
+
+			// VIEW: Auto page resize checkbox.
+			// emu.funcs.shared.page_zoom()
+			// add_page_zoom_listener
+			// remove_page_zoom_listener
+			// page_zoom
 		};
 		EL_view();
 
@@ -304,10 +315,15 @@ emu.funcs        = {
 			if(emu.vars.innerEmu.Module.abort) {
 				try{
 					// Save the CUzeBox eeprom.bin file to localStorage before we end the Emscripten instance?
-					if( Object.keys(emu.vars.innerEmu.Module.FS.root.contents).indexOf("eeprom.bin") !=-1 ){
+					if( Object.keys(emu.vars.innerEmu.Module.FS.root.contents).indexOf("eeprom.bin") != -1 ){
 						localStorage.setItem("EMU_eeprom.bin", emu.vars.innerEmu.Module.FS.readFile("eeprom.bin") );
 						// console.log("Saved eeprom.bin to localStorage.");
 						emu.funcs.shared.textOnCanvas2({"text":"Saved EEPROM"});
+					}
+					if( Object.keys(emu.vars.innerEmu.Module.FS.root.contents).indexOf("_HISCORE.DAT") != -1 ){
+						localStorage.setItem("EMU__HISCORE.DAT", emu.vars.innerEmu.Module.FS.readFile("_HISCORE.DAT") );
+						// console.log("Saved _HISCORE.DAT to localStorage.");
+						emu.funcs.shared.textOnCanvas3({"text":"Saved _HISCORE.DAT"});
 					}
 
 					// Clear the displayed CUzeBox flags.
@@ -919,8 +935,10 @@ emu.funcs        = {
 						d.completefilepath = baseURL + "/" + d.completefilepath;
 					});
 
+					// SUPPOSED TO BE ON BUT I DISABLED IT.
+
 					// Enable the auto-pause.
-					emu.vars.dom.view["emuControls_autopause_chk"].classList.add("enabled");
+					// emu.vars.dom.view["emuControls_autopause_chk"].classList.add("enabled");
 
 					// Enable the auto debug.
 					emu.vars.dom.view["emu_compileOptions_UAM_autoDebug"].classList.add("enabled");
@@ -1117,15 +1135,29 @@ emu.funcs.UAM    = {
 
 		// Determine what will be visible to the user.
 		if(
+			emu.vars.UAMDATA.permKeys.indexOf("isFullAdmin") !=-1 ||
+			(
 			   emu.vars.UAMDATA.permKeys.indexOf("emu_canCompile")    !=-1
 			&& emu.vars.UAMDATA.permKeys.indexOf("emu_isUamGameUser") !=-1
+			)
 		){
 			// Show
+
+			// Refresh the UAM games list data and auto-select the user's default game.
+			// ** Make sure they actually have the permissions to do this.
+			// if( emu.vars.UAMDATA.permKeys.indexOf("emu_canCompile") !=-1 ){ emu.funcs.UAM.getGamesListUAM(); }
+			// else                                                          {
+			// 	console.log("MISSING: emu_canCompile");
+			// }
+
 		}
 
 		if(
+			emu.vars.UAMDATA.permKeys.indexOf("isFullAdmin") !=-1 ||
+			(
 			   emu.vars.UAMDATA.permKeys.indexOf("emu_isDbAdmin") !=-1
 			&& emu.vars.UAMDATA.permKeys.indexOf("emu_isDbUser") !=-1
+			)
 		){
 
 		}
@@ -1143,12 +1175,16 @@ emu.funcs.UAM    = {
 
 		// Permissions are required.
 		if(
-			   emu.vars.UAMDATA.permKeys.indexOf("emu_canCompile") !=-1
+			emu.vars.UAMDATA.permKeys.indexOf("isFullAdmin") !=-1 ||
+			(   emu.vars.UAMDATA.permKeys.indexOf("emu_canCompile") !=-1)
 			)
 		{
 			// // Make the container wider. Shrink the emu windows.
 			// document.querySelector("html").classList.add("wide");
 			// document.querySelector("#emu_emulator").classList.add("largerEmuWindow");
+
+			// Refresh the UAM games list data and auto-select the user's default game.
+			emu.funcs.UAM.getGamesListUAM();
 
 			// Set the other options.
 			setTimeout(function(){
@@ -1215,7 +1251,10 @@ emu.funcs.UAM    = {
 
 		}
 
-		if(	emu.vars.UAMDATA.permKeys.indexOf("emu_isDbAdmin") !=-1 ){
+		if(
+			emu.vars.UAMDATA.permKeys.indexOf("isFullAdmin") !=-1 ||
+			(emu.vars.UAMDATA.permKeys.indexOf("emu_isDbAdmin") !=-1)
+		){
 			// Show the VIEW nav buttons.
 			document.querySelectorAll(".sectionDivs_title_options .navOptions[newview='VIEW']").forEach(function(d, i, a) {
 				d.classList.remove("hidden");
@@ -1273,9 +1312,6 @@ emu.funcs.UAM    = {
 		// Set the initial state of the auto-pause checkbox.
 		// emu.vars.dom.view["emuControls_autopause_chk"].classList.add("enabled");
 
-		// Refresh the UAM games list data and auto-select the user's default game.
-		emu.funcs.UAM.getGamesListUAM();
-
 		// DB: Populate the status select menu with values.
 		emu.funcs.db.gameDb_populateStatusSelectMenu();
 
@@ -1308,6 +1344,11 @@ emu.funcs.UAM    = {
 				// Get handles to the data.
 				let gameList_UAM = res.data;
 				let defaultGame = res.defaultGame;
+				if(res.error){
+					alert      ("ERROR: The server returned this error:\n\n"+res.error_text);
+					console.log("ERROR: The server returned this error:\n\n"+res.error_text);
+					return;
+				}
 
 				// Get handle on DOM select, reset length to 1, modify the first option with the game count..
 				let uam_gamelist = emu.vars.dom.view["emu_gameSelect_UAM_select"];
@@ -1479,39 +1520,38 @@ emu.funcs.UAM    = {
 
 				// Work with emu_latestCompile
 				var consoleOutputString = thestring2.split("--STARTLASTBUILD.TXT--");
-				console.log("consoleOutputString", consoleOutputString.length, consoleOutputString);
-				consoleOutputString = consoleOutputString[1];
-				consoleOutputString = consoleOutputString.substr(0, consoleOutputString.indexOf("---ENDLASTBUILD.TXT---"));
-				consoleOutputString += "\n";
-				consoleOutputString += "\n";
-				consoleOutputString += "FAILURES :" + count_failures + "\n";
-				consoleOutputString += "ERRORS   :" + count_errors + "\n";
-				consoleOutputString += "WARNINGS :" + count_warnings + "\n";
-				consoleOutputString += "\n";
-				consoleOutputString += "\n";
-				consoleOutputString += "COMPILE COUNT :" + compileCount + "\n";
-				consoleOutputString += "C2BIN COUNT   :" + c2binCount + "\n";
-				consoleOutputString = consoleOutputString
-					.replace(/\r\n/g, "\n")                         // Normalize to Unix line endings.
-					.replace(/\n\n/g, "\n")                         // Remove double line-breaks;
-					.replace("AVR Memory Usage\n", "")              // Remove this line.
-					.replace("----------------\n", "")              // Remove this line.
-					.replace("Device: atmega644\n", "")             // Remove this line.
-					.replace("(.text + .data + .bootloader)\n", "") // Remove this line.
-					.replace("(.data + .bss + .noinit)\n\n", "")    // Remove this line.
-					.replace(/  /g, " ")                            // Replace all double-spaces with one space.
-					.replace(/\n/g, "\r\n")                         // Normalize to Windows line endings.
-					.trim();
-				emu_latestCompile.innerHTML = consoleOutputString;
-
-				// Start after compile?
-				if (UAM_chk1) {
-					emu.funcs.nav.changeView("VIEW");
-
-					// Load the game from the JSON url.
-					emu.funcs.getGameFiles("4");
+				// console.log("consoleOutputString", consoleOutputString.length, consoleOutputString);
+				if(consoleOutputString.length > 1){
+					consoleOutputString = consoleOutputString[1];
+					consoleOutputString = consoleOutputString.substr(0, consoleOutputString.indexOf("---ENDLASTBUILD.TXT---"));
+					consoleOutputString += "\n";
+					consoleOutputString += "\n";
+					consoleOutputString += "FAILURES :" + count_failures + "\n";
+					consoleOutputString += "ERRORS   :" + count_errors + "\n";
+					consoleOutputString += "WARNINGS :" + count_warnings + "\n";
+					consoleOutputString += "\n";
+					consoleOutputString += "\n";
+					consoleOutputString += "COMPILE COUNT :" + compileCount + "\n";
+					consoleOutputString += "C2BIN COUNT   :" + c2binCount + "\n";
+					consoleOutputString = consoleOutputString
+						.replace(/\r\n/g, "\n")                         // Normalize to Unix line endings.
+						.replace(/\n\n/g, "\n")                         // Remove double line-breaks;
+						.replace("AVR Memory Usage\n", "")              // Remove this line.
+						.replace("----------------\n", "")              // Remove this line.
+						.replace("Device: atmega644\n", "")             // Remove this line.
+						.replace("(.text + .data + .bootloader)\n", "") // Remove this line.
+						.replace("(.data + .bss + .noinit)\n\n", "")    // Remove this line.
+						.replace(/  /g, " ")                            // Replace all double-spaces with one space.
+						.replace(/\n/g, "\r\n")                         // Normalize to Windows line endings.
+						.trim();
+					emu_latestCompile.innerHTML = consoleOutputString;
 				}
+
 				// Debug on failures or errors?
+				// console.log("UAM_chk2      :", UAM_chk2);
+				// console.log("count_failures:", count_failures);
+				// console.log("count_errors  :", count_errors);
+
 				if (UAM_chk2 && (count_failures || count_errors)) {
 					emu.funcs.nav.changeView("DEBUG1");
 					// output1.scrollTop = output1.querySelector(".emu_failures").offsetTop - 15;
@@ -1521,6 +1561,14 @@ emu.funcs.UAM    = {
 				if (UAM_chk4 && count_warnings) {
 					emu.funcs.nav.changeView("DEBUG1");
 					output1.scrollTop = output1.querySelector(".emu_warnings").offsetTop - 15;
+				}
+
+				// Start after compile?
+				if (UAM_chk1 && !count_errors && !count_failures) {
+					emu.funcs.nav.changeView("VIEW");
+
+					// Load the game from the JSON url.
+					emu.funcs.getGameFiles("4");
 				}
 
 			}, emu.funcs.shared.rejectedPromise
@@ -1620,7 +1668,8 @@ emu.funcs.nav    = {
 				// This will fix it when coming back to the VIEW view.
 				setTimeout(function(){
 					emu.vars.innerEmu.resizeEmuCanvas();
-				}, 250);
+					// emu.funcs.shared.page_zoom();
+				}, 1250);
 
 				break;
 			}
@@ -1798,6 +1847,7 @@ window.onload = function() {
 					document.querySelector("#coresetting #coresetting_toggle").classList.remove("hidden");
 					newJs.src = "CUzeBox_emu_core/emu_core_WASM.js";
 				}
+
 				// Load the ASMJS version instead.
 				else{
 					// console.log("Using asm.js");

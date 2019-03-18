@@ -115,18 +115,18 @@ function API_REQUEST( $api, $type ){
 	$o_values["emu_init"]                = [ "p"=>( ( $public) ? 1 : 0 ), "args"=>[] ] ;
 
 	// EMULATOR FUNCTIONS - VIEW (UAM)
-	$o_values["gameman_manifest_user"] = [ "p"=>( ( $UAM && ($isFullAdmin) ) ? 1 : 0 ), "args"=>[] ] ;
+	$o_values["gameman_manifest_user"] = [ "p"=>( ( $UAM && ($isFullAdmin||$emu_canCompile) ) ? 1 : 0 ), "args"=>[] ] ;
 	$o_values["c2bin_UamGame"]         = [ "p"=>( ( $UAM && ($isFullAdmin||$emu_canCompile) ) ? 1 : 0 ), "args"=>[] ] ;
 	$o_values["compile_UamGame"]       = [ "p"=>( ( $UAM && ($isFullAdmin||$emu_canCompile) ) ? 1 : 0 ), "args"=>[] ] ;
 	$o_values["c2bin_UamGame_2"]       = [ "p"=>( ( $UAM && ($isFullAdmin||$emu_canCompile) ) ? 1 : 0 ), "args"=>[] ] ;
 
 	// EMULATOR FUNCTIONS - GAMES DB (UAM)
-	$o_values["getData_oneGame"]       = [ "p"=>( ( $UAM && ($isFullAdmin)) ? 1 : 0 ), "args"=>[] ] ;
-	$o_values["gameDb_addFiles"]       = [ "p"=>( ( $UAM && ($isFullAdmin)) ? 1 : 0 ), "args"=>[] ] ;
-	$o_values["gameDb_deleteFile"]     = [ "p"=>( ( $UAM && ($isFullAdmin)) ? 1 : 0 ), "args"=>[] ] ;
-	$o_values["gameDb_updateGameData"] = [ "p"=>( ( $UAM && ($isFullAdmin)) ? 1 : 0 ), "args"=>[] ] ;
-	$o_values["gameDb_newGame"]        = [ "p"=>( ( $UAM && ($isFullAdmin)) ? 1 : 0 ), "args"=>[] ] ;
-	$o_values["gameDb_deleteGame"]     = [ "p"=>( ( $UAM && ($isFullAdmin)) ? 1 : 0 ), "args"=>[] ] ;
+	$o_values["getData_oneGame"]       = [ "p"=>( ( $UAM && ($isFullAdmin||$emu_isDbAdmin||$emu_isDbUser)) ? 1 : 0 ), "args"=>[] ] ;
+	$o_values["gameDb_addFiles"]       = [ "p"=>( ( $UAM && ($isFullAdmin||$emu_isDbAdmin||$emu_isDbUser)) ? 1 : 0 ), "args"=>[] ] ;
+	$o_values["gameDb_deleteFile"]     = [ "p"=>( ( $UAM && ($isFullAdmin||$emu_isDbAdmin||$emu_isDbUser)) ? 1 : 0 ), "args"=>[] ] ;
+	$o_values["gameDb_updateGameData"] = [ "p"=>( ( $UAM && ($isFullAdmin||$emu_isDbAdmin||$emu_isDbUser)) ? 1 : 0 ), "args"=>[] ] ;
+	$o_values["gameDb_newGame"]        = [ "p"=>( ( $UAM && ($isFullAdmin||$emu_isDbAdmin||$emu_isDbUser)) ? 1 : 0 ), "args"=>[] ] ;
+	$o_values["gameDb_deleteGame"]     = [ "p"=>( ( $UAM && ($isFullAdmin||$emu_isDbAdmin||$emu_isDbUser)) ? 1 : 0 ), "args"=>[] ] ;
 
 	$o_values["getDataFromUzeboxGamesAndDemos"] = [ "p"=>( ( $UAM && ($isFullAdmin)) ? 1 : 0 ), "args"=>[] ] ;
 
@@ -136,6 +136,7 @@ function API_REQUEST( $api, $type ){
 	if( ! isset( $o_values[ $api] ) ){
 		$stats['error']=true;
 		$stats['error_text']="Unhandled API";
+		$stats['o']=$_POST["o"] ? $_POST["o"] : $_GET["o"];
 		// audit_API_newRecord( $_SESSION['user_id'], $_SESSION['o_api'], $_SESSION['via_type'], 0, $stats['error_text'] );
 	}
 
@@ -150,6 +151,7 @@ function API_REQUEST( $api, $type ){
 	else if( ! $o_values[ $api ]['p'] ){
 		$stats['error']=true;
 		$stats['error_text']="API auth error";
+		$stats['o']=$_POST["o"] ? $_POST["o"] : $_GET["o"];
 		// audit_API_newRecord( $_SESSION['user_id'], $_SESSION['o_api'], $_SESSION['via_type'], 0, $stats['error_text'] );
 	}
 
@@ -177,7 +179,6 @@ function getDataFromUzeboxGamesAndDemos(){
 		// '$_POST'     => $_POST      ,
 	) );
 }
-
 
 class sqlite3_DB_PDO__EMU{
 	public $dbh;              // The DB handle.

@@ -54,13 +54,13 @@ emu.vars.innerEmu = {
 		// Load the files from the files list.
 		this["preRun"]    = [ function(){
 
-			var GameFiles        = emu.vars.gameFiles;
+			// var GameFiles        = emu.vars.gameFiles;
 			var FilesDownloading = emu.vars.gameFilesDownloading;
 
 			// Filter any unpopulated records.
 
 			// Load the CUzeBox eeprom.bin from localStorage to a file in Emscripten?
-			let eeprombin = localStorage.getItem("EMU_eeprom.bin");
+			let eeprombin  = localStorage.getItem("EMU_eeprom.bin");
 			if(eeprombin!=null){
 				eeprombin = eeprombin.split(",");
 				eeprombin = emu.funcs.shared.arrayToArrayBuffer(eeprombin);
@@ -81,21 +81,85 @@ emu.vars.innerEmu = {
 				if(deleteIncludedEEPROMBIN==true || IncludedEEPROMBIN_index !=undefined){
 					delete emu.vars.gameFiles[IncludedEEPROMBIN_index];
 				}
+				emu.vars.gameFiles = emu.vars.gameFiles.filter(Boolean);
 
-				emu.vars.gameFiles.push({
+				let newObj = {
 					"name"    :"eeprom.bin",
 					"data"    :eeprombin_view,
 					"filesize":eeprombin_view.length,
-				});
+				};
+				emu.vars.gameFiles.push(newObj);
+				// GameFiles.push(newObj);
 
-				emu.vars.gameFiles = emu.vars.gameFiles.filter(Boolean);
+				// GameFiles = GameFiles.filter(Boolean);
 
 			}
 
-			if(   FilesDownloading ) { throw new Error('GAME IS STILL LOADING     : FilesDownloading : ' + FilesDownloading); }
-			if( ! GameFiles.length ) { throw new Error('NO FILES HAVE BEEN LOADED : GameFiles. Length: ' + GameFiles.length); }
+			let HISCOREDAT = localStorage.getItem("EMU__HISCORE.DAT");
+			if(HISCOREDAT!=null){
+				HISCOREDAT = HISCOREDAT.split(",");
+				HISCOREDAT = emu.funcs.shared.arrayToArrayBuffer(HISCOREDAT);
+				let HISCOREDAT_view = new Uint8Array( HISCOREDAT );
 
-			GameFiles.map(function(d,i,a){
+				// Was a _HISCORE.DAT file part of the gamefiles? We can't have duplicates. Delete the old file.
+				emu.vars.gameFiles.forEach(function(d,i,a){
+					if(d.name=="_HISCORE.DAT") {
+						delete emu.vars.gameFiles[i];
+						// console.log("delete:", i);
+						emu.vars.gameFiles = emu.vars.gameFiles.filter(Boolean);
+					}
+				});
+
+				// console.log("Loaded _HISCORE.DAT from localStorage.");
+				emu.funcs.shared.textOnCanvas3({"text":"Loaded _HISCORE.DAT"});
+
+				let newObj = {
+					"name"    :"_HISCORE.DAT",
+					"data"    :HISCOREDAT_view,
+					"filesize":HISCOREDAT_view.length,
+				};
+				emu.vars.gameFiles.push(newObj);
+				// GameFiles.push(newObj);
+
+				// GameFiles = GameFiles.filter(Boolean);
+			}
+			// NO _HISCORE.DAT? Add it. It needs to be available for the games that utilize it.
+			else{
+				// console.log("_HISCORE.DAT was missing. Adding it now.");
+				HISCOREDAT = new ArrayBuffer( 512 ); // emu.funcs.shared.arrayToArrayBuffer( );
+				let HISCOREDAT_view = new Uint8Array( HISCOREDAT );
+				let newObj = {
+					"name"    :"_HISCORE.DAT",
+					"data"    :HISCOREDAT,
+					"data"    :HISCOREDAT_view,
+					"filesize":HISCOREDAT_view.length,
+				};
+
+				// Was a _HISCORE.DAT file part of the gamefiles? We can't have duplicates. Delete the old file.
+				emu.vars.gameFiles.forEach(function(d,i,a){
+					if(d.name=="_HISCORE.DAT") {
+						delete emu.vars.gameFiles[i];
+						// console.log("delete:", i);
+						emu.vars.gameFiles = emu.vars.gameFiles.filter(Boolean);
+					}
+				});
+
+				emu.vars.gameFiles.push(newObj);
+				// GameFiles.push(newObj);
+
+				emu.vars.gameFiles = emu.vars.gameFiles.filter(Boolean);
+				// GameFiles = GameFiles.filter(Boolean);
+
+				localStorage.setItem("EMU__HISCORE.DAT", HISCOREDAT_view );
+				// console.log("Saved blank _HISCORE.DAT to localStorage.");
+			}
+
+			if(   FilesDownloading ) { throw new Error('GAME IS STILL LOADING     : FilesDownloading : ' + FilesDownloading); }
+			if( ! emu.vars.gameFiles.length ) { throw new Error('NO FILES HAVE BEEN LOADED : GameFiles. Length: ' + emu.vars.gameFiles.length); }
+
+
+			emu.vars.gameFiles.map(function(d,i,a){
+				// console.log("("+(i+1)+" of "+a.length+") :", "Loading:", d.name );
 				try     { emu.vars.innerEmu.Module["FS"].createPreloadedFile('/', d.name , d.data , true, true); }
 				catch(e){
 					console.log("Error loading file!", d.name, e);
@@ -152,18 +216,61 @@ emu.vars.innerEmu = {
 	},
 	// * Resizes the emu canvas to fit in its container.
 	resizeEmuCanvas             : function(){
+		// get the transform matrix
+		// var body = document.querySelector("body");
+		// var computedStyle = window.getComputedStyle(body, "");
+		// var matrix =
+		// 	computedStyle['-webkit-transform'] ||
+		// 	computedStyle['-moz-transform']    ||
+		// 	computedStyle['-o-transform']      ||
+		// 	computedStyle['-ms-transform']     ||
+		// 	computedStyle['transform'];
+
+		var currentScale=1;
+
+		// console.log(matrix);
+
+		// if(matrix!="none" && matrix!=undefined){
+		// 	currentScale = parseFloat(matrix.split("(")[1].split(",")[0], 10);
+		// }
+
 		var canvas        = emu.vars.dom.view["emuCanvas"];
 		var Container     = document.querySelector("#emscripten_emu_container");
+		var CanvasDims    = canvas.getBoundingClientRect();
 		var ContainerDims = Container.getBoundingClientRect();
 		var newDims       = emu.funcs.shared.calculateAspectRatioFit(
-			canvas.width,
-			canvas.height,
+			// canvas.width,
+			// canvas.height,
+			CanvasDims.width,
+			CanvasDims.height,
 			ContainerDims.width,
 			ContainerDims.height
 		);
 
-		canvas.style.width  = newDims.width  +"px";
-		canvas.style.height = newDims.height +"px";
+		// console.log(
+		// 	"\n currentScale                :", currentScale,
+		// 	"\n newDims                     :", newDims      ,
+		// 	"\n newDims.width               :", newDims.width,
+		// 	"\n newDims.height              :", newDims.height,
+		// 	"\n currentScale*newDims.width  :", currentScale*newDims.width,
+		// 	"\n currentScale*newDims.height :", currentScale*newDims.height,
+		// 	""
+		// );
+
+		canvas.style.width  = (currentScale*(newDims.width )) +"px";
+		canvas.style.height = (currentScale*(newDims.height)) +"px";
+
+		// Container.style.width  = newDims.width  +"px";
+		// Container.style.height = newDims.height +"px";
+
+		// console.log(
+		// 	"\nCanvasDims   :", CanvasDims   ,
+		// 	"\nContainerDims:", ContainerDims,
+		// 	"\nnewDims      :", newDims,
+		// 	"\n",
+		// 	"\ncanvas        :", canvas   ,
+		// 	"\nContainer     :", Container,
+		// );
 	},
 	// * Runs after the Emscripten instance is fully loaded. Sets flags, resizes the emu canvas.
 	emuIsReady                  : function(){

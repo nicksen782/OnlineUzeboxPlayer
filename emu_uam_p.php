@@ -126,6 +126,10 @@ WHERE
 		$bytes_in_text_objects_progmem = 0 ;
 		$bytes_in_other                = 0 ;
 
+		if(!file_exists('avr-nm.txt')){
+			file_put_contents('avr-nm.txt', "");
+		}
+
 		$handle = fopen("avr-nm.txt", "r");
 		if ($handle) {
 			while (($line = fgets($handle)) !== false) {

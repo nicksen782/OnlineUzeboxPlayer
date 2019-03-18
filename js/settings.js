@@ -27,6 +27,10 @@ emu.settings={
 				data = data.split(",");
 				data = emu.funcs.shared.arrayToArrayBuffer(data);
 			}
+			else if(keyname=="EMU__HISCORE.DAT.bin"){
+				data = data.split(",");
+				data = emu.funcs.shared.arrayToArrayBuffer(data);
+			}
 
 			// Load FileSaver if needed.
 			featureDetection.funcs.applyFeatures_fromList([ "FileSaver" ]).then(
@@ -35,6 +39,8 @@ emu.settings={
 					var blob = new Blob( [ data ] , {type: "text/plain;charset=utf-8"});
 
 					// Present the download. (Strip off the "EMU_" part.
+					console.log("blob:", blob);
+					console.log("data:", data);
 					saveAs(blob, keyname.substring(keyname.indexOf('_')+1));
 				}
 				,emu.funcs.shared.rejectedPromise
@@ -79,6 +85,7 @@ emu.settings={
 					var blob = new Blob( [( emu.vars.innerEmu.Module.FS.readFile(filename) )] , {type: "text/plain;charset=utf-8"});
 
 					// Present the download.
+					console.log("blob:", blob);
 					saveAs(blob, filename);
 				}
 				,emu.funcs.shared.rejectedPromise

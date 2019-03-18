@@ -90,6 +90,7 @@ emu.gamepads     = {
 
 		// Determine which group of set buttons we are working with.
 		let tables = this.closest(".sectionWindow").querySelectorAll(".gamepadMappingTable");
+
 		let setButtons=[];
 		if(this.id=="gp1_setAll"){
 			setButtons=tables[0].querySelectorAll(".gp_cfg_set");
@@ -102,11 +103,11 @@ emu.gamepads     = {
 		setButtons.forEach(function(d,i,a){
 			emu.gamepads.autoSet_buttonsToAssign.push(d);
 		} );
+
+		// Set the first set button in the queue to be active.
 		if(emu.gamepads.autoSet_buttonsToAssign.length){
 			emu.gamepads.autoSet_buttonsToAssign[0].classList.add("activeBtnMap");
 		}
-
-		// Set the first set button in the queue to be active.
 
 		// setButtons.forEach(function(d,i,a){
 		// 	emu.gamepads.map1Button.call( d );
@@ -153,11 +154,12 @@ emu.gamepads     = {
 		// Generate the controller name ("status") if not already done.
 		let src_gamepads = emu.gamepads.getSrcGamepads();
 
-		// Do we swap the gamepad order?
+		// Do we swap the gamepad read order?
 		if(emu.gamepads.swapGamepads==1){
 			src_gamepads = src_gamepads.reverse();
 		}
 
+		// Found a new gamepad?
 		if(!emu.vars.dom.gamepad["gp1_status"].innerHTML.length && src_gamepads.length>0){
 			// console.log("assigning gamepad name (1)");
 			let obj = emu.gamepads.generateGamepadKey(src_gamepads[0]);
@@ -173,11 +175,14 @@ emu.gamepads     = {
 			emu.gamepads.newTemplateMapEntry(obj);
 		}
 
+		// Look for button presses. Any gamepad.
 		let buttonWasSet=false;
 		for(let i=0; i<emu.vars.dom.gamepad["gp_cfg_setBtns"].length; i+=1){
 			let thisSetButton = emu.vars.dom.gamepad["gp_cfg_setBtns"][i];
 			if(thisSetButton.classList.contains("activeBtnMap")){
+				buttonWasSet=false;
 				buttonWasSet = emu.gamepads.map1Button.call( thisSetButton );
+				// if( buttonWasSet ) console.log("buttonWasSet:", buttonWasSet);
 
 				// Did the user press a button?
 				if(buttonWasSet){
@@ -188,6 +193,7 @@ emu.gamepads     = {
 					if(emu.gamepads.autoSet_buttonsToAssign.length){
 						// Remove the first index. We just did that button.
 						emu.gamepads.autoSet_buttonsToAssign.shift();
+						// console.log(emu.gamepads.autoSet_buttonsToAssign.length);
 					}
 
 					// Are there any autosets left?
@@ -245,33 +251,48 @@ emu.gamepads     = {
 		// Poll the gamepads.
 		let src_gamepads = emu.gamepads.getSrcGamepads();
 
+		// Do we swap the gamepad read order?
+		if(emu.gamepads.swapGamepads==1){
+			src_gamepads = src_gamepads.reverse();
+		}
+
 		// console.log(src_gamepads);
 
 		// Go through the src_gamepad array buttons and axis.
 		var userHasSelectedAButton=false;
-		var newHTML;
+		var newHTML = "";
 		for(let i=0; i<src_gamepads.length; i+=1){
-			if(userHasSelectedAButton){
-				return userHasSelectedAButton;
-			}
+			// console.log("Looking for active inputs on gamepad #"+i);
+
+			userHasSelectedAButton=false;
+			newHTML="";
 
 			let buttons = src_gamepads[i].buttons.map(function(d,i,a){ return d.value; });
 			let axes    = src_gamepads[i].axes.map(function(d,i,a){ return d; });
 
+			let pressedButton=false;
+			let pressedAxis=false;
+
 			// Get counts of buttons pressed.
-			let axesNegCnt    = axes.filter(function(d,i,a){ if(d==-1) { return true; } }).length
-			let axesPosCnt    = axes.filter(function(d,i,a){ if(d== 1) { return true; } }).length
+			let axesNegCnt    = axes   .filter(function(d,i,a){ if(d==-1) { return true; } }).length
+			let axesPosCnt    = axes   .filter(function(d,i,a){ if(d== 1) { return true; } }).length
 			let buttonsNegCnt = buttons.filter(function(d,i,a){ if(d==-1) { return true; } }).length
 			let buttonsPosCnt = buttons.filter(function(d,i,a){ if(d== 1) { return true; } }).length
 			let inputCount    = (axesNegCnt+axesPosCnt+buttonsNegCnt+buttonsPosCnt) ;
 
+			// Did the user press more than one input?
 			if(inputCount>1){
 				// alert("Please only press one button at a time.");
-				return userHasSelectedAButton;
+				// return userHasSelectedAButton;
+				// return false;
+				continue;
 			}
+			// Did the user NOT press any input?
 			else if(inputCount==0){
 				// console.log("No buttons pressed.");
-				return userHasSelectedAButton;
+				// return userHasSelectedAButton;
+				// return false;
+				continue;
 			}
 
 			// Look through the axes/buttons for a non-zero value.
@@ -282,15 +303,18 @@ emu.gamepads     = {
 				if     (axes.indexOf(-1) !=-1){
 					newHTML="a:"+negIndex+":-1";
 					userHasSelectedAButton=true;
+					pressedAxis=true;
 					emu.gamepads.modifyTempMapEntry(i, key, "axes", negIndex, -1, "-");
 				}
 				else if(axes.indexOf( 1) !=-1){
 					newHTML="a:"+posIndex+":1";
 					userHasSelectedAButton=true;
+					pressedAxis=true;
 					emu.gamepads.modifyTempMapEntry(i, key, "axes", posIndex, 1, "+");
 				}
 				else{
 					// console.log("Didn't actually press a axis??");
+					pressedAxis=false;
 				}
 			}
 			else if(buttonsNegCnt || buttonsPosCnt){
@@ -300,28 +324,64 @@ emu.gamepads     = {
 				if     (buttons.indexOf(-1) !=-1){
 					newHTML="b:"+negIndex+":-1";
 					userHasSelectedAButton=true;
+					pressedButton=true;
 					emu.gamepads.modifyTempMapEntry(i, key, "buttons", negIndex, -1, "-");
 				}
 				else if(buttons.indexOf( 1) !=-1){
 					newHTML="b:"+posIndex+":1";
+					pressedButton=true;
 					userHasSelectedAButton=true;
 					emu.gamepads.modifyTempMapEntry(i, key, "buttons", posIndex, 1, "+");
 				}
 				else{
 					// console.log("Didn't actually press a button??");
+					pressedButton=false;
 				}
 
 			}
 
+			if(userHasSelectedAButton){
+				// console.log("A button on a gamepad was pressed!", newHTML);
+				// return true;
+
+				let CHECK1 = (newHTML !="") ;
+				let CHECK2 = (emu.gamepads.lastAssignedButton != newHTML);
+				let CHECK3 = (newHTML !="" && emu.gamepads.lastAssignedButton != newHTML);
+
+				if( (newHTML !="") && (emu.gamepads.lastAssignedButton != newHTML) ){
+					// console.log(
+					// 	"\ntime              :", new Date().getTime(),
+					// 	"\ngamepad           :", i, src_gamepads[i].id,
+					// 	"\npressed button?   :", pressedButton,
+					// 	"\npressed axis?     :", pressedAxis,
+					// 	"\nbutton name       :", dest.closest("tr").querySelector("td:nth-child(1)").getAttribute("name"),
+					// 	"\n-----",
+					// 	"\nnewHTML           :", newHTML,
+					// 	"\nlastAssignedButton:", emu.gamepads.lastAssignedButton,
+					// 	"\nremaining         :", emu.gamepads.autoSet_buttonsToAssign.length,
+					// 	"\nCHECK1:", CHECK1,
+					// 	"\nCHECK2:", CHECK2,
+					// 	"\nCHECK3:", CHECK3,
+					// 	"\ndest:", dest,
+					// 	// "\ndest              :", dest
+					// 	""
+					// );
+
+					dest.innerHTML = newHTML.trim();
+					emu.gamepads.lastAssignedButton = dest.innerHTML;
+
+					// return true;
+					break;
+				}
+				else{
+					// return false;
+					userHasSelectedAButton=false;
+				}
+
+			}
 		}
-		if(newHTML && emu.gamepads.lastAssignedButton != newHTML){
-			dest.innerHTML = newHTML;
-			emu.gamepads.lastAssignedButton = newHTML;
-			return true;
-		}
-		else{
-			return false;
-		}
+
+		return userHasSelectedAButton;
 	},
 	// * Turns off the main polling, opens the config window, handles emulator pause state.
 	openGamepadConfig    : function(){
@@ -536,7 +596,7 @@ emu.gamepads     = {
 	enabled                : false,     // Saves the status of the main gamepad polling. Used in init to determine to init or de-init.
 	gp_setTimeout_id       : undefined, // Stores the id returned by setTimeout.
 	gp_raf_id              : undefined, // Stores the id returned by requestAnimationFrame.
-	gp_poll_freq           : 16,        // Frequency of gamepad polling.
+	gp_poll_freq           : 8,         // Frequency of gamepad polling.
 	gamepads               : [],        // Stores the found gamepads and some additional state data.
 	// * Used in translation of Uzebox buttons to their bit position and the key the browser needs to send to get that button pressed in CUzeBox.
 	uzeBox_gamepad_mapping : {
@@ -555,23 +615,23 @@ emu.gamepads     = {
 	},
 	// * Gamepad button mappings to Uzebox buttons. Specific to the gamepad. The included ones are gamepads I have.
 	gp_config_mappings     : {
-		// "2820:0009" : {
-		// 	"name":"8Bitdo SNES30 GamePad**2820**0009",
-		// 	"btnMap":{
-		// 		"BTN_B"      : { "type":"buttons" , "index":1 , "true":1 , "sign":"+" },
-		// 		"BTN_Y"      : { "type":"buttons" , "index":4 , "true":1 , "sign":"+" },
-		// 		"BTN_START"  : { "type":"buttons" , "index":11, "true":1 , "sign":"+" },
-		// 		"BTN_SELECT" : { "type":"buttons" , "index":10, "true":1 , "sign":"+" },
-		// 		"BTN_UP"     : { "type":"axes"    , "index":1 , "true":-1, "sign":"-" },
-		// 		"BTN_DOWN"   : { "type":"axes"    , "index":1 , "true":1 , "sign":"+" },
-		// 		"BTN_LEFT"   : { "type":"axes"    , "index":0 , "true":-1, "sign":"-" },
-		// 		"BTN_RIGHT"  : { "type":"axes"    , "index":0 , "true":1 , "sign":"+" },
-		// 		"BTN_A"      : { "type":"buttons" , "index":0 , "true":1 , "sign":"+" },
-		// 		"BTN_X"      : { "type":"buttons" , "index":3 , "true":1 , "sign":"+" },
-		// 		"BTN_SL"     : { "type":"buttons" , "index":6 , "true":1 , "sign":"+" },
-		// 		"BTN_SR"     : { "type":"buttons" , "index":7 , "true":1 , "sign":"+" },
-		// 	}
-		// },
+		"2820:0009" : {
+			"name":"8Bitdo SNES30 GamePad**2820**0009",
+			"btnMap":{
+				"BTN_B"      : { "type":"buttons" , "index":1 , "true":1 , "sign":"+" },
+				"BTN_Y"      : { "type":"buttons" , "index":4 , "true":1 , "sign":"+" },
+				"BTN_START"  : { "type":"buttons" , "index":11, "true":1 , "sign":"+" },
+				"BTN_SELECT" : { "type":"buttons" , "index":10, "true":1 , "sign":"+" },
+				"BTN_UP"     : { "type":"axes"    , "index":1 , "true":-1, "sign":"-" },
+				"BTN_DOWN"   : { "type":"axes"    , "index":1 , "true":1 , "sign":"+" },
+				"BTN_LEFT"   : { "type":"axes"    , "index":0 , "true":-1, "sign":"-" },
+				"BTN_RIGHT"  : { "type":"axes"    , "index":0 , "true":1 , "sign":"+" },
+				"BTN_A"      : { "type":"buttons" , "index":0 , "true":1 , "sign":"+" },
+				"BTN_X"      : { "type":"buttons" , "index":3 , "true":1 , "sign":"+" },
+				"BTN_SL"     : { "type":"buttons" , "index":6 , "true":1 , "sign":"+" },
+				"BTN_SR"     : { "type":"buttons" , "index":7 , "true":1 , "sign":"+" },
+			}
+		},
 		"05ac:111d" : {
 			"name":"Gamepad**05ac**111d",
 			"btnMap":{
@@ -589,23 +649,23 @@ emu.gamepads     = {
 				"BTN_SR"     : { "type":"buttons" , "index":7 , "true":1 , "sign":"+" },
 			}
 		},
-		"1234:bead" : {
-			"name":"vJoy - Virtual Joystick**1234**bead)",
-			"btnMap":{
-				"BTN_B"      : { "type":"buttons" , "index":0  , "true":1 , "sign":"+" },
-				"BTN_Y"      : { "type":"buttons" , "index":1  , "true":1 , "sign":"+" },
-				"BTN_START"  : { "type":"buttons" , "index":2  , "true":1 , "sign":"+" },
-				"BTN_SELECT" : { "type":"buttons" , "index":3  , "true":1 , "sign":"+" },
-				"BTN_UP"     : { "type":"buttons" , "index":4  , "true":1 , "sign":"+" },
-				"BTN_DOWN"   : { "type":"buttons" , "index":5  , "true":1 , "sign":"+" },
-				"BTN_LEFT"   : { "type":"buttons" , "index":6  , "true":1 , "sign":"+" },
-				"BTN_RIGHT"  : { "type":"buttons" , "index":7  , "true":1 , "sign":"+" },
-				"BTN_A"      : { "type":"buttons" , "index":8  , "true":1 , "sign":"+" },
-				"BTN_X"      : { "type":"buttons" , "index":9  , "true":1 , "sign":"+" },
-				"BTN_SL"     : { "type":"buttons" , "index":10 , "true":1 , "sign":"+" },
-				"BTN_SR"     : { "type":"buttons" , "index":11 , "true":1 , "sign":"+" },
-			}
-		}
+		// "1234:bead" : {
+		// 	"name":"vJoy - Virtual Joystick**1234**bead)",
+		// 	"btnMap":{
+		// 		"BTN_B"      : { "type":"buttons" , "index":0  , "true":1 , "sign":"+" },
+		// 		"BTN_Y"      : { "type":"buttons" , "index":1  , "true":1 , "sign":"+" },
+		// 		"BTN_START"  : { "type":"buttons" , "index":2  , "true":1 , "sign":"+" },
+		// 		"BTN_SELECT" : { "type":"buttons" , "index":3  , "true":1 , "sign":"+" },
+		// 		"BTN_UP"     : { "type":"buttons" , "index":4  , "true":1 , "sign":"+" },
+		// 		"BTN_DOWN"   : { "type":"buttons" , "index":5  , "true":1 , "sign":"+" },
+		// 		"BTN_LEFT"   : { "type":"buttons" , "index":6  , "true":1 , "sign":"+" },
+		// 		"BTN_RIGHT"  : { "type":"buttons" , "index":7  , "true":1 , "sign":"+" },
+		// 		"BTN_A"      : { "type":"buttons" , "index":8  , "true":1 , "sign":"+" },
+		// 		"BTN_X"      : { "type":"buttons" , "index":9  , "true":1 , "sign":"+" },
+		// 		"BTN_SL"     : { "type":"buttons" , "index":10 , "true":1 , "sign":"+" },
+		// 		"BTN_SR"     : { "type":"buttons" , "index":11 , "true":1 , "sign":"+" },
+		// 	}
+		// }
 	},
 	//
 	resetGamepadStates : function(){
@@ -633,8 +693,8 @@ emu.gamepads     = {
 		});
 
 		// Clear the gamepad "Set all" buttons.
-		emu.vars.dom.gamepad["gp1_setAll"].remove("active");
-		emu.vars.dom.gamepad["gp2_setAll"].remove("active");
+		emu.vars.dom.gamepad["gp1_setAll"].classList.remove("active");
+		emu.vars.dom.gamepad["gp2_setAll"].classList.remove("active");
 
 		// Clear the other settings for the "Set all" feature.
 		emu.gamepads.lastAssignedButton="";
@@ -654,12 +714,14 @@ emu.gamepads     = {
 		emu.gamepads.p2_needs_mapping      = 0;
 
 		// Player 1: Reset the displayed gamepad states.
+		emu.vars.dom.view["gamepadIcon_container_p1"].title="";
 		emu.vars.dom.view["gamepadIcon_container_p1"].classList.add("neverConnected");
 		emu.vars.dom.view["gamepadIcon_container_p1"].classList.remove("known");
 		emu.vars.dom.view["gamepadIcon_container_p1"].classList.remove("unconfigured");
 		emu.vars.dom.view["gamepadIcon_container_p1"].classList.remove("connected");
 
 		// Player 2: Reset the displayed gamepad states.
+		emu.vars.dom.view["gamepadIcon_container_p2"].title="";
 		emu.vars.dom.view["gamepadIcon_container_p2"].classList.add("neverConnected");
 		emu.vars.dom.view["gamepadIcon_container_p2"].classList.remove("known");
 		emu.vars.dom.view["gamepadIcon_container_p2"].classList.remove("unconfigured");
@@ -668,7 +730,11 @@ emu.gamepads     = {
 	// * Gets a raw copy of navigator.gamepads() and strips out any null or blank values.
 	getSrcGamepads      : function(){
 		// Get the gamepad info. There are many different ways. Use the first one that returns data.
-		let raw_gamepads = navigator.getGamepads ? navigator.getGamepads() : ( navigator.webkitGetGamepads ? navigator.webkitGetGamepads() : [] ) ;
+		let raw_gamepads = navigator.getGamepads
+			? navigator.getGamepads()
+			: ( navigator.webkitGetGamepads
+				? navigator.webkitGetGamepads()
+				: [] ) ;
 
 		// Create blank array for the src_gamepads.
 		let src_gamepads=[];
@@ -688,7 +754,7 @@ emu.gamepads     = {
 			}
 		}
 
-		// Any empty indexes can mess us up. Return an array WITHOUT empty indexes.
+		// Any empty indexes can mess us up. Return the array WITHOUT empty indexes.
 		src_gamepads = src_gamepads.map(function(d,i,a){ return d; }).filter(emu.funcs.shared.removeUndefines);
 		return src_gamepads;
 	},
@@ -788,7 +854,7 @@ emu.gamepads     = {
 					thisPad.active=0;
 				}
 
-				// Do we swap the gamepad order?
+				// Do we swap the gamepad read order?
 				if(emu.gamepads.swapGamepads==1){
 					src_gamepads = src_gamepads.reverse();
 				}
@@ -914,13 +980,17 @@ emu.gamepads     = {
 						emu.gamepads.gamepads[ thisPad.index ].prevActive = 1;
 
 						// Configure the displayed gamepad statuses.
-						if   (thisPad.index==0){
+						// if   (emu.gamepads.gamepads[ thisPad.index ].gamepad==0){
+						if   (emu.gamepads.gamepads[ thisPad.index ].player==0){
+						// if   (thisPad.index==0){
 							emu.vars.dom.view["gamepadIcon_container_p1"].classList.remove("neverConnected");
 							emu.vars.dom.view["gamepadIcon_container_p1"].classList.add("known");
 							emu.vars.dom.view["gamepadIcon_container_p1"].classList.remove("unconfigured");
 							emu.vars.dom.view["gamepadIcon_container_p1"].classList.add("connected");
 						}
-						else if(thisPad.index==1){
+						// if   (emu.gamepads.gamepads[ thisPad.index ].gamepad==1){
+						if   (emu.gamepads.gamepads[ thisPad.index ].player==1){
+						// else if(thisPad.index==1){
 							emu.vars.dom.view["gamepadIcon_container_p2"].classList.remove("neverConnected");
 							emu.vars.dom.view["gamepadIcon_container_p2"].classList.add("known");
 							emu.vars.dom.view["gamepadIcon_container_p2"].classList.remove("unconfigured");
@@ -931,7 +1001,7 @@ emu.gamepads     = {
 
 				}
 
-				// Find the known gamepads that are still set as active 0.
+				// Find the known gamepads that are still set as active=0.
 				for(let i=0; i<emu.gamepads.gamepads.length; i+=1){
 
 					let thisPad=emu.gamepads.gamepads[i];
@@ -943,19 +1013,26 @@ emu.gamepads     = {
 
 					// console.log("thisPad:", "index:", thisPad.gamepad.index, "active:", thisPad.active);
 
+					// Is this pad still active=0? It probably disconnected.
 					if( thisPad.prevActive && thisPad.active==0 ){
+					// if( thisPad.active==0 ){
 						// console.log("gamepad active 0");
 						// Configure the displayed gamepad statuses.
-						if   (thisPad.gamepad.index==0){
-							// console.log("Adjust player1");
+						// if   (thisPad.gamepad.index==0){
+						console.log(thisPad.player+1);
+						if   (thisPad.player==0){
+							// Put on standby status.
+							console.log("Player 1 gamepad has disconnected!");
 							emu.vars.dom.view["gamepadIcon_container_p1"].classList.remove("neverConnected");
 							emu.vars.dom.view["gamepadIcon_container_p1"].classList.add("known");
 							emu.vars.dom.view["gamepadIcon_container_p1"].classList.remove("unconfigured");
 							emu.vars.dom.view["gamepadIcon_container_p1"].classList.remove("connected");
 							thisPad.prevActive=0;
 						}
-						else if(thisPad.gamepad.index==1){
-							// console.log("Adjust player2");
+						// else if(thisPad.gamepad.index==1){
+						else if(thisPad.player==1){
+							// Put on standby status.
+							console.log("Player 2 gamepad has disconnected!");
 							emu.vars.dom.view["gamepadIcon_container_p2"].classList.remove("neverConnected");
 							emu.vars.dom.view["gamepadIcon_container_p2"].classList.add("known");
 							emu.vars.dom.view["gamepadIcon_container_p2"].classList.remove("unconfigured");
@@ -964,6 +1041,8 @@ emu.gamepads     = {
 						}
 					}
 				}
+
+				// What if src_gamepads did not contain an entry found in emu.gamepads.gamepads?
 
 				// Determine which previously connected gamepads are still connected.
 				// Update that status on the known gamepad entry.

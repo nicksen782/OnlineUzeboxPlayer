@@ -24,6 +24,11 @@
 
 // * Object that contains the flags/functions for the Emscripten instance.
 emu.vars.innerEmu = {
+	// * Count of emulator loads.
+	emuLoadCount           : 0,
+	// * Count of emulator loads.
+	emuLoads               : [],
+
 	// * Contains the active Emscripten instance.
 	Module                 : { },
 	// * Indicates if the Emscripten instance has finished loading.
@@ -32,10 +37,13 @@ emu.vars.innerEmu = {
 	startEmuAfterUserInput : false,
 	// * Used as a template to create a new Emscripten module.
 	createDefaultModule         : function(){
+		var _this = this;
+
 		// Tells Emscripten what DOM element that it should be listening to for keyboard input.
 		this["keyboardListeningElement"] = (function() { return emu.vars.dom.view["emuCanvas"] })();
 
-		// this["noExitRuntime"] = 0;
+		//
+		this["noExitRuntime"] = 0;
 
 		// Specifies which file the emulator should start.
 		this["arguments"] = [ "" ];
@@ -184,6 +192,20 @@ emu.vars.innerEmu = {
 					if( emu.vars.dom.view["emu_compileOptions_UAM_autoDebug"].classList.contains("enabled") ){
 						emu.vars.innerEmu.emu_sendKeyEvent("keydown", "key_F3" , 1);
 						emu.vars.innerEmu.emu_sendKeyEvent("keyup"  , "key_F3" , 1);
+
+						if( emu.vars.UAM_active == true ){
+							emu.vars.innerEmu.emu_sendKeyEvent("keydown", "key_F7" , 1);
+							emu.vars.innerEmu.emu_sendKeyEvent("keyup"  , "key_F7" , 1);
+						}
+						
+						// If the screen is already full size then make sure the quality flag is turned up.
+						let GUICORE_SMALL      = emu.vars.innerEmu.Module._NRA_returnFlags(3) ? true : false; // Small view or larger view
+						if(GUICORE_SMALL){
+							// console.log("Switching to increased resolution.");
+							emu.vars.innerEmu.emu_sendKeyEvent("keydown", "key_F2" , 1);
+							emu.vars.innerEmu.emu_sendKeyEvent("keyup"  , "key_F2" , 1);
+						}
+
 						emu.vars.innerEmu.displayCUzeBox_flags();
 					}
 				}, 750);
@@ -206,7 +228,16 @@ emu.vars.innerEmu = {
 						emu.funcs.emu_focusing(null, "mouseleave");
 					}
 				}, 1500);
-			}
+			},
+
+			// function(){
+			// 	setTimeout(function(){
+			// 		console.log("third");
+			// 		_this.abort("dddd");
+			// 	}, 2000);
+
+			// 	_this["noExitRuntime"] = false;
+			// }
 
 		];
 		this["printErr"]  = function(text) {

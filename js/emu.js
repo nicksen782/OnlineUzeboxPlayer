@@ -24,6 +24,8 @@
 
 "use strict";
 
+var test = {};
+
 // shim layer with setTimeout fallback
 if(typeof window.requestAnimationFrame == "undefined"){
 	window.requestAnimFrame = (function(){
@@ -296,6 +298,10 @@ emu.funcs        = {
 			emu.vars.dom.uamLogin["openUAM"].forEach(function(d, i, a) {
 				d.addEventListener("click", emu.funcs.UAM.openUamInNewWindow, false);
 			});
+
+			document.querySelector("#emu_view_slideToggle").addEventListener("click", function(){
+				document.querySelector('#bodyContainer').classList.toggle('slideLeft');
+			}, false);
 		}
 
 	},
@@ -312,44 +318,46 @@ emu.funcs        = {
 			}
 
 			// Abort the current emulator instance?
-			if(emu.vars.innerEmu.Module.abort) {
-				try{
-					// Save the CUzeBox eeprom.bin file to localStorage before we end the Emscripten instance?
-					if( Object.keys(emu.vars.innerEmu.Module.FS.root.contents).indexOf("eeprom.bin") != -1 ){
-						localStorage.setItem("EMU_eeprom.bin", emu.vars.innerEmu.Module.FS.readFile("eeprom.bin") );
-						// console.log("Saved eeprom.bin to localStorage.");
-						emu.funcs.shared.textOnCanvas2({"text":"Saved EEPROM"});
+			if(emu.vars.innerEmu.Module){
+				if(undefined != emu.vars.innerEmu.Module.abort) {
+					try{
+						// Save the CUzeBox eeprom.bin file to localStorage before we end the Emscripten instance?
+						if( Object.keys(emu.vars.innerEmu.Module.FS.root.contents).indexOf("eeprom.bin") != -1 ){
+							localStorage.setItem("EMU_eeprom.bin", emu.vars.innerEmu.Module.FS.readFile("eeprom.bin") );
+							// console.log("Saved eeprom.bin to localStorage.");
+							emu.funcs.shared.textOnCanvas2({"text":"Saved EEPROM"});
+						}
+						if( Object.keys(emu.vars.innerEmu.Module.FS.root.contents).indexOf("_HISCORE.DAT") != -1 ){
+							localStorage.setItem("EMU__HISCORE.DAT", emu.vars.innerEmu.Module.FS.readFile("_HISCORE.DAT") );
+							// console.log("Saved _HISCORE.DAT to localStorage.");
+							emu.funcs.shared.textOnCanvas3({"text":"Saved _HISCORE.DAT"});
+						}
+
+						// Clear the displayed CUzeBox flags.
+						emu.vars.innerEmu.clearDisplayedCUzeBox_flags();
+
+						// Clear the displayed pressed keys.
+						emu.vars.innerEmu.clearDisplayedPressedKeys();
+
+						// Abort the Emscripten module. Needs to be the last thing in this "try" since it will trigger the catch.
+						emu.vars.innerEmu.Module.abort();
+
+					} catch(e){
+						// The abort always throws an exception so it always catches. This is expected.
+						// console.log("A failure occurred at stopEmu:", e);
 					}
-					if( Object.keys(emu.vars.innerEmu.Module.FS.root.contents).indexOf("_HISCORE.DAT") != -1 ){
-						localStorage.setItem("EMU__HISCORE.DAT", emu.vars.innerEmu.Module.FS.readFile("_HISCORE.DAT") );
-						// console.log("Saved _HISCORE.DAT to localStorage.");
-						emu.funcs.shared.textOnCanvas3({"text":"Saved _HISCORE.DAT"});
+
+					// Stop the current gamepad polling if it is running.
+					if(emu.gamepads.enabled==true){
+						// console.log("Gamepads were enabled. Disabling them now.");
+						emu.gamepads.prev_pollState=true;
+						emu.gamepads.enabled=true;
+						emu.gamepads.init();
 					}
 
-					// Clear the displayed CUzeBox flags.
-					emu.vars.innerEmu.clearDisplayedCUzeBox_flags();
-
-					// Clear the displayed pressed keys.
-					emu.vars.innerEmu.clearDisplayedPressedKeys();
-
-					// Abort the Emscripten module. Needs to be the last thing in this "try" since it will trigger the catch.
-					emu.vars.innerEmu.Module.abort();
-
-
-				} catch(e){
-					// The abort always throws an exception so it always catches. This is expected.
-					// console.log("A failure occurred at stopEmu:", e);
 				}
-
-				// Stop the current gamepad polling if it is running.
-				if(emu.gamepads.enabled==true){
-					// console.log("Gamepads were enabled. Disabling them now.");
-					emu.gamepads.prev_pollState=true;
-					emu.gamepads.enabled=true;
-					emu.gamepads.init();
-				}
-
 			}
+
 			// Clear Module.
 			emu.vars.innerEmu.Module = null;
 
@@ -358,6 +366,7 @@ emu.funcs        = {
 
 			// Indicate that there is not a game loaded.
 			emu.vars.innerEmu.emulatorIsReady=false;
+
 		}
 		else {
 			return;
@@ -970,14 +979,80 @@ emu.funcs        = {
 			return;
 		}
 
+		// // Start new Emscripen instance by modifying Module.arguments and then running the Emscritpen module function.
+		// emu.funcs.stopEmu(false);
+
+		// // Edit Module: Set the game file.
+		// emu.vars.innerEmu.Module.arguments = [emu.vars.gameFile];
+
+		// // Start the new instance.
+		// emu.vars.innerEmu.UOP( emu.vars.innerEmu.Module );
+
 		// Start new Emscripen instance by modifying Module.arguments and then running the Emscritpen module function.
 		emu.funcs.stopEmu(false);
 
-		// Edit Module: Set the game file.
-		emu.vars.innerEmu.Module.arguments = [emu.vars.gameFile];
+		// Clear Module.
+		emu.vars.innerEmu.Module = null;
 
-		// Start the new instance.
-		emu.vars.innerEmu.UOP( emu.vars.innerEmu.Module );
+		// Clear the emu canvas and put a loading message on it while the game is loading.
+		emu.funcs.shared.clearTheCanvas(emu.vars.dom.view["emuCanvas"]);
+		emu.funcs.shared.textOnCanvas({ "canvas": emu.vars.dom.view["emuCanvas"], "text": " - STARTING GAME - " });
+
+		// Perhaps 1/2 second will be enough for garbage collection?
+		setTimeout(function(){
+			// Reset Module.
+			emu.vars.innerEmu.Module = new emu.vars.innerEmu.createDefaultModule();
+
+			// Edit Module: Set the game file.
+			emu.vars.innerEmu.Module.arguments = [emu.vars.gameFile];
+
+			// Update the load count.
+			emu.vars.innerEmu.emuLoadCount++;
+
+			// DEBUG: Output the load count.
+			// console.log("emu.vars.innerEmu.emuLoadCount:", emu.vars.innerEmu.emuLoadCount);
+			let titleText="";
+			if(window.performance && window.performance.memory){
+
+				let mem = window.performance.memory;
+				titleText += "  Emulator load  : " + emu.vars.innerEmu.emuLoadCount;
+				titleText += ", jsHeapSizeLimit: " + mem.jsHeapSizeLimit.toLocaleString() ;
+				titleText += ", totalJSHeapSize: " + mem.totalJSHeapSize.toLocaleString() ;
+				titleText += ", usedJSHeapSize : " + mem.usedJSHeapSize.toLocaleString()  ;
+
+				document.querySelector("#emu_screen_titlebar").title=titleText;
+
+				emu.vars.innerEmu.emuLoads.push(titleText);
+
+				// console.log(titleText);
+				console.log(emu.vars.innerEmu.emuLoads);
+				// console.log(
+				// 	"\njsHeapSizeLimit:", mem.jsHeapSizeLimit ,
+				// 	"\ntotalJSHeapSize:", mem.totalJSHeapSize ,
+				// 	"\nusedJSHeapSize :", mem.usedJSHeapSize  ,
+				// 	""
+				// );
+			}
+			else{
+				document.querySelector("#emu_screen_titlebar").title="Emulator loaded " + emu.vars.innerEmu.emuLoadCount + " times.";
+			}
+
+			try{
+				// Start the new instance.
+
+				// var test1 = Object.keys(window);
+				test.test=emu.vars.innerEmu.UOP( emu.vars.innerEmu.Module );
+				// var test2 = Object.keys(window);
+
+				// console.log(test1);
+				// console.log(test2);
+			}
+			catch(e){
+				console.log("The emulator failed to load. Please refresh this webpage.", e);
+				alert      ("The emulator failed to load. Please refresh this webpage.");
+			}
+		}, 500);
+
 	},
 	// * Sets/Clears focus to the emu canvas, pauses/unpauses Emscripten.
 	emu_focusing          : function(e, typeOverride) {
@@ -1424,16 +1499,18 @@ emu.funcs.UAM    = {
 					return;
 				}
 				// console.log(res);
-				let compileCount = res.c2binCount;
-				let c2binCount = res.compileCount;
-				let error = res.error;
-				let execResults = res.execResults;
-				let info = res.info;
-				let info2 = res.info2;
-				let json = res.json;
-				let link1 = res.link1;
-				let link2 = res.link2;
-				let link3 = res.link3;
+				let compileCount       = res.compileCount;
+				let c2binCount         = res.c2binCount;
+				let compileCount_today = res.compileCount_today;
+				let c2binCount_today   = res.c2binCount_today;
+				let error              = res.error;
+				let execResults        = res.execResults;
+				let info               = res.info;
+				let info2              = res.info2;
+				let json               = res.json;
+				let link1              = res.link1;
+				let link2              = res.link2;
+				let link3              = res.link3;
 
 				// Display cflow data links.
 				// var emu_cflowpdfDiv = document.querySelector("#emu_cflowpdfDiv");
@@ -1468,6 +1545,7 @@ emu.funcs.UAM    = {
 					var table_css = "background-color:#888888; color:black; margin:auto;";
 					var td1 = "border: 1px solid black !important; margin: 0px; padding: 4px; empty-cells: show;";
 					var grey = "background-color:#dddddd;";
+					var sizeInBytes = 0;
 
 					var outputHTML = "";
 					outputHTML += "<table style='" + table1 + table_css + "'>";
@@ -1496,8 +1574,21 @@ emu.funcs.UAM    = {
 							"	<td style='" + td1 + "font-size: 16px;text-align:center;'> " + dat[i].line + " </td>" +
 							"</tr>" +
 							"";
+						sizeInBytes+= (parseInt(dat[i].size, 10) || 0);
 					}
+
+					// One more row for the total.
+					// outputHTML +=
+					// 	"<tr>" +
+					// 	"	<td colspan='2' style='" + td1 + "font-size: 26px;text-align:center; background-color: goldenrod;'> TOTAL </td>" +
+					// 	"	<td colspan='5' style='" + td1 + "font-size: 26px;text-align:left;  background-color: goldenrod;'> " + sizeInBytes + " </td>" +
+					// 	"</tr>" +
+					// "";
+
+					// Close the table tag.
 					outputHTML += "</table>";
+
+					// Return the html/text output.
 					return outputHTML;
 				};
 
@@ -1526,13 +1617,13 @@ emu.funcs.UAM    = {
 					consoleOutputString = consoleOutputString.substr(0, consoleOutputString.indexOf("---ENDLASTBUILD.TXT---"));
 					consoleOutputString += "\n";
 					consoleOutputString += "\n";
-					consoleOutputString += "FAILURES :" + count_failures + "\n";
-					consoleOutputString += "ERRORS   :" + count_errors + "\n";
-					consoleOutputString += "WARNINGS :" + count_warnings + "\n";
+					consoleOutputString += "FAILURES : " + count_failures + "\n";
+					consoleOutputString += "ERRORS &nbsp; : " + count_errors   + "\n";
+					consoleOutputString += "WARNINGS : " + count_warnings + "\n";
 					consoleOutputString += "\n";
 					consoleOutputString += "\n";
-					consoleOutputString += "COMPILE COUNT :" + compileCount + "\n";
-					consoleOutputString += "C2BIN COUNT   :" + c2binCount + "\n";
+					consoleOutputString += "COMPILE COUNT : " + compileCount + " (TODAY: "+compileCount_today+")"+"\n";
+					consoleOutputString += "C2BIN COUNT &nbsp;&nbsp;: " + c2binCount   + " (TODAY: "+c2binCount_today+")"+"\n";
 					consoleOutputString = consoleOutputString
 						.replace(/\r\n/g, "\n")                         // Normalize to Unix line endings.
 						.replace(/\n\n/g, "\n")                         // Remove double line-breaks;
@@ -1552,19 +1643,130 @@ emu.funcs.UAM    = {
 				// console.log("count_failures:", count_failures);
 				// console.log("count_errors  :", count_errors);
 
+/*
+: In function ‘
+: At top level:
+*/
+
+				// Count up the different types of errors and display them (lots of additional text but at least it will be grouped.)
+				var newText=res.execResults.split("\n");
+				var errorGroups = {
+					"missing_declaration"                   : {
+						"searchText":"no previous declaration",
+						"data":[],
+						"count":0,
+					} ,
+					"implicitly truncated"                   : {
+						"searchText":"implicitly truncated",
+						"data":[],
+						"count":0,
+					} ,
+					"comparison_between_pointer_and"                   : {
+						"searchText":"comparison between pointer and",
+						"data":[],
+						"count":0,
+					} ,
+					"makesIncorrectPointerFrom"             : {
+						"searchText":"assignment makes pointer from incompatible",
+						"data":[],
+						"count":0,
+					} ,
+					"fromIncompatiblePointerType"           : {
+						"searchText":"’ from incompatible pointer type",
+						"data":[],
+						"count":0,
+					} ,
+					"assignmentFromIncompatiblePointerType" : {
+						"searchText":"assignment from incompatible pointer type",
+						"data":[],
+						"count":0,
+					} ,
+					"discardsConstQualifier"                : {
+						"searchText":"assignment discards ‘const’ qualifier",
+						"data":[],
+						"count":0,
+					} ,
+					"makesFromPointerWithoutCase"           : {
+						"searchText":"from pointer without a cast",
+						"data":[],
+						"count":0,
+					} ,
+					"incorrectArgumentDatatype"             : {
+						"searchText":"but argument is of type",
+						"data":[],
+						"count":0,
+					} ,
+					"unusedVariable"                        : {
+						"searchText":"unused variable",
+						"data":[],
+						"count":0,
+					} ,
+					"returnWithValueFromVoidFunction"       : {
+						"searchText":"‘return’ with a value, in function returning void",
+						"data":[],
+						"count":0,
+					} ,
+					"setButNotUsed"                         : {
+						"searchText":"set but not used",
+						"data":[],
+						"count":0,
+					} ,
+					"definedButNotUsed"                     : {
+						"searchText":"defined but not used",
+						"data":[],
+						"count":0,
+					} ,
+				};
+				var errorGroups_keys = Object.keys(errorGroups);
+				for(var i=0; i<newText.length; i+=1){
+					// Look at this line and try to make a partial string match.
+					for(var ii=0; ii<errorGroups_keys.length; ii+=1){
+						// Match found?
+						if(newText[i].indexOf(errorGroups[errorGroups_keys[ii]].searchText)!=-1){
+							// Add it to the appropriate list.
+							errorGroups[errorGroups_keys[ii]].data.push(newText[i]);
+							errorGroups[errorGroups_keys[ii]].count+=1;
+							// console.log(newText[i]);
+						}
+					}
+				}
+
+				var warningsOutput="";
+				var count_warnings2=0;
+				for(var ii=0; ii<errorGroups_keys.length; ii+=1){
+					// Does the data key have a length?
+					if(errorGroups[errorGroups_keys[ii]].data.length){
+						warningsOutput+="\n<span style='font-size:24px; font-weight:bold'>"+errorGroups_keys[ii]+"</span>\n";
+						for(var iii=0; iii<errorGroups[errorGroups_keys[ii]].data.length; iii+=1){
+							warningsOutput+=errorGroups[errorGroups_keys[ii]].data[iii];
+							warningsOutput+="\n";
+							count_warnings2++;
+						}
+						warningsOutput+="\tCOUNT OF WARNINGS: "+errorGroups[errorGroups_keys[ii]].count + "\n";
+					}
+				}
+				var warningsHTML="";
+				warningsHTML+="<br><br>";
+				warningsHTML+="<div style='color:greenyellow; font-size: 32px; text-align: center;'>WARNINGS GROUPED:</div>";
+				warningsHTML+="<div style='color:greenyellow; font-size: 16px; text-align: center;'>NOTE: Some might not be included!</div>";
+				warningsHTML+="<div style='color:greenyellow; font-size: 12px; text-align: center;'>Showing: "+(count_warnings2-0)+" of: "+(count_warnings)+"</div>";
+				warningsHTML+="<br><br><pre>" + warningsOutput + "</pre>";
+
+				output1.innerHTML = warningsHTML + "<br><br>" + output1.innerHTML;
+
 				if (UAM_chk2 && (count_failures || count_errors)) {
 					emu.funcs.nav.changeView("DEBUG1");
 					// output1.scrollTop = output1.querySelector(".emu_failures").offsetTop - 15;
 					output1.scrollTop = output1.querySelector(".emu_errors").offsetTop - 15;
 				}
 				// Debug on warnings?
-				if (UAM_chk4 && count_warnings) {
+				else if (UAM_chk4 && count_warnings) {
 					emu.funcs.nav.changeView("DEBUG1");
 					output1.scrollTop = output1.querySelector(".emu_warnings").offsetTop - 15;
 				}
 
 				// Start after compile?
-				if (UAM_chk1 && !count_errors && !count_failures) {
+				else if (UAM_chk1 && !count_errors && !count_failures) {
 					emu.funcs.nav.changeView("VIEW");
 
 					// Load the game from the JSON url.
@@ -1845,7 +2047,9 @@ window.onload = function() {
 					// console.log("Using Web Assembly");
 					document.querySelector("#coresetting #coresetting_text").innerHTML="Using Web ASM";
 					document.querySelector("#coresetting #coresetting_toggle").classList.remove("hidden");
-					newJs.src = "CUzeBox_emu_core/emu_core_WASM.js";
+					// newJs.src = "CUzeBox_emu_core/emu_core_WASM.js";
+					// newJs.src = "CUzeBox_emu_core/WASM_cuzebox.js";
+					newJs.src = "CUzeBox_emu_core/ASMJS_cuzebox_COMBINED.js";
 				}
 
 				// Load the ASMJS version instead.
@@ -1853,7 +2057,9 @@ window.onload = function() {
 					// console.log("Using asm.js");
 					document.querySelector("#coresetting #coresetting_text").innerHTML="Using ASM.JS";
 					document.querySelector("#coresetting #coresetting_toggle").classList.remove("hidden");
-					newJs.src = "CUzeBox_emu_core/emu_core_ASMJS.js";
+					// newJs.src = "CUzeBox_emu_core/emu_core_ASMJS.js";
+					// newJs.src = "CUzeBox_emu_core/ASMJS_cuzebox.js";
+					newJs.src = "CUzeBox_emu_core/WASM_cuzebox_COMBINED.js";
 				}
 
 				// Append the new script element.
@@ -1936,5 +2142,18 @@ window.onload = function() {
 
 	// Feature detect/replace.
 	featureDetection.funcs.init(continueApp);
-
 };
+
+function window_naturalOrder(){
+	var obj = {};
+
+	var keys = Object.keys(window);
+	var index=0;
+
+	keys.map(function(d,i,a){
+		obj[ index+"__"+d ] = window[d];
+		index++;
+	});
+
+	console.log(obj);
+}

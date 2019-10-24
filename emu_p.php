@@ -5,7 +5,7 @@
 $securityLoadedFrom_indexp = true;
 
 // Configure error reporting
-error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT);
+error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT & ~E_WARNING);
 ini_set('error_log', getcwd() . '/UAM5-EMU-error.txt');
 ini_set("log_errors", 1);
 ini_set("display_errors", 1);
@@ -110,23 +110,23 @@ function API_REQUEST( $api, $type ){
 	// $o_values["gameman_manifest_all"]      = [ "p"=>( ( $loggedIn && $admin) ? 1 : 0 ), 'get'=>0, 'post'=>1, ] ;
 
 	// EMULATOR FUNCTIONS - VIEW (NON-UAM)
-	$o_values["emu_getBuiltInGamelist"]  = [ "p"=>( ( $public) ? 1 : 0 ), "args"=>[] ] ;
-	$o_values["emu_returnJSON_byGameId"] = [ "p"=>( ( $public) ? 1 : 0 ), "args"=>[] ] ;
-	$o_values["emu_init"]                = [ "p"=>( ( $public) ? 1 : 0 ), "args"=>[] ] ;
+	$o_values["emu_getBuiltInGamelist"]  = [ "audit"=>false, "p"=>( ( $public) ? 1 : 0 ), "args"=>[] ] ;
+	$o_values["emu_returnJSON_byGameId"] = [ "audit"=>false, "p"=>( ( $public) ? 1 : 0 ), "args"=>[] ] ;
+	$o_values["emu_init"]                = [ "audit"=>false, "p"=>( ( $public) ? 1 : 0 ), "args"=>[] ] ;
 
 	// EMULATOR FUNCTIONS - VIEW (UAM)
-	$o_values["gameman_manifest_user"] = [ "p"=>( ( $UAM && ($isFullAdmin||$emu_canCompile) ) ? 1 : 0 ), "args"=>[] ] ;
-	$o_values["c2bin_UamGame"]         = [ "p"=>( ( $UAM && ($isFullAdmin||$emu_canCompile) ) ? 1 : 0 ), "args"=>[] ] ;
-	$o_values["compile_UamGame"]       = [ "p"=>( ( $UAM && ($isFullAdmin||$emu_canCompile) ) ? 1 : 0 ), "args"=>[] ] ;
-	$o_values["c2bin_UamGame_2"]       = [ "p"=>( ( $UAM && ($isFullAdmin||$emu_canCompile) ) ? 1 : 0 ), "args"=>[] ] ;
+	$o_values["gameman_manifest_user"] = [ "audit"=>false,"p"=>( ( $UAM && ($isFullAdmin||$emu_canCompile) ) ? 1 : 0 ), "args"=>[] ] ;
+	$o_values["c2bin_UamGame"]         = [ "audit"=>true, "p"=>( ( $UAM && ($isFullAdmin||$emu_canCompile) ) ? 1 : 0 ), "args"=>[] ] ;
+	$o_values["compile_UamGame"]       = [ "audit"=>true, "p"=>( ( $UAM && ($isFullAdmin||$emu_canCompile) ) ? 1 : 0 ), "args"=>[] ] ;
+	$o_values["c2bin_UamGame_2"]       = [ "audit"=>true, "p"=>( ( $UAM && ($isFullAdmin||$emu_canCompile) ) ? 1 : 0 ), "args"=>[] ] ;
 
 	// EMULATOR FUNCTIONS - GAMES DB (UAM)
-	$o_values["getData_oneGame"]       = [ "p"=>( ( $UAM && ($isFullAdmin||$emu_isDbAdmin||$emu_isDbUser)) ? 1 : 0 ), "args"=>[] ] ;
-	$o_values["gameDb_addFiles"]       = [ "p"=>( ( $UAM && ($isFullAdmin||$emu_isDbAdmin||$emu_isDbUser)) ? 1 : 0 ), "args"=>[] ] ;
-	$o_values["gameDb_deleteFile"]     = [ "p"=>( ( $UAM && ($isFullAdmin||$emu_isDbAdmin||$emu_isDbUser)) ? 1 : 0 ), "args"=>[] ] ;
-	$o_values["gameDb_updateGameData"] = [ "p"=>( ( $UAM && ($isFullAdmin||$emu_isDbAdmin||$emu_isDbUser)) ? 1 : 0 ), "args"=>[] ] ;
-	$o_values["gameDb_newGame"]        = [ "p"=>( ( $UAM && ($isFullAdmin||$emu_isDbAdmin||$emu_isDbUser)) ? 1 : 0 ), "args"=>[] ] ;
-	$o_values["gameDb_deleteGame"]     = [ "p"=>( ( $UAM && ($isFullAdmin||$emu_isDbAdmin||$emu_isDbUser)) ? 1 : 0 ), "args"=>[] ] ;
+	$o_values["getData_oneGame"]       = [ "audit"=>true, "p"=>( ( $UAM && ($isFullAdmin||$emu_isDbAdmin||$emu_isDbUser)) ? 1 : 0 ), "args"=>[] ] ;
+	$o_values["gameDb_addFiles"]       = [ "audit"=>true, "p"=>( ( $UAM && ($isFullAdmin||$emu_isDbAdmin||$emu_isDbUser)) ? 1 : 0 ), "args"=>[] ] ;
+	$o_values["gameDb_deleteFile"]     = [ "audit"=>true, "p"=>( ( $UAM && ($isFullAdmin||$emu_isDbAdmin||$emu_isDbUser)) ? 1 : 0 ), "args"=>[] ] ;
+	$o_values["gameDb_updateGameData"] = [ "audit"=>true, "p"=>( ( $UAM && ($isFullAdmin||$emu_isDbAdmin||$emu_isDbUser)) ? 1 : 0 ), "args"=>[] ] ;
+	$o_values["gameDb_newGame"]        = [ "audit"=>true, "p"=>( ( $UAM && ($isFullAdmin||$emu_isDbAdmin||$emu_isDbUser)) ? 1 : 0 ), "args"=>[] ] ;
+	$o_values["gameDb_deleteGame"]     = [ "audit"=>true, "p"=>( ( $UAM && ($isFullAdmin||$emu_isDbAdmin||$emu_isDbUser)) ? 1 : 0 ), "args"=>[] ] ;
 
 	$o_values["getDataFromUzeboxGamesAndDemos"] = [ "p"=>( ( $UAM && ($isFullAdmin)) ? 1 : 0 ), "args"=>[] ] ;
 
@@ -158,6 +158,15 @@ function API_REQUEST( $api, $type ){
 	// Can the function be run?
 	if(! $stats['error']){
 		// GOOD! Allow the API call.
+		$_SESSION['o_api']=$api;
+		if( $o_values[ $api ] ["audit"] == true){
+			$info="";
+			if     ($api=="c2bin_UamGame"  ){ $info=$_POST["gameId"]; }
+			else if($api=="compile_UamGame"){ $info=$_POST["gameId"]; }
+			else if($api=="c2bin_UamGame_2"){ $info=$_POST["gameId"]; }
+			EMU_UAM_audit_API_newRecord( $_SESSION['user_id'], $api, 1, $info );
+		}
+
 		call_user_func_array( $api, array( $o_values[ $api ]["args"]) );
 	}
 
@@ -167,6 +176,53 @@ function API_REQUEST( $api, $type ){
 		exit();
 	}
 
+}
+
+function EMU_UAM_audit_API_newRecord( $user_id, $o, $authorized, $info ){
+	// Records an API call if indicated to do so.
+	global $UAMDB;
+	$dbhandle = new sqlite3_DB_PDO__UAM5($UAMDB) or exit("cannot open the database");
+
+	$s_SQL1  =
+"
+INSERT INTO 'api_log'(
+	  user_id
+	, o
+	, tstamp
+	, authorized
+	, origin
+	, info
+)
+VALUES (
+	  :user_id
+	, :o
+	, CURRENT_TIMESTAMP
+	, :authorized
+	, :origin
+	, :info
+);
+";
+	$prp1    = $dbhandle->prepare($s_SQL1);
+
+	$origin = json_encode(array(
+		basename(debug_backtrace()[0]['file']),
+		debug_backtrace()[1]['function']."()" ,
+		debug_backtrace()[0]['line']          ,
+	));
+
+	// $extraInfo = json_encode(array(
+	// 	'SESSION' => $_SESSION ,
+	// 	'POST'    => $_POST    ,
+	// 	'GET'     => $_GET     ,
+	// ),JSON_PRETTY_PRINT);
+
+	$dbhandle->bind(':user_id'    , $user_id    ) ;
+	$dbhandle->bind(':o'          , $o          ) ;
+	$dbhandle->bind(':authorized' , $authorized ) ;
+	$dbhandle->bind(':origin'     , $origin     ) ;
+	$dbhandle->bind(':info'       , $info       ) ;
+
+	$retval1 = $dbhandle->execute();
 }
 
 function getDataFromUzeboxGamesAndDemos(){

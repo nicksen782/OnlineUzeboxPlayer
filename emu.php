@@ -233,10 +233,10 @@
 				<div class="navOptions uamOnly hidden" newview="DB"      >DB</div>
 			</div>
 		</div>
+
 		<div id="emu_gameSelector" class="sectionWindow">
 			<div class="sectionWindow_title">Game Selection</div>
 			<div class="sectionWindow_content">
-
 				<table class="table1">
 					<tr>
 						<td>Database</td>
@@ -421,14 +421,19 @@
 
 			</div>
 		</div>
+
 		<div id="emu_emulator" class="sectionWindow">
 			<div class="sectionWindow_title">
-				Emulator Screen
+				<span id="emu_screen_titlebar" title="Emulator loaded 0 times.">Emulator Screen</span>
 
 				<div id="coresetting">
 					<span id="coresetting_text"></span>
 					<span id="coresetting_toggle" class="hyperlink1 hidden">(Toggle core)</span>
 				</div>
+
+				<!--<div id="emu_view_slideToggle" onclick="document.querySelector('#emu_view').classList.toggle('slideLeft');">HIDE</div>-->
+				<div id="emu_view_slideToggle" onclick="">TOGGLE MENU SLIDE</div>
+
 			</div>
 			<div class="sectionWindow_content">
 				<div class="emu_emuControls" id="emu_emuControlsTOP">

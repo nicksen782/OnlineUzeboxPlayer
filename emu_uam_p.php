@@ -120,6 +120,8 @@ WHERE
 		$text_objects_progmem = array() ;
 		$other                = array() ;
 
+		$ALL                = array() ;
+
 		$bytes_in_bss_objects          = 0 ;
 		$bytes_in_text_funcs           = 0 ;
 		$bytes_in_text_objects         = 0 ;
@@ -134,7 +136,7 @@ WHERE
 		if ($handle) {
 			while (($line = fgets($handle)) !== false) {
 				// process the line read.
-				$pos = strpos($line, $theString);
+				$pos  = strpos($line, $theString);
 				$pos2 = strpos($line, '_progmem');
 
 					// Replace part of the string.
@@ -157,28 +159,40 @@ WHERE
 						"file"    => explode(":", trim($splitLine[7]))[0],
 						"line"    => explode(":", trim($splitLine[7]))[1],
 					);
+					array_push($ALL, $newArray);
 
 					// Remove the leading zeros from the size key.
 					$newArray['size'] = ltrim($newArray['size'], "0");
 
+					// Was $theString NOT found? (Specifically looking for data that is NOT part of the Uzebox kernel.)
 					if ( $pos === false ) {
 						$splitLine2 = explode("/", $newArray['section']);
 						$newArray['section'] = $splitLine2[sizeof($splitLine2)-1];
 						array_push($other, $newArray) ;
 						$bytes_in_other+=$newArray['size'];
 					}
+					// Was $theString found? (This data line is from the game, not the Uzebox kernel.)
 					else{
-						if     ( $newArray['section']=='.bss'  ) {
-							if( $newArray['type']=='OBJECT' ) { array_push($bss_objects  , $newArray) ; $bytes_in_bss_objects+=$newArray['size']; }
+						// Separate the data into appropriate sections.
+						// .bss (In RAM.)
+						if     ( $newArray['section']=='.bss' || $newArray['section']=='.data' ) {
+							if( $newArray['type']=='OBJECT' ) {
+								array_push($bss_objects  , $newArray) ;
+								$bytes_in_bss_objects+=$newArray['size'];
+							}
 							else                              {
 								$splitLine2 = explode("/", $newArray['section']);
 								$newArray['section'] = $splitLine2[sizeof($splitLine2)-1];
-								array_push($other, $newArray) ;
+									array_push($other, $newArray) ;
 								$bytes_in_other+=$newArray['size'];
 							}
 						}
-						else if( $newArray['section']=='.text'   ){
-							if     ( $newArray['type']=='FUNC'   ){ array_push($text_funcs , $newArray) ; $bytes_in_text_funcs+=$newArray['size']; }
+						// .text (In PROGMEM/FLASH.)
+						else if( $newArray['section']=='.text' ){
+							if     ( $newArray['type']=='FUNC'   ){
+								array_push($text_funcs , $newArray) ; $bytes_in_text_funcs+=$newArray['size'];
+							}
+
 							else if( $newArray['type']=='OBJECT' ){
 								// Progmem texts go into their own array.
 								if($pos2 !== false) {
@@ -193,14 +207,17 @@ WHERE
 							else {
 								$splitLine2 = explode("/", $newArray['section']);
 								$newArray['section'] = $splitLine2[sizeof($splitLine2)-1];
-								// array_push($other, $newArray) ;
+									array_push($other, $newArray) ;
 								$bytes_in_other+=$newArray['size'];
 							}
+
 						}
+
+						// OTHER
 						else {
 							$splitLine2 = explode("/", $newArray['section']);
 							$newArray['section'] = $splitLine2[sizeof($splitLine2)-1];
-							// array_push($other, $newArray) ;
+								array_push($other, $newArray) ;
 							$bytes_in_other+=$newArray['size'];
 						}
 					}
@@ -237,6 +254,7 @@ WHERE
 			'text_objects_progmem' => array( 'data'=>$text_objects_progmem, 'caption'=> 'TEXT: OBJECTS PROGMEM' . " (" . number_format($bytes_in_text_objects_progmem) . " bytes)", ) ,
 			'other'                => array( 'data'=>$other               , 'caption'=> 'OTHER'                 . " (" . number_format($bytes_in_other)                . " bytes)", ) ,
 			// 'other'                => array( 'data'=>[]                   , 'caption'=> 'OTHER2'                 . " (" . number_format($bytes_in_other)                . " bytes)", ) ,
+			'$ALL' => $ALL ,
 		);
 	}
 
@@ -255,11 +273,26 @@ WHERE
 				FROM api_log
 				WHERE info = :gameId AND o='compile_UamGame'
 			) AS compileCount
+
 			,(
 				SELECT COUNT(pkey)
 				FROM api_log
 				WHERE info = :gameId AND o='c2bin_UamGame'
 			) AS c2binCount
+
+			,(
+				SELECT COUNT(pkey)
+				FROM api_log
+				WHERE info = :gameId AND o='compile_UamGame'
+				AND tstamp >= strftime('%Y-%m-%d','now')
+			) AS compileCount_today
+
+			,(
+				SELECT COUNT(pkey)
+				FROM api_log
+				WHERE info = :gameId AND o='c2bin_UamGame'
+				AND tstamp >= strftime('%Y-%m-%d','now')
+			) AS c2binCount_today
 	";
 	$prp1    = $dbhandle->prepare($s_SQL1);
 	$dbhandle->bind(':gameId'        , $gameId        ) ;
@@ -268,6 +301,9 @@ WHERE
 
 	$compileCount = $results1[0]['compileCount'];
 	$c2binCount   = $results1[0]['c2binCount'];
+
+	$compileCount_today = $results1[0]['compileCount_today'];
+	$c2binCount_today   = $results1[0]['c2binCount_today'];
 
 	echo json_encode(array(
 		'data'    => $results1 ,
@@ -278,20 +314,26 @@ WHERE
 		'execResults'  => $execResults  ,
 		'info'         => $info         ,
 		'info2'        => $info2        ,
+
 		'compileCount' => $compileCount ,
 		'c2binCount'   => $c2binCount   ,
+		'compileCount_today' => $compileCount_today   ,
+		'c2binCount_today'   => $c2binCount_today   ,
+
 		'link1'        => $_SERVER['HTTP_HOST'].'/'.$results0[0]['gamedir'].'/'.'build_files'.'/cflow.pdf'       ,
 		'link2'        => $_SERVER['HTTP_HOST'].'/'.$results0[0]['gamedir'].'/'.'build_files'.'/cflow.txt'       ,
 		'link3'        => "",//$_SERVER['HTTP_HOST'].'/'.$results1[0]['gamedir'].'/'.'build_files'.'/lastbuild.txt'       ,
 		// 'cflow'        => htmlspecialchars($cflow)       ,
 
-		// '$_POST'     => $_POST       ,
+		'$_POST'     => $_POST       ,
 		// 'execResults2' => urlencode($execResults) ,
 		// 'execResults3' => htmlentities($execResults) ,
 		// 'execResults4' => htmlspecialchars($execResults) ,
 		// 'gamedir' => $results0[0]['gamedir'],
 		// 'results0' => $results0,
-		// 'results1' => $results1,
+		'results1' => $results1,
+
+		'$ALL' => $ALL,
 	) );
 
 }

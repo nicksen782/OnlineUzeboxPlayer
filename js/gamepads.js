@@ -615,6 +615,7 @@ emu.gamepads     = {
 	},
 	// * Gamepad button mappings to Uzebox buttons. Specific to the gamepad. The included ones are gamepads I have.
 	gp_config_mappings     : {
+		// SNES30 v 2.68 (bluetooth)
 		"2820:0009" : {
 			"name":"8Bitdo SNES30 GamePad**2820**0009",
 			"btnMap":{
@@ -649,6 +650,49 @@ emu.gamepads     = {
 				"BTN_SR"     : { "type":"buttons" , "index":7 , "true":1 , "sign":"+" },
 			}
 		},
+		// SNES30 v 4.20 (wired)
+		// https://usb-ids.gowdy.us/read/UD/2dc8/ab20
+		"2dc8:ab20": {
+			"name": "SNES30 Joy**2dc8**ab20",
+			"btnMap": {
+				"BTN_B"     : { "type": "buttons", "index": 1 , "true": 1 , "sign": "+" },
+				"BTN_Y"     : { "type": "buttons", "index": 4 , "true": 1 , "sign": "+" },
+				"BTN_START" : { "type": "buttons", "index": 11, "true": 1 , "sign": "+" },
+				"BTN_SELECT": { "type": "buttons", "index": 10, "true": 1 , "sign": "+" },
+
+				"BTN_UP"    : { "type": "axes"   , "index": 1 , "true": -1, "sign": "-" },
+				"BTN_DOWN"  : { "type": "axes"   , "index": 1 , "true": 1 , "sign": "+" },
+				"BTN_LEFT"  : { "type": "axes"   , "index": 0 , "true": -1, "sign": "-" },
+				"BTN_RIGHT" : { "type": "axes"   , "index": 0 , "true": 1 , "sign": "+" },
+
+				"BTN_A"     : { "type": "buttons", "index": 0 , "true": 1 , "sign": "+" },
+				"BTN_X"     : { "type": "buttons", "index": 3 , "true": 1 , "sign": "+" },
+				"BTN_SL"    : { "type": "buttons", "index": 6 , "true": 1 , "sign": "+" },
+				"BTN_SR"    : { "type": "buttons", "index": 7 , "true": 1 , "sign": "+" }
+			}
+		},
+		// SNES30 v 4.20 (bluetooth)
+		// https://usb-ids.gowdy.us/read/UD/2dc8
+		"2dc8:2840": {
+			"name": "SNES30 Joy**2dc8**2840",
+			"btnMap": {
+				"BTN_B"     : { "type": "buttons", "index": 1 , "true": 1 , "sign": "+" },
+				"BTN_Y"     : { "type": "buttons", "index": 4 , "true": 1 , "sign": "+" },
+				"BTN_START" : { "type": "buttons", "index": 11, "true": 1 , "sign": "+" },
+				"BTN_SELECT": { "type": "buttons", "index": 10, "true": 1 , "sign": "+" },
+
+				"BTN_UP"    : { "type": "axes"   , "index": 1 , "true": -1, "sign": "-" },
+				"BTN_DOWN"  : { "type": "axes"   , "index": 1 , "true": 1 , "sign": "+" },
+				"BTN_LEFT"  : { "type": "axes"   , "index": 0 , "true": -1, "sign": "-" },
+				"BTN_RIGHT" : { "type": "axes"   , "index": 0 , "true": 1 , "sign": "+" },
+
+				"BTN_A"     : { "type": "buttons", "index": 0 , "true": 1 , "sign": "+" },
+				"BTN_X"     : { "type": "buttons", "index": 3 , "true": 1 , "sign": "+" },
+				"BTN_SL"    : { "type": "buttons", "index": 6 , "true": 1 , "sign": "+" },
+				"BTN_SR"    : { "type": "buttons", "index": 7 , "true": 1 , "sign": "+" }
+			}
+		}
+
 		// "1234:bead" : {
 		// 	"name":"vJoy - Virtual Joystick**1234**bead)",
 		// 	"btnMap":{
@@ -1060,6 +1104,18 @@ emu.gamepads     = {
 		}
 		// * Reads gamepad instance. Uses the specified gamepad mapping and returns an Uzebox-compatible value for the gamepad button state.
 		function findGpButtonsViaMapping (gp_obj){
+			var analogToDigital_withDeadzone= function(number, deadzone){
+				let sign       = Math.sign(number) ; // Will be -1, 0, or 1.
+				let abs        = Math.abs(number) ;
+				let inDeadzone = ! (0 + abs > deadzone) ? true : false ;
+
+				// No value or value within the deadzone?
+				if( abs==0 || inDeadzone){ return 0; }
+
+				// Value and outside of the deadzone.
+				else{ return sign; }
+			}
+
 			// gp_obj provides the custom values as well as the gamepad state.
 			let map     = gp_obj.btnMap.btnMap;
 			let axes    = gp_obj.gamepad.axes;
@@ -1098,7 +1154,10 @@ emu.gamepads     = {
 					// Is the button at the specified button array index true?
 					// ??? Look for what the "index" is.
 
-					if(axes_value!=0){
+					// A "deadzone" is needed for the axes.
+					axes_value = analogToDigital_withDeadzone(axes_value, 0.2);
+
+					if(axes_value != 0){
 						// Does the sign of the value match the designated sign for this button?
 						let value_sign = Math.sign(axes_value) == -1 ? "-" : "+";
 						let req_sign   = map[d].sign;

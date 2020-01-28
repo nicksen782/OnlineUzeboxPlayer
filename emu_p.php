@@ -128,8 +128,10 @@ function API_REQUEST( $api, $type ){
 	$o_values["gameDb_newGame"]        = [ "audit"=>true, "p"=>( ( $UAM && ($isFullAdmin||$emu_isDbAdmin||$emu_isDbUser)) ? 1 : 0 ), "args"=>[] ] ;
 	$o_values["gameDb_deleteGame"]     = [ "audit"=>true, "p"=>( ( $UAM && ($isFullAdmin||$emu_isDbAdmin||$emu_isDbUser)) ? 1 : 0 ), "args"=>[] ] ;
 
-	$o_values["getDataFromUzeboxGamesAndDemos"] = [ "p"=>( ( $UAM && ($isFullAdmin)) ? 1 : 0 ), "args"=>[] ] ;
+	// In basics_p.php
+	$o_values["keepAlive_ping"]        = [ "audit"=>false, "p"=>( ( $public) ? 1 : 0 ), "args"=>[] ] ;
 
+	$o_values["getDataFromUzeboxGamesAndDemos"] = [ "p"=>( ( $UAM && ($isFullAdmin)) ? 1 : 0 ), "args"=>[] ] ;
 	// DETERMINE IF THE API IS AVAILABLE TO THE USER.
 
 	// Is this a known API?
@@ -337,6 +339,9 @@ function emu_init(){
 
 	// If yes then return the base session information including permissions list.
 	if($UAMFOUND){
+		if( $_SESSION['hasActiveLogin'] == 1 ) {
+			$_SESSION['refreshes'] = 0;
+		}
 		$UAMDATA = $_SESSION;
 	}
 	// If no, then that's it. No UAM.

@@ -1001,6 +1001,7 @@ emu.funcs        = {
 		// Perhaps 1/2 second will be enough for garbage collection?
 		setTimeout(function(){
 			// Reset Module.
+			// delete emu.vars.innerEmu.Module;
 			emu.vars.innerEmu.Module = new emu.vars.innerEmu.createDefaultModule();
 
 			// Edit Module: Set the game file.
@@ -1392,6 +1393,9 @@ emu.funcs.UAM    = {
 
 		// Switch to the main emulator view.
 		emu.funcs.nav.changeView("VIEW");
+
+		let mins = 20;
+		setInterval(emu.funcs.UAM.keepAlive_ping, (mins*60*1000) );
 
 		// Put a default value for user JSON.
 		// emu.vars.dom.view["emu_FilesFromJSON"].value = "https://dev3-nicksen782.c9users.io/non-web/Uzebox/RamTileTest_1/output/remoteload.json";
@@ -1798,6 +1802,24 @@ emu.funcs.UAM    = {
 		// 	alert      ("An error has occurred. This is the error from the server:\n\n"+res.data+"");
 		// 	return;
 		// }
+	},
+
+	// Keeps the session open.
+	keepAlive_ping : function(){
+		var formData = {
+			"o"       : "keepAlive_ping",
+			"_config": { "noProgress" : true, "processor": "emu_p.php" }
+		};
+		emu.funcs.shared.serverRequest(formData).then(
+			function(res){
+				// console.log("keepAlive_ping:", new Date().toLocaleString(), res.data, "hasActiveLogin:", res.hasActiveLogin);
+				console.log("keepAlive_ping:", new Date().toLocaleString(), res.data, "hasActiveLogin:", res.hasActiveLogin, "REFRESHES:", res.refreshes );
+			},
+			function(res){
+				console.log("FAILURE:", res);
+			}
+		);
+
 	},
 
 };

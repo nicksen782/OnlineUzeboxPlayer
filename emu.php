@@ -422,7 +422,7 @@
 			</div>
 		</div>
 
-		<div id="emu_emulator" class="sectionWindow">
+		<div id="emu_emulator" class="sectionWindow largerEmuWindow">
 			<div class="sectionWindow_title">
 				<span id="emu_screen_titlebar" title="Emulator loaded 0 times.">Emulator Screen</span>
 
@@ -456,7 +456,9 @@
 				<div id="emscripten_emu_container_outer">
 					<div id="emscripten_emu_container">
 						<!--<canvas tabindex="0" class="verticalAlign" id="emuCanvas" width="620" height="456"></canvas>-->
-						<canvas tabindex="0" class="verticalAlign" id="emuCanvas" width="310" height="228"></canvas>
+						<!-- <canvas tabindex="0" class="verticalAlign" id="emuCanvas" width="310" height="228"></canvas> -->
+						<canvas tabindex="0" id="emuCanvas" width="310" height="228" org_width="310" org_height="228"></canvas>
+						<!-- <canvas tabindex="0" id="emuCanvas" width="262" height="262"></canvas> -->
 					</div>
 				</div>
 
@@ -483,11 +485,11 @@
 							<td>&nbsp;</td>
 						</tr>
 
-							<tr> <td>&nbsp;<span class="checkbox_button" id="emu_compileOptions_UAM_chk1"><span class="checkbox enabled"                              ></span></span></td> <td>Start after compile</td></tr>
-							<tr> <td>&nbsp;<span class="checkbox_button" id="emu_compileOptions_UAM_chk2"><span class="checkbox enabled"                              ></span></span></td> <td>Debug on failures/errors</td></tr>
-							<tr> <td>&nbsp;<span class="checkbox_button" id="emu_compileOptions_UAM_chk4"><span class="checkbox "                                     ></span></span></td> <td>Debug on warnings</td></tr>
-							<tr> <td>&nbsp;<span class="checkbox_button"                                 ><span id="emu_compileOptions_UAM_autoDebug" class="checkbox"></span></span></td> <td>AUTO CUZEBOX DEBUG</td> </tr>
-							<tr> <td>&nbsp;<span class="checkbox_button" id="emuControls_autopause_btn"  ><span id="emuControls_autopause_chk" class="checkbox "      ></span></span></td> <td>AUTO-PAUSE</td> </tr>
+							<tr> <td><span class="checkbox_button" id="emu_compileOptions_UAM_chk1"><span class="checkbox enabled"                              ></span></span></td> <td>Start after compile</td></tr>
+							<tr> <td><span class="checkbox_button" id="emu_compileOptions_UAM_chk2"><span class="checkbox enabled"                              ></span></span></td> <td>Debug on failures/errors</td></tr>
+							<tr> <td><span class="checkbox_button" id="emu_compileOptions_UAM_chk4"><span class="checkbox "                                     ></span></span></td> <td>Debug on warnings</td></tr>
+							<tr> <td><span class="checkbox_button"                                 ><span id="emu_compileOptions_UAM_autoDebug" class="checkbox"></span></span></td> <td>AUTO CUZEBOX DEBUG</td> </tr>
+							<tr> <td><span class="checkbox_button" id="emuControls_autopause_btn"  ><span id="emuControls_autopause_chk" class="checkbox "      ></span></span></td> <td>AUTO-PAUSE</td> </tr>
 					</table>
 						<input type="button" id="emu_compile_UAM" value="COMPILE">
 						<input type="button" id="emu_c2bin_UAM" value="C2BIN">

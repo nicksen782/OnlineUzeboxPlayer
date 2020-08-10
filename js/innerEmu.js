@@ -24,6 +24,9 @@
 
 // * Object that contains the flags/functions for the Emscripten instance.
 emu.vars.innerEmu = {
+	texw:0,
+	texh:0,
+
 	// * Count of emulator loads.
 	emuLoadCount           : 0,
 	// * Count of emulator loads.
@@ -197,7 +200,7 @@ emu.vars.innerEmu = {
 							emu.vars.innerEmu.emu_sendKeyEvent("keydown", "key_F7" , 1);
 							emu.vars.innerEmu.emu_sendKeyEvent("keyup"  , "key_F7" , 1);
 						}
-						
+
 						// If the screen is already full size then make sure the quality flag is turned up.
 						let GUICORE_SMALL      = emu.vars.innerEmu.Module._NRA_returnFlags(3) ? true : false; // Small view or larger view
 						if(GUICORE_SMALL){
@@ -259,6 +262,8 @@ emu.vars.innerEmu = {
 
 		var currentScale=1;
 
+		let isFullScreen = emu.funcs.shared.isFullScreen();
+
 		// console.log(matrix);
 
 		// if(matrix!="none" && matrix!=undefined){
@@ -270,8 +275,8 @@ emu.vars.innerEmu = {
 		var CanvasDims    = canvas.getBoundingClientRect();
 		var ContainerDims = Container.getBoundingClientRect();
 		var newDims       = emu.funcs.shared.calculateAspectRatioFit(
-			// canvas.width,
 			// canvas.height,
+			// canvas.width,
 			CanvasDims.width,
 			CanvasDims.height,
 			ContainerDims.width,
@@ -288,8 +293,27 @@ emu.vars.innerEmu = {
 		// 	""
 		// );
 
-		canvas.style.width  = (currentScale*(newDims.width )) +"px";
-		canvas.style.height = (currentScale*(newDims.height)) +"px";
+		// canvas.style.width  = Math.floor((currentScale*(newDims.width ))*0.90) +"px";
+		// canvas.style.height = Math.floor((currentScale*(newDims.height))*0.90) +"px";
+
+		// canvas.style.width  = Math.floor((currentScale*(canvas.width ))*0.95) +"px";
+		// canvas.style.height = Math.floor((currentScale*(canvas.height))*0.95) +"px";
+
+		// Resize to the expanded dimensions.
+		if(isFullScreen){
+			canvas.style.width  = newDims.width  +"px" ;
+			canvas.style.height = newDims.height +"px" ;
+		}
+		// Resize to the smaller dimensions of the container.
+		else{
+			// canvas.style.width  = canvas.width  +"px" ;
+			// canvas.style.height = canvas.height +"px" ;
+			// canvas.style.width  = ContainerDims.width *0.95 +"px" ;
+			// canvas.style.height = ContainerDims.height*0.95 +"px" ;
+
+			canvas.style.width  = newDims.width  +"px" ;
+			canvas.style.height = newDims.height +"px" ;
+		}
 
 		// Container.style.width  = newDims.width  +"px";
 		// Container.style.height = newDims.height +"px";
@@ -321,7 +345,7 @@ emu.vars.innerEmu = {
 	// * Sends keyboard events to the Emscripten emulator.
 	emu_sendKeyEvent            : function(type, key, gamePadNumber) {
 		// Get DOM handle to the emu canvas.
-		var target = emu.vars.dom.view.emuCanvas;
+		var target = emu.vars.dom.view["emuCanvas"];
 
 		// Is there an element there?
 		if (null == target) {
@@ -520,22 +544,20 @@ emu.vars.innerEmu = {
 		// emu.vars.innerEmu.Module.requestFullscreen();
 
 		// The standard way.
-		var canvas = emu.vars.dom.view["emscripten_emu_container"]
+		let canvas = emu.vars.dom.view["emscripten_emu_container"];
+		let canvas2 = emu.vars.dom.view["emuCanvas"];
 
 		// Go to fullscreen.
 		if(!(
-			   document.fullscreen              // Chrome
-			|| document.fullscreenElement       // Chrome
-			|| document.webkitFullscreenElement // Chrome
-			|| window  .fullScreen              // Firefox
-			|| document.mozFullScreenElement    // Firefox
-			|| document.msFullscreenElement     // Edge
+			emu.funcs.shared.isFullScreen()
 		))
 		{
 			if      (canvas.requestFullscreen      ) { canvas.requestFullscreen();       } // Standard
 			else if (canvas.webkitRequestFullscreen) { canvas.webkitRequestFullscreen(); } // Chrome
 			else if (canvas.mozRequestFullScreen   ) { canvas.mozRequestFullScreen();    } // Firefox
 			else if (canvas.msRequestFullscreen    ) { canvas.msRequestFullscreen();     } // IE11
+
+			canvas2.classList.add("verticalAlign");
 		}
 
 		// Exit fullscreen.
@@ -544,6 +566,8 @@ emu.vars.innerEmu = {
 			else if(document.webkitExitFullscreen) {document.webkitExitFullscreen(); } // Chrome
 			else if(document.mozCancelFullScreen)  {document.mozCancelFullScreen();  } // Firefox
 			else if(document.msExitFullscreen)     {document.msExitFullscreen();     } // IE11
+
+			canvas2.classList.remove("verticalAlign");
 		}
 	},
 	// * Queries CUzeBox for and then displays the status of certain CUzeBox flags. Uses _NRA_returnFlags

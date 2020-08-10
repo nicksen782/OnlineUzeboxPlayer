@@ -124,12 +124,7 @@ emu.funcs        = {
 
 					// Is this fullscreen now? (Occurs right after the change to fullscreen.)
 					if(
-						   document.fullscreen              // Chrome
-						|| document.fullscreenElement       // Chrome
-						|| document.webkitFullscreenElement // Chrome
-						|| window  .fullScreen              // Firefox
-						|| document.mozFullScreenElement    // Firefox
-						|| document.msFullscreenElement     // Edge
+						emu.funcs.shared.isFullScreen()
 					){
 						// console.log("is fullscreen now", GUICORE_SMALL);
 						if(GUICORE_SMALL){
@@ -312,9 +307,8 @@ emu.funcs        = {
 		if (emu.vars.gameFiles.length) {
 			emu.funcs.shared.grayTheCanvas(emu.vars.dom.view["emuCanvas"]);
 			if(showStoppedText){
-				emu.funcs.shared.resetCanvasDimensions();
+				// emu.funcs.shared.resetCanvasDimensions();
 				emu.funcs.shared.textOnCanvas({ "canvas": emu.vars.dom.view["emuCanvas"], "text": " - STOPPED - " });
-
 			}
 
 			// Abort the current emulator instance?
@@ -378,8 +372,8 @@ emu.funcs        = {
 		emu.funcs.stopEmu(false);
 
 		// Clear last image from the canvas.
+		// emu.funcs.shared.resetCanvasDimensions();
 		emu.funcs.shared.clearTheCanvas(emu.vars.dom.view["emuCanvas"]);
-		emu.funcs.shared.resetCanvasDimensions();
 
 		// Reset.
 		emu.vars.gameFiles = [];
@@ -393,7 +387,7 @@ emu.funcs        = {
 		emu.funcs.stopEmu(true);
 
 		// Clear last image from the canvas.
-		emu.funcs.shared.resetCanvasDimensions();
+		// emu.funcs.shared.resetCanvasDimensions();
 		emu.funcs.shared.clearTheCanvas(emu.vars.dom.view["emuCanvas"]);
 
 		// Indicate that there is not a game loaded.
@@ -1061,7 +1055,7 @@ emu.funcs        = {
 		var type = "";
 
 		// Get DOM handle to the emu canvas.
-		var target = emu.vars.dom.view.emuCanvas;
+		var target = emu.vars.dom.view["emuCanvas"];
 
 		// Is there an element there?
 		if (null == target) {
@@ -1367,7 +1361,7 @@ emu.funcs.UAM    = {
 
 		// Make the container normal width. Enlarge the emu windows.
 		document.querySelector("html").classList.remove("wide");
-		document.querySelector("#emu_emulator").classList.remove("largerEmuWindow");
+		// document.querySelector("#emu_emulator").classList.remove("largerEmuWindow");
 		// emu.vars.dom.view["emuCanvas"].width="640";
 		// emu.vars.dom.view["emuCanvas"].height="560";
 	},
@@ -1837,11 +1831,11 @@ emu.funcs.nav    = {
 
 		if(size=="wide"){
 			document.querySelector("html").classList.add("wide");
-			document.querySelector("#emu_emulator").classList.add("largerEmuWindow");
+			// document.querySelector("#emu_emulator").classList.add("largerEmuWindow");
 		}
 		if(size=="narrow"){
 			document.querySelector("html").classList.remove("wide");
-			document.querySelector("#emu_emulator").classList.remove("largerEmuWindow");
+			// document.querySelector("#emu_emulator").classList.remove("largerEmuWindow");
 		}
 	},
 	// * Changes the main application views.

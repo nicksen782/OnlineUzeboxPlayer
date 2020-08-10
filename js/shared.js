@@ -24,8 +24,23 @@
 emu.funcs.shared = {
 	// * Sets the canvas dimensions back to default.
 	resetCanvasDimensions   : function(){
-		emu.vars.dom.view["emuCanvas"].width="310";
-		emu.vars.dom.view["emuCanvas"].height="228";
+		// Canvas dims.
+		// emu.vars.dom.view["emuCanvas"].width="310";
+		// emu.vars.dom.view["emuCanvas"].height="228";
+
+		// CSS dims.
+		// emu.vars.dom.view["emuCanvas"].style.width="310"+"px";
+		// emu.vars.dom.view["emuCanvas"].style.height="228"+"px";
+
+		if(emu.vars.innerEmu.texw && emu.vars.innerEmu.texh){
+			// Canvas dims.
+			emu.vars.dom.view["emuCanvas"].width  = emu.vars.innerEmu.texw;
+			emu.vars.dom.view["emuCanvas"].height = emu.vars.innerEmu.texh;
+
+			// CSS dims.
+			emu.vars.dom.view["emuCanvas"].style.width  = emu.vars.innerEmu.texw + "px";
+			emu.vars.dom.view["emuCanvas"].style.height = emu.vars.innerEmu.texh + "px";
+		}
 	},
 	// * Display message on the canvas in the center.
 	textOnCanvas            : function(obj) {
@@ -439,10 +454,12 @@ emu.funcs.shared = {
 	// * Used by resizeEmuCanvas to determine the new width/height/aspect ratio when resizing the emu canvas.
 	calculateAspectRatioFit : function(srcWidth, srcHeight, maxWidth, maxHeight) {
 		// https://stackoverflow.com/a/14731922
-		var newRatio = Math.min(maxWidth / srcWidth, maxHeight / srcHeight);
+		let newRatio = Math.min(maxWidth / srcWidth, maxHeight / srcHeight);
 		return {
-			width : Math.floor(srcWidth  * newRatio) ,
-			height: Math.floor(srcHeight * newRatio) ,
+			// width : Math.floor(srcWidth  * newRatio) ,
+			// height: Math.floor(srcHeight * newRatio) ,
+			width : Math.round( (srcWidth  * newRatio)/2)*2  ,
+			height: Math.round( (srcHeight * newRatio)/2)*2  ,
 			ratio : newRatio
 		};
 	},
@@ -526,5 +543,22 @@ emu.funcs.shared = {
 		// window.getComputedStyle(document.querySelector("body"), "")["-moz-transform"] ||
 		// window.getComputedStyle(document.querySelector("body"), "")["-ms-transform"]
 
-	}
+	},
+
+	isFullScreen : function(){
+		// emu.funcs.shared.isFullScreen
+		if(
+			document.fullscreen              // Chrome
+		 || document.fullscreenElement       // Chrome
+		 || document.webkitFullscreenElement // Chrome
+		 || window  .fullScreen              // Firefox
+		 || document.mozFullScreenElement    // Firefox
+		 || document.msFullscreenElement     // Edge
+		){
+			return true;
+		}
+		else{
+			return false;
+		}
+	},
 };

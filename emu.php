@@ -432,7 +432,7 @@
 				</div>
 
 				<!--<div id="emu_view_slideToggle" onclick="document.querySelector('#emu_view').classList.toggle('slideLeft');">HIDE</div>-->
-				<div id="emu_view_slideToggle" onclick="">TOGGLE MENU SLIDE</div>
+				<!-- <div id="emu_view_slideToggle" onclick="">TOGGLE MENU SLIDE</div> -->
 
 			</div>
 			<div class="sectionWindow_content">

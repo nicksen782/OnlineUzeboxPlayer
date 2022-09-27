@@ -49,3 +49,4 @@ getfilehashes.php
 # MAKE EXECEPTIONS FOR THESE FILES #
 !_sys/eud.db
 
+OLDgames/*

@@ -294,9 +294,9 @@ emu.funcs        = {
 				d.addEventListener("click", emu.funcs.UAM.openUamInNewWindow, false);
 			});
 
-			document.querySelector("#emu_view_slideToggle").addEventListener("click", function(){
-				document.querySelector('#bodyContainer').classList.toggle('slideLeft');
-			}, false);
+			// document.querySelector("#emu_view_slideToggle").addEventListener("click", function(){
+			// 	document.querySelector('#bodyContainer').classList.toggle('slideLeft');
+			// }, false);
 		}
 
 	},

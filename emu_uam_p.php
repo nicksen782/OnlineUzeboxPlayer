@@ -128,9 +128,11 @@ WHERE
 		$bytes_in_text_objects_progmem = 0 ;
 		$bytes_in_other                = 0 ;
 
+		$oldmask = umask(0);
 		if(!file_exists('avr-nm.txt')){
 			file_put_contents('avr-nm.txt', "");
 		}
+		umask($oldmask);
 
 		$handle = fopen("avr-nm.txt", "r");
 		if ($handle) {
@@ -433,12 +435,14 @@ WHERE id = :gameid
 
 	$targetpath=$directory."";
 
+	$oldmask = umask(0);
 	foreach($_FILES as $key => $value) {
 		$moved[$key] = move_uploaded_file(
 			$_FILES[$key]['tmp_name'],
 			$targetpath . "" . basename($_FILES[$key]['name'])
 		);
 	}
+	umask($oldmask);
 
 	// Get the game data and files. (Use output buffering.)
 	ob_start();
@@ -603,11 +607,13 @@ VALUES(
 
 	// Create the new game dir for the game.
 	if($retval1){
+		$oldmask = umask(0);
+
 		// Make the new game dir.
 		// Generate the new game dir from the game title.
 		$directory = $emu_dir . $gamedir;
 		if( ! file_exists($directory) ){
-			@mkdir($directory."", 0755);
+			@mkdir($directory."", 666);
 			$lastError = error_get_last();
 		}
 		else{
@@ -616,9 +622,11 @@ VALUES(
 				"--" .
 				str_pad(rand(0, 1000), 4, "0", STR_PAD_LEFT) .
 				""
-			, 0755);
+			, 666);
 			$lastError = error_get_last();
 		}
+
+		umask($oldmask);
 	}
 
 	// Update the new game record with the new game dir.

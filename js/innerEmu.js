@@ -38,9 +38,56 @@ emu.vars.innerEmu = {
 	emulatorIsReady        : false,
 	// * Indicates that the Emscripten instance should not load until some user input (mousemove on the emu canvas.)
 	startEmuAfterUserInput : false,
+
+	// Used for: emu.configFile.tempCanvasDraw == true.
+	raf_id: null,
+	last: undefined,
+	loop: function(){
+		emu.vars.innerEmu.raf_id = window.requestAnimationFrame( async (ts)=>{
+			// Get the new ImageData.
+			let imgData = emu.vars.innerEmu.tempCanvas.getContext("2d").getImageData(0, 0, emu.vars.innerEmu.tempCanvas.width, emu.vars.innerEmu.tempCanvas.height);
+
+			// Fix canvas dimensions and css dimensions on mismatch (initial/fullScreen).
+			if( emu.vars.dom.view["emuCanvas"].width  != emu.vars.innerEmu.tempCanvas.width  ){ console.log("HTML Fix width"); emu.vars.dom.view["emuCanvas"].width  = emu.vars.innerEmu.tempCanvas.width ; };
+			if( emu.vars.dom.view["emuCanvas"].height != emu.vars.innerEmu.tempCanvas.height ){ console.log("HTML Fix height"); emu.vars.dom.view["emuCanvas"].height = emu.vars.innerEmu.tempCanvas.height; };
+			if( emu.vars.dom.view["emuCanvas"].style.width  != emu.vars.innerEmu.tempCanvas.style.width  ){ console.log("CSS Fix width");  emu.vars.innerEmu.tempCanvas.style.width  = emu.vars.dom.view["emuCanvas"].style.width; };
+			if( emu.vars.dom.view["emuCanvas"].style.height != emu.vars.innerEmu.tempCanvas.style.height ){ console.log("CSS Fix height"); emu.vars.innerEmu.tempCanvas.style.height = emu.vars.dom.view["emuCanvas"].style.height; };
+
+			// Check the new data against the old data for a change. 
+			let data1;
+			let data2;
+			for(let i=0,l=imgData.data.length; i<l; i+=1){
+				data1 = imgData.data[i];
+				data2 = emu.vars.innerEmu.last.data[i];
+
+				// Is this value different? 
+				if(data1 != data2){ 
+					// Yes. Stop comparing and just draw the new data.
+					// emu.vars.dom.view["emuCanvas"].getContext("2d").putImageData(imgData, 0, 0);
+					emu.vars.dom.view["emuCanvas"].getContext("2d").drawImage(emu.vars.innerEmu.tempCanvas, 0, 0);
+					emu.vars.innerEmu.last = imgData; 
+					emu.vars.innerEmu.loop(); return;
+					break; 
+				}
+			}
+			emu.vars.innerEmu.loop(); return;
+		} ); 
+	},
+
 	// * Used as a template to create a new Emscripten module.
 	createDefaultModule         : function(){
 		var _this = this;
+
+		if(emu.configFile.tempCanvasDraw){
+			// console.log("Using tempCanvasDraw");
+			emu.vars.innerEmu.tempCanvas =  document.createElement("canvas");
+			emu.vars.innerEmu.tempCanvas.width  = emu.vars.dom.view["emuCanvas"].width;
+			emu.vars.innerEmu.tempCanvas.height = emu.vars.dom.view["emuCanvas"].height;
+			window.cancelAnimationFrame(emu.vars.innerEmu.raf_id);
+		}
+		else{
+			console.log("NOT Using tempCanvasDraw");
+		}
 
 		// Tells Emscripten what DOM element that it should be listening to for keyboard input.
 		this["keyboardListeningElement"] = (function() { return emu.vars.dom.view["emuCanvas"] })();
@@ -52,7 +99,12 @@ emu.vars.innerEmu = {
 		this["arguments"] = [ "" ];
 
 		// The Emscripten output canvas.
-		this["canvas"]    = (function() { return emu.vars.dom.view["emuCanvas"] })() ;
+		if(emu.configFile.tempCanvasDraw){
+			this["canvas"]    = (function() { return emu.vars.innerEmu.tempCanvas })() ;
+		}
+		else{
+			this["canvas"]    = (function() { return emu.vars.dom.view["emuCanvas"] })() ;
+		}
 
 		// Do this before initialization.
 		this["preInit"]   = [
@@ -189,6 +241,19 @@ emu.vars.innerEmu = {
 
 			// Focus on the emu canvas.
 			function(){
+				if(emu.configFile.tempCanvasDraw){
+					console.log("Using tempCanvasDraw, postRun");
+					emu.vars.dom.view["emuCanvas"].width  = emu.vars.innerEmu.tempCanvas.width  ;
+					emu.vars.dom.view["emuCanvas"].height = emu.vars.innerEmu.tempCanvas.height ;
+
+					let imgData = emu.vars.innerEmu.tempCanvas.getContext("2d").getImageData(0, 0, emu.vars.innerEmu.tempCanvas.width, emu.vars.innerEmu.tempCanvas.height);
+					emu.vars.innerEmu.last = imgData; 
+
+					window.requestAnimationFrame(emu.vars.innerEmu.loop);
+				}
+				else{
+					console.log("NOT Using tempCanvasDraw");
+				}
 
 				// Activate the CUzeBox debug?
 				setTimeout(function(){
@@ -539,7 +604,8 @@ emu.vars.innerEmu = {
 		emu.vars.dom.view["p2_key_RSHIFT"].classList.remove("active");
 	},
 	// * Toggles full screen on the emulator canvas.
-	emuFullscreen               : function(){
+	emuFullscreen               : function(event){
+		// console.log(event.isTrusted, event);
 		// The Emscripten way.
 		// emu.vars.innerEmu.Module.requestFullscreen();
 
@@ -552,12 +618,17 @@ emu.vars.innerEmu = {
 			emu.funcs.shared.isFullScreen()
 		))
 		{
-			if      (canvas.requestFullscreen      ) { canvas.requestFullscreen();       } // Standard
-			else if (canvas.webkitRequestFullscreen) { canvas.webkitRequestFullscreen(); } // Chrome
-			else if (canvas.mozRequestFullScreen   ) { canvas.mozRequestFullScreen();    } // Firefox
-			else if (canvas.msRequestFullscreen    ) { canvas.msRequestFullscreen();     } // IE11
+			try{
+				if      (canvas.requestFullscreen      ) { canvas.requestFullscreen();       } // Standard
+				else if (canvas.webkitRequestFullscreen) { canvas.webkitRequestFullscreen(); } // Chrome
+				else if (canvas.mozRequestFullScreen   ) { canvas.mozRequestFullScreen();    } // Firefox
+				else if (canvas.msRequestFullscreen    ) { canvas.msRequestFullscreen();     } // IE11
 
-			canvas2.classList.add("verticalAlign");
+				canvas2.classList.add("verticalAlign");
+			}
+			catch(e){
+				console.log("ERROR: when requesting full screen:", e);
+			}
 		}
 
 		// Exit fullscreen.

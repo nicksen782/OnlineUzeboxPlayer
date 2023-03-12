@@ -159,9 +159,9 @@ emu.funcs        = {
 			document.addEventListener("MSFullscreenChange"    , on_fullscreenchange, false);
 
 			// These will toggle fullscreen.
-			emu.vars.dom.view["emuControls_FULLSCREEN"]  .addEventListener("click"   , emu.vars.innerEmu.emuFullscreen, false);
-			emu.vars.dom.view["emuCanvas"]               .addEventListener("dblclick", emu.vars.innerEmu.emuFullscreen, false);
-			emu.vars.dom.view["emscripten_emu_container"].addEventListener("dblclick", emu.vars.innerEmu.emuFullscreen, false);
+			emu.vars.dom.view["emuControls_FULLSCREEN"]  .addEventListener("click"   , (e)=>emu.vars.innerEmu.emuFullscreen(e), false);
+			// emu.vars.dom.view["emuCanvas"]               .addEventListener("dblclick", (e)=>{ emu.vars.innerEmu.emuFullscreen(e); e.preventDefault(); return false; } , false);
+			emu.vars.dom.view["emscripten_emu_container"].addEventListener("dblclick", (e)=>{ emu.vars.innerEmu.emuFullscreen(e); e.preventDefault(); return false; } , false);
 
 			// VIEW: File loading.
 			emu.vars.dom.view["emu_FilesFromJSON"]            .addEventListener("click", function() { this.select(); }, false);
@@ -356,7 +356,7 @@ emu.funcs        = {
 			emu.vars.innerEmu.Module = null;
 
 			// Reset Module.
-			emu.vars.innerEmu.Module = new emu.vars.innerEmu.createDefaultModule();
+			// emu.vars.innerEmu.Module = new emu.vars.innerEmu.createDefaultModule();
 
 			// Indicate that there is not a game loaded.
 			emu.vars.innerEmu.emulatorIsReady=false;
@@ -1986,7 +1986,12 @@ window.onload = function() {
 	console.log("*** -- Online Uzebox Emulator v2b -- ***");
 	console.log("****************************************");
 
-	var continueApp = function() {
+	var continueApp = async function() {
+		// Get the config file. 
+		let resp = await fetch("config.json");
+		resp = await resp.json();
+		emu.configFile = resp;
+
 		// Do the application init.
 		var formData = {
 			"o": "emu_init",
@@ -2002,6 +2007,13 @@ window.onload = function() {
 
 			// Populate the DOM handle caches.
 			emu.funcs.domHandleCache_populate();
+
+			// EXPERIMENTAL
+			// emu.webworker = new Worker( "js/drawing_webworker.js" );
+			// console.log(emu.vars.dom.view["emuCanvas"]);
+			// const htmlCanvas = document.getElementById("canvas");
+			// const offscreen = emu.vars.dom.view["emuCanvas"].transferControlToOffscreen();
+			// emu.webworker.postMessage({ mode:"init", data: { canvas: offscreen } }, [offscreen]);
 
 			// ** HANDLE UAM INTEGRATION **
 			// If no UAM was found then show nothing for UAM (Dialog A).

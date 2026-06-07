@@ -35,14 +35,16 @@ input[type="file"]:hover
 .readOnly{
   background-color: yellow !important;
 }
-input:read-only,
-input[readonly="readonly"],
-input[readonly]
-{
+input:read-only{
   background-color: darkgray;
   color: black;
   font-style: italic;
-  /* font-size: 90%; */
+}
+input[readonly="readonly"],
+input[readonly]
+{
+  
+/*   font-size: 90%; */
   cursor: not-allowed;
 }
 /* Firefox puts extra border/padding on inputs. Remove it! */

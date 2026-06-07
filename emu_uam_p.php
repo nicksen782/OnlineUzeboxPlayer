@@ -1,5 +1,8 @@
 <?php
 if(!$securityLoadedFrom_indexp){ exit(); };
+
+error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT & ~E_WARNING);
+
 // UAM FUNCTIONS
 // if(!$securityLoadedFrom_indexp){ exit(); };
 
@@ -128,11 +131,11 @@ WHERE
 		$bytes_in_text_objects_progmem = 0 ;
 		$bytes_in_other                = 0 ;
 
-		$oldmask = umask(0);
+		// $oldmask = umask(0);
 		if(!file_exists('avr-nm.txt')){
 			file_put_contents('avr-nm.txt', "");
 		}
-		umask($oldmask);
+		// umask($oldmask);
 
 		$handle = fopen("avr-nm.txt", "r");
 		if ($handle) {
@@ -152,14 +155,14 @@ WHERE
 
 					// Create new array for this line.
 					$newArray = array(
-						"name"    => trim($splitLine[0]),
-						"value"   => trim($splitLine[1]),
-						"class"   => trim($splitLine[2]),
-						"type"    => trim($splitLine[3]),
-						"size"    => trim($splitLine[4]),
-						"section" => trim($splitLine[6]),
-						"file"    => explode(":", trim($splitLine[7]))[0],
-						"line"    => explode(":", trim($splitLine[7]))[1],
+						"name"    => trim($splitLine[0] ?? ''),
+						"value"   => trim($splitLine[1] ?? ''),
+						"class"   => trim($splitLine[2] ?? ''),
+						"type"    => trim($splitLine[3] ?? ''),
+						"size"    => trim($splitLine[4] ?? ''),
+						"section" => trim($splitLine[6] ?? ''),
+						"file"    => explode(":", trim($splitLine[7] ?? ''))[0],
+						"line"    => explode(":", trim($splitLine[7] ?? ''))[1],
 					);
 					array_push($ALL, $newArray);
 
@@ -171,7 +174,7 @@ WHERE
 						$splitLine2 = explode("/", $newArray['section']);
 						$newArray['section'] = $splitLine2[sizeof($splitLine2)-1];
 						array_push($other, $newArray) ;
-						$bytes_in_other+=$newArray['size'];
+						$bytes_in_other += (int) $newArray['size'];
 					}
 					// Was $theString found? (This data line is from the game, not the Uzebox kernel.)
 					else{
@@ -241,13 +244,13 @@ WHERE
 
 		// Sort by key in reverse. (Largest size first.)
 		// function sortFunction($a, $b){ return strcmp($b['size'], $a['size']); }; // Alphabetical
-		function sortFunction($a, $b){ return $b['size'] - $a['size']; }; // Numerical
+		function sortFunction($a, $b){ return (int) $b['size'] - (int) $a['size']; }; // Numerical
 
-		usort( $bss_objects         , sortFunction );
-		usort( $text_funcs          , sortFunction );
-		usort( $text_objects        , sortFunction );
-		usort( $text_objects_progmem, sortFunction );
-		usort( $other               , sortFunction );
+		usort( $bss_objects         , "sortFunction" );
+		usort( $text_funcs          , "sortFunction" );
+		usort( $text_objects        , "sortFunction" );
+		usort( $text_objects_progmem, "sortFunction" );
+		usort( $other               , "sortFunction" );
 
 		return array(
 			'bss_objects'          => array( 'data'=>$bss_objects         , 'caption'=> 'BSS: OBJECTS'          . " (" . number_format($bytes_in_bss_objects)          . " bytes)", ) ,
@@ -311,10 +314,10 @@ WHERE
 		'data'    => $results1 ,
 		'success' => true      ,
 
-		'json'         => $json         ,
-		'error'        => $error        ,
-		'execResults'  => $execResults  ,
-		'info'         => $info         ,
+		'json'         => $json ?? ""         ,
+		'error'        => $error ?? ""       ,
+		'execResults'  => $execResults ?? "" ,
+		'info'         => $info ?? ""        ,
 		'info2'        => $info2        ,
 
 		'compileCount' => $compileCount ,
@@ -335,7 +338,7 @@ WHERE
 		// 'results0' => $results0,
 		'results1' => $results1,
 
-		'$ALL' => $ALL,
+		'$ALL' => $ALL ?? "",
 	) );
 
 }
@@ -374,12 +377,27 @@ ORDER BY "title" ASC
 	$title     = $thisGame["gameName"];
 
 	// Scan the dir. Get the file names.
+	
+	$fullPath = preg_replace( '#/+#','/', $_appdir . "/" . $directory );
+	// echo "_appdir: "; print_r($_appdir); echo "\n";
+	// echo "directory: "; print_r($directory); echo "\n";
+	// echo "test:"; print_r($_appdir . "/" . $directory); echo "\n";
+	// echo "fullPath:"; print_r($fullPath); echo "\n";
+
 	$scanned_directory = array_values(
 		array_diff(
-			// scandir($_SERVER["DOCUMENT_ROOT"] . "/" . $directory
-			scandir($_appdir . "/" . $directory
-		)
-		, array('..', '.', '.git')
+				// scandir($_SERVER["DOCUMENT_ROOT"] . "/" . $directory
+				// scandir( $_appdir . "/" . $directory )
+				scandir( $fullPath )
+			, array(
+
+				'..', 
+
+				'.', 
+
+				'.git'
+
+			)
 		)
 	);
 
@@ -435,14 +453,14 @@ WHERE id = :gameid
 
 	$targetpath=$directory."";
 
-	$oldmask = umask(0);
+	// $oldmask = umask(0);
 	foreach($_FILES as $key => $value) {
 		$moved[$key] = move_uploaded_file(
 			$_FILES[$key]['tmp_name'],
 			$targetpath . "" . basename($_FILES[$key]['name'])
 		);
 	}
-	umask($oldmask);
+	// umask($oldmask);
 
 	// Get the game data and files. (Use output buffering.)
 	ob_start();
@@ -607,7 +625,7 @@ VALUES(
 
 	// Create the new game dir for the game.
 	if($retval1){
-		$oldmask = umask(0);
+		// $oldmask = umask(0);
 
 		// Make the new game dir.
 		// Generate the new game dir from the game title.
@@ -626,7 +644,7 @@ VALUES(
 			$lastError = error_get_last();
 		}
 
-		umask($oldmask);
+		// umask($oldmask);
 	}
 
 	// Update the new game record with the new game dir.
@@ -654,6 +672,29 @@ WHERE id = :gameid;
 		'_emu_dir'   => $emu_dir,
 	) );
 
+}
+
+function emu_recursive_delete($path){
+	if(!file_exists($path)){
+		return true;
+	}
+
+	if(is_file($path) || is_link($path)){
+		return unlink($path);
+	}
+
+	if(!is_dir($path)){
+		return false;
+	}
+
+	$items = array_diff(scandir($path), array('.', '..', '.git'));
+	foreach($items as $item){
+		if(!emu_recursive_delete($path . DIRECTORY_SEPARATOR . $item)){
+			return false;
+		}
+	}
+
+	return rmdir($path);
 }
 function gameDb_deleteGame(){
 	$gameid   = intval($_POST['gameid']);
@@ -688,9 +729,13 @@ WHERE id = :gameid
 	$filelist_fullPath = array();
 	$targetDir         = $directory;
 	$absPathToGameDir  = realpath($targetDir) ;
+	$gamesRoot         = realpath($emu_dir . 'games');
 
 	// Now get a list of the files that are within the game's directory.
-	$scanned_directory = array_values(array_diff(scandir($directory), array('..', '.', '.git')));
+	$scanned_directory = array();
+	if(is_dir($directory)){
+		$scanned_directory = array_values(array_diff(scandir($directory), array('..', '.', '.git')));
+	}
 
 	// Gather only the file names.
 	for($i=0; $i<sizeof($scanned_directory); $i++){
@@ -703,40 +748,21 @@ WHERE id = :gameid
 	$success_gameDirDeletion = false ;
 	$success                 = false ;
 
+	$gamesRootPrefix = $gamesRoot ? rtrim($gamesRoot, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR : false;
+
 	// MAKE VERY SURE THAT WE HAVE A GAMES FILE PATH!
-	if( strpos($absPathToGameDir, "/games/")  != -1 )  {
-		// Delete the files within the game directory.
-		for($i=0; $i<sizeof($filelist_fullPath); $i++){
-			// Delete a file from the list.
-			if( file_exists($filelist_fullPath[$i]) ){
-				// unlink( $filelist_fullPath[$i] ) ;
-				$success_fileDeletions=true;
-			}
-			else {
-				$success_fileDeletions=false;
-				break;
-			}
-
-		}
-
-		if($success_fileDeletions){
-			// Delete the now-empty game directory.
-			if(
-				file_exists($absPathToGameDir)
-				&& is_dir($absPathToGameDir)
-			){
-				// rmdir( $absPathToGameDir );
-				$success_gameDirDeletion=true;
-			}
-			else{
-				$success_gameDirDeletion=false;
-			}
-		}
+	if(
+		$gamesRootPrefix
+		&& $absPathToGameDir
+		&& strpos($absPathToGameDir . DIRECTORY_SEPARATOR, $gamesRootPrefix) === 0
+	){
+		$success_fileDeletions = emu_recursive_delete($absPathToGameDir);
+		$success_gameDirDeletion = $success_fileDeletions;
 
 		// Determine current success.
 		if( $success_fileDeletions && $success_gameDirDeletion ) {
 			// Now remove the game's entry in the game DB.
-			$s_SQL2   = " DELETE FROM gamelist WHERE id = :gameId ;";
+			$s_SQL2   = " DELETE FROM gamelist WHERE id = :gameid ;";
 			$prp2     = $dbhandle->prepare($s_SQL2);
 			$dbhandle->bind(':gameid' , $gameid ) ;
 			$retval2  = $dbhandle->execute();
@@ -763,9 +789,10 @@ WHERE id = :gameid
 		'$thisGame'                => $thisGame                                  ,
 		'$scanned_directory'       => $scanned_directory                         ,
 		'absPathToGameDir'         => $absPathToGameDir                          ,
-		'test1'                    => strpos($absPathToGameDir, "/games/") != -1 ,
-		'test2'                    => is_dir($absPathToGameDir) ,
-		'test3'                    => is_dir($absPathToGameDir.'/') ,
+		'gamesRoot'                => $gamesRoot                                 ,
+		'test1'                    => $gamesRootPrefix ? strpos($absPathToGameDir . DIRECTORY_SEPARATOR, $gamesRootPrefix) === 0 : false ,
+		'test2'                    => $absPathToGameDir ? is_dir($absPathToGameDir) : false ,
+		'test3'                    => $absPathToGameDir ? is_dir($absPathToGameDir.'/') : false ,
 	) );
 
 

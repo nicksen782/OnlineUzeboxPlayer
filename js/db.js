@@ -455,7 +455,7 @@ emu.funcs.db     = {
 				// Clear the displayed data for the deleted game.
 				emu.funcs.db.clearAllDisplayedGameData();
 				// Reload the built-in game lists.
-				emu.funcs.emu_getBuiltInGamelist()();
+				emu.funcs.emu_getBuiltInGamelist();
 			}
 			,emu.funcs.shared.rejectedPromise
 		);

@@ -252,7 +252,7 @@ emu.vars.innerEmu = {
 					window.requestAnimationFrame(emu.vars.innerEmu.loop);
 				}
 				else{
-					console.log("NOT Using tempCanvasDraw");
+					// console.log("NOT Using tempCanvasDraw");
 				}
 
 				// Activate the CUzeBox debug?

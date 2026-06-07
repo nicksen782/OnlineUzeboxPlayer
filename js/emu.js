@@ -1433,9 +1433,13 @@ emu.funcs.UAM    = {
 				let option = undefined;
 				let frag = document.createDocumentFragment();
 
+				// Filter-out the non-uzebox games (Look for "UZEBOX")
+				gameList_UAM = gameList_UAM.filter(d=>{ return d.gameName.indexOf("UZEBOX") != -1; });
+
 				// Populate the games list select menu.
 				gameList_UAM.map(function(d, i, a) {
 					option = document.createElement("option");
+					// option.setAttribute("title", d.gameId);
 					option.setAttribute("gameid", d.gameId);
 					option.setAttribute("gamename", d.gameName);
 					option.setAttribute("author_user_id", d.author_user_id);
@@ -1447,14 +1451,23 @@ emu.funcs.UAM    = {
 					// option.text = d.title;
 					frag.appendChild(option);
 				});
+
 				// Add the fragment to the select.
 				uam_gamelist.appendChild(frag);
 
-				// Auto select the default game.
-				uam_gamelist.value = defaultGame;
+				// Select the first option by default. 
+				uam_gamelist.selectedIndex = 0;
 
-				// Load the default games's JSON url.
-				emu.vars.dom.view["emu_FilesFromJSON_UAM"].value = uam_gamelist.options[uam_gamelist.selectedIndex].getAttribute("remoteload");
+				// Auto select the default game. (If the option is there.)
+				for(let i=0; i<uam_gamelist.options.length; i+=1){
+					if (uam_gamelist.options[i].value === defaultGame) { 
+						// Load the default games's JSON url.
+						uam_gamelist.value = defaultGame; 
+						emu.vars.dom.view["emu_FilesFromJSON_UAM"].value = uam_gamelist.options[uam_gamelist.selectedIndex].getAttribute("remoteload");
+						break; 
+					}
+				}
+
 			}, emu.funcs.shared.rejectedPromise
 		);
 
@@ -1609,6 +1622,7 @@ emu.funcs.UAM    = {
 
 				// Work with emu_latestCompile
 				var consoleOutputString = thestring2.split("--STARTLASTBUILD.TXT--");
+
 				// console.log("consoleOutputString", consoleOutputString.length, consoleOutputString);
 				if(consoleOutputString.length > 1){
 					consoleOutputString = consoleOutputString[1];

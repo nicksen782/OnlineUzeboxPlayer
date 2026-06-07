@@ -155,7 +155,7 @@
 	opacity: 0.15;
 }
 .uamOnly.enabled{
-	/*display:block;*/
+	/* display:block; */
 	opacity: 1.0;
 }
 .uamOnly.sectionWindow{
